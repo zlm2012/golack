@@ -6,6 +6,20 @@ import (
 	"strconv"
 )
 
+// ParseMode defines the parse parameter values for post.message method.
+// See https://api.slack.com/docs/message-formatting#parsing_modes
+type ParseMode string
+
+const (
+	ParseModeNone ParseMode = "none"
+	ParseModeFull ParseMode = "full"
+)
+
+// String returns a stringified form of BotType
+func (mode ParseMode) String() string {
+	return string(mode)
+}
+
 type AttachmentField struct {
 	Title string `json:"title,omitempty"`
 	Value string `json:"value"`
@@ -27,11 +41,12 @@ type MessageAttachment struct {
 	ThumbURL   string             `json:"thumb_url,omitempty"`
 }
 
-// https://api.slack.com/docs/message-attachments
+// PostMessage is a payload to be sent with chat.postMessage method.
+// See https://api.slack.com/methods/chat.postMessage
 type PostMessage struct {
 	Channel     string
 	Text        string
-	Parse       string
+	Parse       ParseMode
 	LinkNames   int
 	Attachments []*MessageAttachment
 	UnfurlLinks bool
@@ -42,17 +57,48 @@ type PostMessage struct {
 	IconEmoji   string
 }
 
+// WithLinkNames sets/overrides link_names parameter for current PostMessage.
+// See https://api.slack.com/methods/chat.postMessage#formatting
+func (message *PostMessage) WithLinkNames(linkNames int) *PostMessage {
+	message.LinkNames = linkNames
+	return message
+}
+
+// WithParse sets/overrides parse parameter for current PostMessage.
+// See https://api.slack.com/docs/message-formatting#parsing_modes
+func (message *PostMessage) WithParse(parse ParseMode) *PostMessage {
+	message.Parse = parse
+	return message
+}
+
+// WithUnfurlLinks sets/overrides unfurl_links for current PostMessage.
+// See https://api.slack.com/docs/message-attachments#unfurling
+func (message *PostMessage) WithUnfurlLinks(unfurl bool) *PostMessage {
+	message.UnfurlLinks = unfurl
+	return message
+}
+
+// WithUnfurlLinks sets/overrides unfurl_media for current PostMessage.
+// See https://api.slack.com/docs/message-attachments#unfurling
+func (message *PostMessage) WithUnfurlMedia(unfurl bool) *PostMessage {
+	message.UnfurlMedia = unfurl
+	return message
+}
+
+// ToURLValues forms requesting parameter for Slack's Rest API endpoint.
+// See https://api.slack.com/docs/message-formatting
 func (message *PostMessage) ToURLValues() url.Values {
 	values := url.Values{}
+
 	values.Add("channel", message.Channel)
 	values.Add("text", message.Text)
-	values.Add("parse", message.Parse)
-	values.Add("link_names", string(message.LinkNames))
+	values.Add("parse", message.Parse.String())
+	values.Add("link_names", strconv.Itoa(message.LinkNames))
 	values.Add("unfurl_links", strconv.FormatBool(message.UnfurlLinks))
 	values.Add("unfurl_media", strconv.FormatBool(message.UnfurlMedia))
 	values.Add("as_user", strconv.FormatBool(message.AsUser))
 	if message.UserName != "" {
-		values.Add("user_name", message.UserName)
+		values.Add("username", message.UserName)
 	}
 	if message.IconURL != "" {
 		values.Add("icon_url", message.IconURL)
@@ -68,24 +114,23 @@ func (message *PostMessage) ToURLValues() url.Values {
 	return values
 }
 
-func NewPostMessage(channel string, text string) *PostMessage {
-	return &PostMessage{
-		Channel:     channel,
-		Text:        text,
-		LinkNames:   1,
-		Parse:       "full",
-		UnfurlLinks: true,
-		UnfurlMedia: true,
-	}
+// NewPostMessage creates PostMessage instance with given channel and text settings.
+// By default this sets commonly used settings as much as possible. e.g. link_names=1, unfurl_links=true, etc...
+// To override those settings and add some extra settings including username, icon_url, or icon_emoji, call setter methods start with With***.
+func NewPostMessage(channel, text string) *PostMessage {
+	return NewPostMessageWithAttachments(channel, text, nil)
 }
 
-func NewPostMessageWithAttachments(channel string, text string, attachments []*MessageAttachment) *PostMessage {
+// NewPostMessage creates PostMessage instance with given channel, text settings, attachments.
+// By default this sets commonly used settings as much as possible. e.g. link_names=1, unfurl_links=true, etc...
+// To override those settings and add some extra settings including username, icon_url, or icon_emoji, call setter methods start with With***.
+func NewPostMessageWithAttachments(channel, text string, attachments []*MessageAttachment) *PostMessage {
 	return &PostMessage{
 		Channel:     channel,
 		Text:        text,
+		Parse:       ParseModeFull,
 		LinkNames:   1,
 		Attachments: attachments,
-		Parse:       "full",
 		UnfurlLinks: true,
 		UnfurlMedia: true,
 	}

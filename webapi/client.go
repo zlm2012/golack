@@ -29,11 +29,11 @@ func NewClient(config *Config) *Client {
 	return &Client{config: config}
 }
 
-func (client *Client) buildEndpoint(slackMethod string, queryParams *url.Values) *url.URL {
+func buildEndpoint(slackMethod, token string, queryParams *url.Values) *url.URL {
 	if queryParams == nil {
 		queryParams = &url.Values{}
 	}
-	queryParams.Add("token", client.config.Token)
+	queryParams.Add("token", token)
 
 	requestURL, err := url.Parse(fmt.Sprintf(slackAPIEndpointFormat, slackMethod))
 	if err != nil {
@@ -45,19 +45,13 @@ func (client *Client) buildEndpoint(slackMethod string, queryParams *url.Values)
 }
 
 func (client *Client) Get(ctx context.Context, slackMethod string, queryParams *url.Values, intf interface{}) error {
-	endpoint := client.buildEndpoint(slackMethod, queryParams)
+	endpoint := buildEndpoint(slackMethod, client.config.Token, queryParams)
 
 	reqCtx, cancel := context.WithTimeout(ctx, client.config.RequestTimeout)
 	defer cancel()
 	resp, err := ctxhttp.Get(reqCtx, http.DefaultClient, endpoint.String())
 	if err != nil {
-		switch e := err.(type) {
-		case *url.Error:
-			return e
-		default:
-			// Comes here when request URL is nil, but that MUST NOT happen.
-			panic(fmt.Sprintf("error on HTTP GET request. %#v", e))
-		}
+		return err
 	}
 
 	defer resp.Body.Close()
@@ -92,19 +86,13 @@ func statusErr(resp *http.Response) error {
 }
 
 func (client *Client) Post(ctx context.Context, slackMethod string, bodyParam url.Values, intf interface{}) error {
-	endpoint := client.buildEndpoint(slackMethod, nil)
+	endpoint := buildEndpoint(slackMethod, client.config.Token, nil)
 
 	reqCtx, cancel := context.WithTimeout(ctx, client.config.RequestTimeout)
 	defer cancel()
 	resp, err := ctxhttp.PostForm(reqCtx, http.DefaultClient, endpoint.String(), bodyParam)
 	if err != nil {
-		switch e := err.(type) {
-		case *url.Error:
-			return e
-		default:
-			// Comes here when request URL is nil, but that MUST NOT happen.
-			panic(fmt.Sprintf("error on HTTP GET request. %#v", e))
-		}
+		return err
 	}
 
 	defer resp.Body.Close()
