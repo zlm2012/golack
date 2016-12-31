@@ -62,7 +62,7 @@ func TestClient_Get(t *testing.T) {
 	responder, _ := httpmock.NewJsonResponder(200, returningResponse)
 	httpmock.RegisterResponder("GET", "https://slack.com/api/foo", responder)
 
-	client := &Client{config: &Config{Token: "abc"}}
+	client := &Client{config: &Config{Token: "abc", RequestTimeout: 3 * time.Second}}
 	returnedResponse := &GetResponseDummy{}
 	err := client.Get(context.TODO(), "foo", nil, returnedResponse)
 
@@ -91,7 +91,7 @@ func TestClient_Get_StatusError(t *testing.T) {
 	}
 	httpmock.RegisterResponder("GET", "https://slack.com/api/foo", responder)
 
-	client := &Client{config: &Config{Token: "abc"}}
+	client := &Client{config: &Config{Token: "abc", RequestTimeout: 3 * time.Second}}
 	returnedResponse := &GetResponseDummy{}
 	err := client.Get(context.TODO(), "foo", nil, returnedResponse)
 
@@ -107,7 +107,7 @@ func TestClient_Get_JSONError(t *testing.T) {
 	responder := httpmock.NewStringResponder(200, "invalid json")
 	httpmock.RegisterResponder("GET", "https://slack.com/api/foo", responder)
 
-	client := &Client{config: &Config{Token: "abc"}}
+	client := &Client{config: &Config{Token: "abc", RequestTimeout: 3 * time.Second}}
 	returnedResponse := &GetResponseDummy{}
 	err := client.Get(context.TODO(), "foo", nil, returnedResponse)
 
@@ -123,7 +123,7 @@ func TestClient_Post(t *testing.T) {
 	responder, _ := httpmock.NewJsonResponder(200, &APIResponse{OK: true})
 	httpmock.RegisterResponder("POST", "https://slack.com/api/foo", responder)
 
-	client := &Client{config: &Config{Token: "abc"}}
+	client := &Client{config: &Config{Token: "abc", RequestTimeout: 3 * time.Second}}
 	returnedResponse := &APIResponse{}
 	err := client.Post(context.TODO(), "foo", url.Values{}, returnedResponse)
 
@@ -144,7 +144,7 @@ func TestPostStatusError(t *testing.T) {
 	}
 	httpmock.RegisterResponder("POST", "https://slack.com/api/foo", responder)
 
-	client := &Client{config: &Config{Token: "abc"}}
+	client := &Client{config: &Config{Token: "abc", RequestTimeout: 3 * time.Second}}
 	returnedResponse := &APIResponse{}
 	err := client.Post(context.TODO(), "foo", url.Values{}, returnedResponse)
 
