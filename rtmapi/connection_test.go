@@ -1,7 +1,6 @@
 package rtmapi
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"golang.org/x/net/context"
@@ -12,6 +11,7 @@ import (
 	"reflect"
 	"sync"
 	"testing"
+	"time"
 )
 
 var webSocketServerAddress string
@@ -104,49 +104,43 @@ func TestConnWrapper_Receive(t *testing.T) {
 	}
 	defer conn.Close()
 
-	type output struct {
-		payload reflect.Type
-		err     reflect.Type
-	}
-	testSets := []struct {
-		input  string
-		output output
-	}{
-		{
-			`{"type": "message", "channel": "C12345", "user": "U6789", "text": "Hello world", "ts": "1355517523.000005"}`,
-			output{
-				payload: reflect.TypeOf(&Message{}),
-				err:     nil,
-			},
-		},
-		{
-			`aaaaaaaa`,
-			output{
-				payload: nil,
-				err:     reflect.TypeOf(&json.SyntaxError{}), // invalid character 'a' looking for beginning of value
-			},
-		},
-		{
-			" ",
-			output{
-				payload: nil,
-				err:     reflect.TypeOf(&json.SyntaxError{}), // unexpected end of JSON input
-			},
-		},
-	}
+	channelName := "C12345"
+	user := "U6789"
+	text := "Hello world!"
+	timestamp := 1355517523
+	slackTimestamp := fmt.Sprintf("%d.000005", timestamp)
+	input := fmt.Sprintf(`{"type": "message", "channel": "%s", "user": "%s", "text": "%s", "ts": "%s"}`, channelName, user, text, slackTimestamp)
 
 	connWrapper := newConnectionWrapper(conn)
-	for i, testSet := range testSets {
-		testCnt := i + 1
-		conn.Write([]byte(testSet.input))
-		decodedPayload, err := connWrapper.Receive()
+	conn.Write([]byte(input))
+	decodedPayload, err := connWrapper.Receive()
+	if err != nil {
+		t.Fatalf("error on payload reception: %s.", err.Error())
+	}
 
-		if testSet.output.payload != reflect.TypeOf(decodedPayload) {
-			t.Errorf("Test No. %d. expected return type of %s, but was %#v", testCnt, testSet.output.payload.Name(), err)
-		}
-		if testSet.output.err != reflect.TypeOf(err) {
-			t.Errorf("Test No. %d. Expected return error type of %s, but was %#v", testCnt, testSet.output.err.Name(), err)
-		}
+	message, ok := decodedPayload.(*Message)
+	if !ok {
+		t.Fatalf("received payload is not Message: %#v.", message)
+	}
+
+	if message.Channel.Name != channelName {
+		t.Errorf("expected channel name is not given: %s.", message.Channel.Name)
+	}
+
+	if message.Sender != user {
+		t.Errorf("expected user is not given: %s.", message.Sender)
+	}
+
+	if message.Text != text {
+		t.Errorf("expected text is not given: %s.", message.Text)
+	}
+
+	if !message.TimeStamp.Time.Equal(time.Unix(1355517523, 0)) {
+		t.Errorf("expected time is not given: %d.", message.TimeStamp.Time.Unix())
+	}
+
+	if message.TimeStamp.OriginalValue != slackTimestamp {
+		t.Errorf("expected timestamp original value is not given: %s.", message.TimeStamp.OriginalValue)
 	}
 }
 
@@ -227,11 +221,18 @@ func TestDecodePayload(t *testing.T) {
 			},
 		},
 		{
+			`{"type": "message", "subtype": "channel_join", "text": "<@UXXXXX|bobby> has joined the channel", "ts": "1403051575.000407", "user": "U023BECGF"}`,
+			output{
+				reflect.TypeOf(&MiscMessage{}),
+				nil,
+			},
+		},
+		{
 			// invalid type
 			`{"type": "unsupportedEventType"}`,
 			output{
 				nil,
-				ErrUnsupportedEventType,
+				reflect.TypeOf(&MalformedPayloadError{}),
 			},
 		},
 		{
@@ -242,10 +243,33 @@ func TestDecodePayload(t *testing.T) {
 			},
 		},
 		{
+			// required fields are not given
+			`{"what": true}`,
+			output{
+				nil,
+				reflect.TypeOf(&MalformedPayloadError{}),
+			},
+		},
+		{
+			// not valid json structure
 			`malformedJson`,
 			output{
 				nil,
 				reflect.TypeOf(&MalformedPayloadError{}),
+			},
+		},
+		{
+			"　",
+			output{
+				nil,
+				ErrEmptyPayload,
+			},
+		},
+		{
+			"\r",
+			output{
+				nil,
+				ErrEmptyPayload,
 			},
 		},
 	}
@@ -259,10 +283,10 @@ func TestDecodePayload(t *testing.T) {
 			t.Errorf("Test No. %d. expected return type of %s, but was %#v", testCnt, testSet.output.payload.Name(), err)
 		}
 		if e := testSet.output.err; e != nil {
-			if reflect.TypeOf(e) == reflect.TypeOf(errors.New("dummy")) {
+			if reflect.TypeOf(e) == reflect.TypeOf(errors.New("Dummy")) {
 				// pre-declared error instance is returned.
 				if e != err {
-					t.Errorf("expected test is not returned. test #%d. error: %#v.", testCnt, err)
+					t.Errorf("expected error is not returned. test #%d. error: %#v.", testCnt, err)
 				}
 			} else {
 				// new error instance of specific error struct is returned.

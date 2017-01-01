@@ -1,16 +1,5 @@
 package rtmapi
 
-import (
-	"encoding/json"
-	"errors"
-	"fmt"
-)
-
-var (
-	ErrUnsupportedEventType = errors.New("given type is not supported")
-	ErrEventTypeNotGiven    = errors.New("type field is not given")
-)
-
 // Hello event is sent from slack when WebSocket connection is successfully established.
 // https://api.slack.com/events/hello
 type Hello struct {
@@ -66,54 +55,4 @@ type Message struct {
 type MiscMessage struct {
 	CommonMessage
 	TimeStamp *TimeStamp `json:"ts"`
-}
-
-// DecodedEvent is just an empty interface that marks decoded event.
-// This can be used to define method signature or type of returning value.
-type DecodedEvent interface {
-}
-
-// DecodeEvent decodes given payload and converts this to corresponding event structure.
-func DecodeEvent(input json.RawMessage) (DecodedEvent, error) {
-	event := &CommonEvent{}
-	if err := json.Unmarshal(input, event); err != nil {
-		return nil, NewMalformedPayloadError(err.Error())
-	}
-
-	var mapping DecodedEvent
-
-	switch event.Type {
-	case UnsupportedEvent:
-		return nil, ErrUnsupportedEventType
-	case HelloEvent:
-		mapping = &Hello{}
-	case MessageEvent:
-		subTypedMessage := &CommonMessage{}
-		if err := json.Unmarshal(input, subTypedMessage); err != nil {
-			return nil, NewMalformedPayloadError(err.Error())
-		}
-		switch subTypedMessage.SubType {
-		case Empty:
-			mapping = &Message{}
-		default:
-			mapping = &MiscMessage{}
-		}
-	case TeamMigrationStartedEvent:
-		mapping = &TeamMigrationStarted{}
-	case PongEvent:
-		mapping = &Pong{}
-	case "":
-		// type field is not given so string's zero value, empty string, is set.
-		return nil, ErrEventTypeNotGiven
-	default:
-		// What?? Even if the type field is not given, "" should be set and there for case check for "" should
-		// catch that.
-		panic(fmt.Sprintf("error on event decode. %s", string(input)))
-	}
-
-	if err := json.Unmarshal(input, mapping); err != nil {
-		return nil, errors.New("error on JSON deserializing to mapped event. " + string(input))
-	}
-
-	return mapping, nil
 }

@@ -3,9 +3,12 @@ package rtmapi
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
+	"github.com/tidwall/gjson"
 	"golang.org/x/net/context"
 	"golang.org/x/net/websocket"
 	"io"
+	"strings"
 )
 
 var (
@@ -57,11 +60,14 @@ func newConnectionWrapper(conn *websocket.Conn) Connection {
 
 }
 
+// Receive is a blocking method to receive payload from WebSocket connection.
+// When connection is closed in the middle of this method call, this immediately returns error.
 func (wrapper *connWrapper) Receive() (DecodedPayload, error) {
-	// Blocking method to receive payload from WebSocket connection.
-	// When connection is closed in the middle of this method call, this immediately returns error.
-	payload := json.RawMessage{}
-	err := websocket.JSON.Receive(wrapper.conn, &payload)
+	// Slack's RTM events and reply all have different form
+	// so websocket.JSON.Receive can only work with json.RawMessage,
+	// which ends up with multiple json.Unmarshal calls for proper mapping.
+	payload := []byte{}
+	err := websocket.Message.Receive(wrapper.conn, &payload)
 	if err != nil {
 		return nil, err
 	}
@@ -83,27 +89,99 @@ func (wrapper *connWrapper) Close() error {
 	return wrapper.conn.Close()
 }
 
-func decodePayload(incoming json.RawMessage) (DecodedPayload, error) {
-	// First, try decode incoming object as Event.
-	decodedEvent, eventDecodeErr := DecodeEvent(incoming)
-	if eventDecodeErr == nil {
-		return decodedEvent, nil
+func decodePayload(input json.RawMessage) (DecodedPayload, error) {
+	inputStr := strings.TrimSpace(string(input))
+	if len(inputStr) == 0 {
+		return nil, ErrEmptyPayload
 	}
 
-	if eventDecodeErr == ErrUnsupportedEventType {
-		return nil, eventDecodeErr
-	}
-
-	if eventDecodeErr == ErrEventTypeNotGiven {
-		// When incoming object can't be treated as Event, try treat this as WebSocketReply.
-		reply, replyDecodeErr := DecodeReply(incoming)
-		if replyDecodeErr != nil {
-			// Payload is not event or reply.
-			return nil, NewMalformedPayloadError(replyDecodeErr.Error())
+	res := gjson.Parse(inputStr)
+	eventType := res.Get("type")
+	if eventType.Exists() {
+		typeVal := eventType.String()
+		switch typeVal {
+		case HelloEvent:
+			return unmarshal(input, &Hello{})
+		case MessageEvent:
+			subType := res.Get("subtype")
+			if subType.Exists() {
+				switch subType.String() {
+				// TODO handle each subtypes
+				case BotMessage:
+					return unmarshal(input, &MiscMessage{})
+				case ChannelArchive:
+					return unmarshal(input, &MiscMessage{})
+				case ChannelJoin:
+					return unmarshal(input, &MiscMessage{})
+				case ChannelLeave:
+					return unmarshal(input, &MiscMessage{})
+				case ChannelName:
+					return unmarshal(input, &MiscMessage{})
+				case ChannelPurpose:
+					return unmarshal(input, &MiscMessage{})
+				case ChannelTopic:
+					return unmarshal(input, &MiscMessage{})
+				case ChannelUnarchive:
+					return unmarshal(input, &MiscMessage{})
+				case FileComment:
+					return unmarshal(input, &MiscMessage{})
+				case FileMention:
+					return unmarshal(input, &MiscMessage{})
+				case FileShare:
+					return unmarshal(input, &MiscMessage{})
+				case GroupArchive:
+					return unmarshal(input, &MiscMessage{})
+				case GroupJoin:
+					return unmarshal(input, &MiscMessage{})
+				case GroupLeave:
+					return unmarshal(input, &MiscMessage{})
+				case GroupName:
+					return unmarshal(input, &MiscMessage{})
+				case GroupPurpose:
+					return unmarshal(input, &MiscMessage{})
+				case GroupTopic:
+					return unmarshal(input, &MiscMessage{})
+				case GroupUnarchive:
+					return unmarshal(input, &MiscMessage{})
+				case MeMessage:
+					return unmarshal(input, &MiscMessage{})
+				case MessageChanged:
+					return unmarshal(input, &MiscMessage{})
+				case MessageDeleted:
+					return unmarshal(input, &MiscMessage{})
+				case PinnedItem:
+					return unmarshal(input, &MiscMessage{})
+				case UnpinnedItem:
+					return unmarshal(input, &MiscMessage{})
+				default:
+					return unmarshal(input, &MiscMessage{})
+				}
+			} else {
+				// plain message
+				return unmarshal(input, &Message{})
+			}
+		case TeamMigrationStartedEvent:
+			return unmarshal(input, &TeamMigrationStarted{})
+		case PongEvent:
+			return unmarshal(input, &Pong{})
+		default:
+			return nil, NewMalformedPayloadError(fmt.Sprintf(`unsupported event type "%s" is given: %s`, typeVal, input))
 		}
-
-		return reply, nil
 	}
 
-	return nil, NewMalformedPayloadError(eventDecodeErr.Error())
+	if res.Get("reply_to").Exists() && res.Get("ok").Exists() {
+		// https://api.slack.com/rtm#handling_responses
+		// When incoming object can't be treated as Event, try treat this as WebSocketReply.
+		return unmarshal(input, &WebSocketReply{})
+	}
+
+	return nil, NewMalformedPayloadError(fmt.Sprintf("given json object has unknown structure. can not handle: %s.", input))
+}
+
+func unmarshal(input json.RawMessage, mapping interface{}) (DecodedPayload, error) {
+	if err := json.Unmarshal(input, mapping); err != nil {
+		return nil, NewMalformedPayloadError(err.Error())
+	}
+
+	return mapping, nil
 }
