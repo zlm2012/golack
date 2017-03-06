@@ -10,16 +10,93 @@ type EventType string
 
 // List of available EventTypes
 const (
-	UnsupportedEvent          EventType = "unsupported"
-	HelloEvent                          = "hello"
-	MessageEvent                        = "message"
-	TeamMigrationStartedEvent           = "team_migration_started"
-	PingEvent                           = "ping"
-	PongEvent                           = "pong"
+	UnsupportedEvent           EventType = "unsupported"
+	AccountsChangedEvent                 = "accounts_changed"
+	BotAddedEvent                        = "bot_added"
+	BotChangedEvent                      = "bot_changed"
+	ChannelArchivedEvent                 = "channel_archive"
+	ChannelCreatedEvent                  = "channel_created"
+	ChannelDeletedEvent                  = "channel_deleted"
+	ChannelHistoryChangedEvent           = "channel_history_changed"
+	ChannelJoinedEvent                   = "channel_joined"
+	ChannelLeftEvent                     = "channel_left"
+	ChannelMarkedEvent                   = "channel_marked"
+	ChannelRenameEvent                   = "channel_rename"
+	ChannelUnarchiveEvent                = "channel_unarchive"
+	CommandsChangedEvent                 = "commands_changed"
+	DNDUpdatedEvent                      = "dnd_updated"
+	DNDUpdatedUserEvent                  = "dnd_updated_user"
+	EmailDomainChangedEvent              = "email_domain_changed"
+	EmojiChangedEvent                    = "emoji_changed"
+	FileChangeEvent                      = "file_change"
+	FileCommentAddedEvent                = "file_comment_added"
+	FileCommentDeletedEvent              = "file_comment_deleted"
+	FileCommentEditedEvent               = "file_comment_edited"
+	FileCreatedEvent                     = "file_created"
+	FileDeletedEvent                     = "file_deleted"
+	FilePublicEvent                      = "file_public"
+	FileSharedEvent                      = "file_shared"
+	FileUnsharedEvent                    = "file_unshared"
+	GoodByeEvent                         = "goodbye"
+	GroupArchiveEvent                    = "group_archive"
+	GroupCloseEvent                      = "group_close"
+	GroupHistoryChangedEvent             = "group_history_changed"
+	GroupJoinedEvent                     = "group_joined"
+	GroupLeftEvent                       = "group_left"
+	GroupMarkedEvent                     = "group_marked"
+	GroupOpenEvent                       = "group_open"
+	GroupRenameEvent                     = "group_rename"
+	GroupUnarchiveEvent                  = "group_unarchive"
+	HelloEvent                           = "hello"
+	IMCloseEvent                         = "im_close"
+	IMCreatedEvent                       = "im_created"
+	IMHistoryChangedEvent                = "im_history_changed"
+	IMMarkedEvent                        = "im_marked"
+	IMOpenEvent                          = "im_open"
+	ManualPresenceChangeEvent            = "manual_presence_change"
+	MessageEvent                         = "message"
+	PinAddedEvent                        = "pin_added"
+	PinRemovedEvent                      = "pin_removed"
+	PrefChangeEvent                      = "pref_change"
+	PresenceChangeEvent                  = "presence_change"
+	ReactionAddedEvent                   = "reaction_added"
+	ReactionRemovedEvent                 = "reaction_removed"
+	ReconnectURLEvent                    = "reconnect_url"
+	StarAddedEvent                       = "star_added"
+	StarRemovedEvent                     = "star_removed"
+	SubTeamCreatedEvent                  = "subteam_created"
+	SubTeamSlefAddedEvent                = "subteam_self_added"
+	SubTeamSelfRemovedEvent              = "subteam_self_removed"
+	SubTeamUpdatedEvent                  = "subteam_updated"
+	TeamDomainChangeEvent                = "team_domain_change"
+	TeamJoinEvent                        = "team_join"
+	TeamMigrationStartedEvent            = "team_migration_started"
+	TeamPlanChangedEvent                 = "team_plan_change"
+	TeamPrefChangeEvent                  = "team_pref_change"
+	TeamProfileChangeEvent               = "team_profile_change"
+	TeamProfileDeleteEvent               = "team_profile_delete"
+	TeamProfileReorderEvent              = "team_profile_reorder"
+	TeamRenameEvent                      = "team_rename"
+	UserChangeEvent                      = "user_change"
+	UserTypingEvent                      = "user_typing"
+	PingEvent                            = "ping"
+	PongEvent                            = "pong"
 )
 
 var (
-	possibleEvents = [...]EventType{HelloEvent, MessageEvent, TeamMigrationStartedEvent, PingEvent, PongEvent}
+	possibleEvents = [...]EventType{
+		UnsupportedEvent, AccountsChangedEvent, BotAddedEvent, BotChangedEvent, ChannelArchivedEvent, ChannelCreatedEvent, ChannelDeletedEvent,
+		ChannelHistoryChangedEvent, ChannelJoinedEvent, ChannelLeftEvent, ChannelMarkedEvent, ChannelRenameEvent, ChannelUnarchiveEvent,
+		CommandsChangedEvent, DNDUpdatedEvent, DNDUpdatedUserEvent, EmailDomainChangedEvent, EmojiChangedEvent, FileChangeEvent,
+		FileCommentAddedEvent, FileCommentDeletedEvent, FileCommentEditedEvent, FileCreatedEvent, FileDeletedEvent, FilePublicEvent,
+		FileSharedEvent, FileUnsharedEvent, GoodByeEvent, GroupArchiveEvent, GroupCloseEvent, GroupHistoryChangedEvent, GroupJoinedEvent,
+		GroupLeftEvent, GroupMarkedEvent, GroupOpenEvent, GroupRenameEvent, GroupUnarchiveEvent, HelloEvent, IMCloseEvent, IMCreatedEvent,
+		IMHistoryChangedEvent, IMMarkedEvent, IMOpenEvent, ManualPresenceChangeEvent, MessageEvent, PinAddedEvent, PinRemovedEvent,
+		PrefChangeEvent, PresenceChangeEvent, ReactionAddedEvent, ReactionRemovedEvent, ReconnectURLEvent, StarAddedEvent, StarRemovedEvent,
+		SubTeamCreatedEvent, SubTeamSlefAddedEvent, SubTeamSelfRemovedEvent, SubTeamUpdatedEvent, TeamDomainChangeEvent, TeamJoinEvent,
+		TeamMigrationStartedEvent, TeamPlanChangedEvent, TeamPrefChangeEvent, TeamProfileChangeEvent, TeamProfileDeleteEvent, TeamProfileReorderEvent,
+		TeamRenameEvent, UserChangeEvent, UserTypingEvent, PingEvent, PongEvent,
+	}
 )
 
 // UnmarshalText parses a given event value to EventType.
