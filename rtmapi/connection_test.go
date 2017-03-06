@@ -104,12 +104,12 @@ func TestConnWrapper_Receive(t *testing.T) {
 	}
 	defer conn.Close()
 
-	channelName := "C12345"
-	user := "U6789"
+	var channelID ChannelID = "C12345"
+	var userID UserID = "U6789"
 	text := "Hello world!"
 	timestamp := 1355517523
 	slackTimestamp := fmt.Sprintf("%d.000005", timestamp)
-	input := fmt.Sprintf(`{"type": "message", "channel": "%s", "user": "%s", "text": "%s", "ts": "%s"}`, channelName, user, text, slackTimestamp)
+	input := fmt.Sprintf(`{"type": "message", "channel": "%s", "user": "%s", "text": "%s", "ts": "%s"}`, channelID.String(), userID.String(), text, slackTimestamp)
 
 	connWrapper := newConnectionWrapper(conn)
 	conn.Write([]byte(input))
@@ -123,11 +123,11 @@ func TestConnWrapper_Receive(t *testing.T) {
 		t.Fatalf("received payload is not Message: %#v.", message)
 	}
 
-	if message.Channel.Name != channelName {
-		t.Errorf("expected channel name is not given: %s.", message.Channel.Name)
+	if message.ChannelID != channelID {
+		t.Errorf("expected channel name is not given: %s.", message.ChannelID.String())
 	}
 
-	if message.Sender != user {
+	if message.Sender != userID {
 		t.Errorf("expected user is not given: %s.", message.Sender)
 	}
 
@@ -155,7 +155,8 @@ func TestConnWrapper_Send(t *testing.T) {
 	defer conn.Close()
 
 	connWrapper := newConnectionWrapper(conn)
-	if err := connWrapper.Send(&Channel{Name: "dummy channel"}, "hello"); err != nil {
+	var channelID ChannelID = "dummy channel"
+	if err := connWrapper.Send(channelID, "hello"); err != nil {
 		t.Errorf("error on sending message over WebSocket connection. %#v.", err)
 	}
 }

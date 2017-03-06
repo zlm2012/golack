@@ -17,13 +17,13 @@ type OutgoingCommonEvent struct {
 // https://api.slack.com/rtm#sending_messages
 type OutgoingMessage struct {
 	OutgoingCommonEvent
-	ID      uint     `json:"id"`
-	Channel *Channel `json:"channel"`
-	Text    string   `json:"text"`
+	ID      uint      `json:"id"`
+	Channel ChannelID `json:"channel"`
+	Text    string    `json:"text"`
 }
 
 // NewOutgoingMessage is a constructor to create new OutgoingMessage instance with given arguments.
-func NewOutgoingMessage(eventID *OutgoingEventID, channel *Channel, text string) *OutgoingMessage {
+func NewOutgoingMessage(eventID *OutgoingEventID, channel ChannelID, text string) *OutgoingMessage {
 	return &OutgoingMessage{
 		Channel: channel,
 		Text:    text,

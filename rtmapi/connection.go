@@ -22,7 +22,7 @@ type PayloadReceiver interface {
 }
 
 type PayloadSender interface {
-	Send(*Channel, string) error
+	Send(ChannelID, string) error
 	Ping() error
 }
 
@@ -72,10 +72,11 @@ func (wrapper *connWrapper) Receive() (DecodedPayload, error) {
 		return nil, err
 	}
 
-	return decodePayload(payload)
+	decoded, err := decodePayload(payload)
+	return decoded, err
 }
 
-func (wrapper *connWrapper) Send(channel *Channel, content string) error {
+func (wrapper *connWrapper) Send(channel ChannelID, content string) error {
 	event := NewOutgoingMessage(wrapper.outgoingEventID, channel, content)
 	return websocket.JSON.Send(wrapper.conn, event)
 }
@@ -100,8 +101,92 @@ func decodePayload(input json.RawMessage) (DecodedPayload, error) {
 	if eventType.Exists() {
 		typeVal := eventType.String()
 		switch typeVal {
+		case AccountsChangedEvent:
+			return unmarshal(input, &AccountsChanged{})
+		case BotAddedEvent:
+			return unmarshal(input, &BotAdded{})
+		case BotChangedEvent:
+			return unmarshal(input, &BotChanged{})
+		case ChannelArchivedEvent:
+			return unmarshal(input, &ChannelArchived{})
+		case ChannelCreatedEvent:
+			return unmarshal(input, &ChannelCreated{})
+		case ChannelDeletedEvent:
+			return unmarshal(input, &ChannelDeleted{})
+		case ChannelHistoryChangedEvent:
+			return unmarshal(input, &ChannelHistoryChanged{})
+		case ChannelJoinedEvent:
+			return unmarshal(input, &ChannelJoined{})
+		case ChannelLeftEvent:
+			return unmarshal(input, &ChannelLeft{})
+		case ChannelMarkedEvent:
+			return unmarshal(input, &ChannelMarked{})
+		case ChannelRenameEvent:
+			return unmarshal(input, &ChannelRenamed{})
+		case ChannelUnarchiveEvent:
+			return unmarshal(input, &ChannelUnarchived{})
+		case CommandsChangedEvent:
+			return unmarshal(input, &CommandsChanged{})
+		case DNDUpdatedEvent:
+			return unmarshal(input, &DNDUpdated{})
+		case DNDUpdatedUserEvent:
+			return unmarshal(input, &DNDUpdated{})
+		case EmailDomainChangedEvent:
+			return unmarshal(input, &EmailDomainChanged{})
+		case EmojiChangedEvent:
+			return unmarshal(input, &EmojiChanged{})
+		case FileChangeEvent:
+			return unmarshal(input, &FileChanged{})
+		case FileCommentAddedEvent:
+			return unmarshal(input, &FileCommentAdded{})
+		case FileCommentDeletedEvent:
+			return unmarshal(input, &FileCommentDeleted{})
+		case FileCommentEditedEvent:
+			return unmarshal(input, &FileCommentEdited{})
+		case FileCreatedEvent:
+			return unmarshal(input, &FileCreated{})
+		case FileDeletedEvent:
+			return unmarshal(input, &FileDeleted{})
+		case FilePublicEvent:
+			return unmarshal(input, &FilePublicated{})
+		case FileSharedEvent:
+			return unmarshal(input, &FileShared{})
+		case FileUnsharedEvent:
+			return unmarshal(input, &FileUnshared{})
+		case GoodByeEvent:
+			return unmarshal(input, &GoodBye{})
+		case GroupArchiveEvent:
+			return unmarshal(input, &GroupArchived{})
+		case GroupCloseEvent:
+			return unmarshal(input, &GroupClosed{})
+		case GroupHistoryChangedEvent:
+			return unmarshal(input, &GroupHistoryChanged{})
+		case GroupJoinedEvent:
+			return unmarshal(input, &GroupJoined{})
+		case GroupLeftEvent:
+			return unmarshal(input, &GroupLeft{})
+		case GroupMarkedEvent:
+			return unmarshal(input, &GroupMarked{})
+		case GroupOpenEvent:
+			return unmarshal(input, &GroupOpened{})
+		case GroupRenameEvent:
+			return unmarshal(input, &GroupRenamed{})
+		case GroupUnarchiveEvent:
+			return unmarshal(input, &GroupUnarchived{})
 		case HelloEvent:
 			return unmarshal(input, &Hello{})
+		case IMCloseEvent:
+			return unmarshal(input, &IMClosed{})
+		case IMCreatedEvent:
+			return unmarshal(input, &IMCreated{})
+		case IMHistoryChangedEvent:
+			return unmarshal(input, &IMHistoryChanged{})
+		case IMMarkedEvent:
+			return unmarshal(input, &IMMarked{})
+		case IMOpenEvent:
+			return unmarshal(input, &IMOpened{})
+		case ManualPresenceChangeEvent:
+			return unmarshal(input, &PresenceManuallyChanged{})
 		case MessageEvent:
 			subType := res.Get("subtype")
 			if subType.Exists() {
@@ -160,8 +245,54 @@ func decodePayload(input json.RawMessage) (DecodedPayload, error) {
 				// plain message
 				return unmarshal(input, &Message{})
 			}
+		case PinAddedEvent:
+			return unmarshal(input, &PinAdded{})
+		case PinRemovedEvent:
+			return unmarshal(input, &PinRemoved{})
+		case PrefChangeEvent:
+			return unmarshal(input, &PreferenceChanged{})
+		case PresenceChangeEvent:
+			return unmarshal(input, &PresenceChange{})
+		case ReactionAddedEvent:
+			return unmarshal(input, &ReactionAdded{})
+		case ReactionRemovedEvent:
+			return unmarshal(input, &ReactionRemoved{})
+		case ReconnectURLEvent:
+			return unmarshal(input, &ReconnectURL{})
+		case StarAddedEvent:
+			return unmarshal(input, &StarAdded{})
+		case StarRemovedEvent:
+			return unmarshal(input, &StarRemoved{})
+		case SubTeamCreatedEvent:
+			return unmarshal(input, &SubTeamCreated{})
+		case SubTeamSlefAddedEvent:
+			return unmarshal(input, &SubTeamSelfAdded{})
+		case SubTeamSelfRemovedEvent:
+			return unmarshal(input, &SubTeamSelfRemoved{})
+		case SubTeamUpdatedEvent:
+			return unmarshal(input, &SubTeamUpdated{})
+		case TeamDomainChangeEvent:
+			return unmarshal(input, &TeamDomainChanged{})
+		case TeamJoinEvent:
+			return unmarshal(input, &TeamJoined{})
 		case TeamMigrationStartedEvent:
 			return unmarshal(input, &TeamMigrationStarted{})
+		case TeamPlanChangedEvent:
+			return unmarshal(input, &TeamPlanChanged{})
+		case TeamPrefChangeEvent:
+			return unmarshal(input, &TeamPreferenceChanged{})
+		case TeamProfileChangeEvent:
+			return unmarshal(input, &TeamProfileChanged{})
+		case TeamProfileDeleteEvent:
+			return unmarshal(input, &TeamProfileDeleted{})
+		case TeamProfileReorderEvent:
+			return unmarshal(input, &TeamProfileReordered{})
+		case TeamRenameEvent:
+			return unmarshal(input, &TeamRenamed{})
+		case UserChangeEvent:
+			return unmarshal(input, &UserChanged{})
+		case UserTypingEvent:
+			return unmarshal(input, &UserTyping{})
 		case PongEvent:
 			return unmarshal(input, &Pong{})
 		default:

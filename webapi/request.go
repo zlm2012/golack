@@ -117,16 +117,16 @@ func (message *PostMessage) ToURLValues() url.Values {
 // NewPostMessage creates PostMessage instance with given channel and text settings.
 // By default this sets commonly used settings as much as possible. e.g. link_names=1, unfurl_links=true, etc...
 // To override those settings and add some extra settings including username, icon_url, or icon_emoji, call setter methods start with With***.
-func NewPostMessage(channel, text string) *PostMessage {
-	return NewPostMessageWithAttachments(channel, text, nil)
+func NewPostMessage(channelID, text string) *PostMessage {
+	return NewPostMessageWithAttachments(channelID, text, nil)
 }
 
 // NewPostMessage creates PostMessage instance with given channel, text settings, attachments.
 // By default this sets commonly used settings as much as possible. e.g. link_names=1, unfurl_links=true, etc...
 // To override those settings and add some extra settings including username, icon_url, or icon_emoji, call setter methods start with With***.
-func NewPostMessageWithAttachments(channel, text string, attachments []*MessageAttachment) *PostMessage {
+func NewPostMessageWithAttachments(channelID, text string, attachments []*MessageAttachment) *PostMessage {
 	return &PostMessage{
-		Channel:     channel,
+		Channel:     channelID,
 		Text:        text,
 		Parse:       ParseModeFull,
 		LinkNames:   1,
