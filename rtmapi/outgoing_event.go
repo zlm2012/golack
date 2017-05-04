@@ -1,5 +1,7 @@
 package rtmapi
 
+import "github.com/oklahomer/golack/slackobject"
+
 // OutgoingEvent is just an empty interface that marks outgoing event.
 // This can be used to define method signature or type of returning value.
 type OutgoingEvent interface {
@@ -17,13 +19,13 @@ type OutgoingCommonEvent struct {
 // https://api.slack.com/rtm#sending_messages
 type OutgoingMessage struct {
 	OutgoingCommonEvent
-	ID      uint      `json:"id"`
-	Channel ChannelID `json:"channel"`
-	Text    string    `json:"text"`
+	ID      uint                  `json:"id"`
+	Channel slackobject.ChannelID `json:"channel"`
+	Text    string                `json:"text"`
 }
 
 // NewOutgoingMessage is a constructor to create new OutgoingMessage instance with given arguments.
-func NewOutgoingMessage(eventID *OutgoingEventID, channel ChannelID, text string) *OutgoingMessage {
+func NewOutgoingMessage(eventID *OutgoingEventID, channel slackobject.ChannelID, text string) *OutgoingMessage {
 	return &OutgoingMessage{
 		Channel: channel,
 		Text:    text,

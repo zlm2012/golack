@@ -3,6 +3,7 @@ package rtmapi
 import (
 	"errors"
 	"fmt"
+	"github.com/oklahomer/golack/slackobject"
 	"golang.org/x/net/context"
 	"golang.org/x/net/websocket"
 	"io"
@@ -104,8 +105,8 @@ func TestConnWrapper_Receive(t *testing.T) {
 	}
 	defer conn.Close()
 
-	var channelID ChannelID = "C12345"
-	var userID UserID = "U6789"
+	var channelID slackobject.ChannelID = "C12345"
+	var userID slackobject.UserID = "U6789"
 	text := "Hello world!"
 	timestamp := 1355517523
 	slackTimestamp := fmt.Sprintf("%d.000005", timestamp)
@@ -155,7 +156,7 @@ func TestConnWrapper_Send(t *testing.T) {
 	defer conn.Close()
 
 	connWrapper := newConnectionWrapper(conn)
-	var channelID ChannelID = "dummy channel"
+	var channelID slackobject.ChannelID = "dummy channel"
 	if err := connWrapper.Send(channelID, "hello"); err != nil {
 		t.Errorf("error on sending message over WebSocket connection. %#v.", err)
 	}

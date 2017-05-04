@@ -2,6 +2,7 @@ package webapi
 
 import (
 	"encoding/json"
+	"github.com/oklahomer/golack/slackobject"
 	"net/url"
 	"strconv"
 )
@@ -44,7 +45,7 @@ type MessageAttachment struct {
 // PostMessage is a payload to be sent with chat.postMessage method.
 // See https://api.slack.com/methods/chat.postMessage
 type PostMessage struct {
-	Channel     string
+	ChannelID   slackobject.ChannelID
 	Text        string
 	Parse       ParseMode
 	LinkNames   int
@@ -90,7 +91,7 @@ func (message *PostMessage) WithUnfurlMedia(unfurl bool) *PostMessage {
 func (message *PostMessage) ToURLValues() url.Values {
 	values := url.Values{}
 
-	values.Add("channel", message.Channel)
+	values.Add("channel", message.ChannelID.String())
 	values.Add("text", message.Text)
 	values.Add("parse", message.Parse.String())
 	values.Add("link_names", strconv.Itoa(message.LinkNames))
@@ -117,16 +118,16 @@ func (message *PostMessage) ToURLValues() url.Values {
 // NewPostMessage creates PostMessage instance with given channel and text settings.
 // By default this sets commonly used settings as much as possible. e.g. link_names=1, unfurl_links=true, etc...
 // To override those settings and add some extra settings including username, icon_url, or icon_emoji, call setter methods start with With***.
-func NewPostMessage(channelID, text string) *PostMessage {
+func NewPostMessage(channelID slackobject.ChannelID, text string) *PostMessage {
 	return NewPostMessageWithAttachments(channelID, text, nil)
 }
 
 // NewPostMessage creates PostMessage instance with given channel, text settings, attachments.
 // By default this sets commonly used settings as much as possible. e.g. link_names=1, unfurl_links=true, etc...
 // To override those settings and add some extra settings including username, icon_url, or icon_emoji, call setter methods start with With***.
-func NewPostMessageWithAttachments(channelID, text string, attachments []*MessageAttachment) *PostMessage {
+func NewPostMessageWithAttachments(channelID slackobject.ChannelID, text string, attachments []*MessageAttachment) *PostMessage {
 	return &PostMessage{
-		Channel:     channelID,
+		ChannelID:   channelID,
 		Text:        text,
 		Parse:       ParseModeFull,
 		LinkNames:   1,

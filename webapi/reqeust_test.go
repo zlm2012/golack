@@ -1,6 +1,7 @@
 package webapi
 
 import (
+	"github.com/oklahomer/golack/slackobject"
 	"strconv"
 	"testing"
 )
@@ -28,16 +29,16 @@ func TestParseMode_String(t *testing.T) {
 }
 
 func TestNewPostMessage(t *testing.T) {
-	channel := "myChannel"
+	channelID := slackobject.ChannelID("myChannel")
 	text := "myText"
-	message := NewPostMessage(channel, text)
+	message := NewPostMessage(channelID, text)
 
 	if message == nil {
 		t.Fatal("new PostMessage instance is not returned.")
 	}
 
-	if message.Channel != channel {
-		t.Errorf("expected channel is not set: %s.", message.Channel)
+	if message.ChannelID != channelID {
+		t.Errorf("expected channelID is not set: %s.", message.ChannelID)
 	}
 
 	if message.Text != text {
@@ -46,17 +47,17 @@ func TestNewPostMessage(t *testing.T) {
 }
 
 func TestNewPostMessageWithAttachments(t *testing.T) {
-	channel := "myChannel"
+	channelID := slackobject.ChannelID("myChannel")
 	text := "myText"
 	attachment := &MessageAttachment{}
-	message := NewPostMessageWithAttachments(channel, text, []*MessageAttachment{attachment})
+	message := NewPostMessageWithAttachments(channelID, text, []*MessageAttachment{attachment})
 
 	if message == nil {
 		t.Fatal("new PostMessage instance is not returned.")
 	}
 
-	if message.Channel != channel {
-		t.Errorf("expected channel is not set: %s.", message.Channel)
+	if message.ChannelID != channelID {
+		t.Errorf("expected channel is not set: %s.", message.ChannelID)
 	}
 
 	if message.Text != text {
@@ -112,7 +113,7 @@ func TestPostMessage_WithUnfurlMedia(t *testing.T) {
 }
 
 func TestPostMessage_ToURLValues(t *testing.T) {
-	channel := "myChannel"
+	channelID := slackobject.ChannelID("myChannel")
 	text := "myText"
 	parse := ParseModeFull
 	linkNames := 1
@@ -124,7 +125,7 @@ func TestPostMessage_ToURLValues(t *testing.T) {
 	iconUrl := "http://example.com/icon.png"
 	iconEmoji := ":chart_with_upwards_trend:"
 	message := &PostMessage{
-		Channel:     channel,
+		ChannelID:   channelID,
 		Text:        text,
 		Parse:       parse,
 		LinkNames:   linkNames,
@@ -143,7 +144,7 @@ func TestPostMessage_ToURLValues(t *testing.T) {
 	}{
 		{
 			key: "channel",
-			val: channel,
+			val: channelID.String(),
 		},
 		{
 			key: "text",

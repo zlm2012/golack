@@ -1,28 +1,6 @@
 package rtmapi
 
-type AppID string
-
-func (id AppID) String() string {
-	return string(id)
-}
-
-type BotID string
-
-func (id BotID) String() string {
-	return string(id)
-}
-
-type UserID string
-
-func (id UserID) String() string {
-	return string(id)
-}
-
-type ChannelID string
-
-func (id ChannelID) String() string {
-	return string(id)
-}
+import "github.com/oklahomer/golack/slackobject"
 
 // AccountsChanged event indicates that the list of accounts a user is signed into has changed.
 // https://api.slack.com/events/accounts_changed
@@ -31,9 +9,9 @@ type AccountsChanged struct {
 }
 
 type Bot struct {
-	ID    BotID  `json:"id"`
-	AppID AppID  `json:"app_id"`
-	Name  string `json:"name"`
+	ID    slackobject.BotID `json:"id"`
+	AppID slackobject.AppID `json:"app_id"`
+	Name  string            `json:"name"`
 	Icons struct {
 		Image48 string `json:"image_48"`
 	} `json:"icons"`
@@ -50,24 +28,24 @@ type BotChanged struct {
 }
 
 type ChannelArchived struct {
-	Type      string    `json:"type"`
-	ChannelID ChannelID `json:"channel"`
-	User      UserID    `json:"user"`
+	Type      string                `json:"type"`
+	ChannelID slackobject.ChannelID `json:"channel"`
+	User      slackobject.UserID    `json:"user"`
 }
 
 type ChannelCreated struct {
 	CommonEvent
 	Channel struct {
-		ID      ChannelID  `json:"id"`
-		Name    string     `json:"name"`
-		Created *TimeStamp `json:"created"`
-		Creator string     `json:"creator"`
+		ID      slackobject.ChannelID `json:"id"`
+		Name    string                `json:"name"`
+		Created *TimeStamp            `json:"created"`
+		Creator string                `json:"creator"`
 	} `json:"channel"`
 }
 
 type ChannelDeleted struct {
 	CommonEvent
-	ChannelID ChannelID `json:"channel"`
+	ChannelID slackobject.ChannelID `json:"channel"`
 }
 
 type historyChangedEvent struct {
@@ -83,17 +61,17 @@ type ChannelHistoryChanged struct {
 
 type ChannelJoined struct {
 	CommonEvent
-	ChannelID ChannelID `json:"channel"`
+	ChannelID slackobject.ChannelID `json:"channel"`
 }
 
 type ChannelLeft struct {
 	CommonEvent
-	ChannelID ChannelID `json:"channel"`
+	ChannelID slackobject.ChannelID `json:"channel"`
 }
 
 type markedAsReadEvent struct {
-	ChannelID ChannelID  `json:"channel"`
-	TimeStamp *TimeStamp `json:"ts"`
+	ChannelID slackobject.ChannelID `json:"channel"`
+	TimeStamp *TimeStamp            `json:"ts"`
 }
 
 type ChannelMarked struct {
@@ -104,16 +82,16 @@ type ChannelMarked struct {
 type ChannelRenamed struct {
 	CommonEvent
 	Channel *struct {
-		ID      ChannelID  `json:"id"`
-		Name    string     `json:"name"`
-		Created *TimeStamp `json:"created"`
+		ID      slackobject.ChannelID `json:"id"`
+		Name    string                `json:"name"`
+		Created *TimeStamp            `json:"created"`
 	} `json:"channel"`
 }
 
 type ChannelUnarchived struct {
 	CommonEvent
-	ChannelID ChannelID `json:"channel"`
-	User      UserID    `json:"user"`
+	ChannelID slackobject.ChannelID `json:"channel"`
+	User      slackobject.UserID    `json:"user"`
 }
 
 type CommandsChanged struct {
@@ -123,7 +101,7 @@ type CommandsChanged struct {
 
 type DNDUpdated struct {
 	CommonEvent
-	User      UserID `json:"user"`
+	User      slackobject.UserID `json:"user"`
 	DNDStatus struct {
 		Enabled            bool       `json:"dnd_enabled"`
 		NextStartTimeStamp *TimeStamp `json:"next_dnd_start_ts"`
@@ -135,7 +113,7 @@ type DNDUpdated struct {
 
 type DNDUpdatedUser struct {
 	CommonEvent
-	User      UserID `json:"user"`
+	User      slackobject.UserID `json:"user"`
 	DNDStatus struct {
 		Enabled            bool `json:"dnd_enabled"`
 		NextStartTimeStamp int  `json:"next_dnd_start_ts"`
@@ -157,60 +135,60 @@ type EmojiChanged struct {
 }
 
 type Comment struct {
-	ID      string     `json:"id"`
-	Created *TimeStamp `json:"created"`
-	User    UserID     `json:"user"`
-	Content string     `json:"comment"`
+	ID      string             `json:"id"`
+	Created *TimeStamp         `json:"created"`
+	User    slackobject.UserID `json:"user"`
+	Content string             `json:"comment"`
 }
 
 type File struct {
-	ID                 string      `json:"id"`
-	TimeStamp          *TimeStamp  `json:"created"`
-	Name               string      `json:"name"`
-	Title              string      `json:"title"`
-	MimeType           string      `json:"mimetype"`
-	FileType           string      `json:"filetype"`
-	PrettyType         string      `json:"pretty_type"`
-	User               UserID      `json:"user"`
-	Mode               string      `json:"mode"`
-	Editable           bool        `json:"editable"`
-	IsExternal         bool        `json:"is_external"`
-	ExternalType       string      `json:"external_type"`
-	UserName           string      `json:"username"`
-	Size               int         `json:"size"`
-	URLPrivate         string      `json:"url_private"`
-	URLPrivateDownload string      `json:"url_private_download"`
-	Thumb64            string      `json:"thumb_64"`
-	Thumb80            string      `json:"thumb_80"`
-	Thumb360           string      `json:"thumb_360"`
-	Thumb360Gif        string      `json:"thumb_360_gif"`
-	Thumb360W          int         `json:"thumb_360_w"`
-	Thumb360H          int         `json:"thumb_360_h"`
-	Thumb480           string      `json:"thumb_480"`
-	Thumb480W          int         `json:"thumb_480_w"`
-	Thumb480H          int         `json:"thumb_480_h"`
-	Thumb160           string      `json:"thumb_160"`
-	Permalink          string      `json:"permalink"`
-	PermalinkPublic    string      `json:"permalink_public"`
-	EditLink           string      `json:"edit_link"`
-	Preview            string      `json:"preview"`
-	PreviewHighlight   string      `json:"preview_highlight"`
-	Lines              int         `json:"lines"`
-	LinesMore          int         `json:"lines_more"`
-	IsPublic           bool        `json:"is_public"`
-	PublicURLShared    bool        `json:"public_url_shared"`
-	DisplayAsBot       bool        `json:"display_as_bot"`
-	Channels           []ChannelID `json:"channels"`
-	Groups             []string    `json:"groups"`
-	Ims                []string    `json:"ims"`
-	InitialComment     *Comment    `json:"initial_comment"`
-	NumStars           int         `json:"num_stars"`
-	IsStarred          bool        `json:"is_starred"`
-	PinnedTo           []string    `json:"pinned_to"`
+	ID                 string                  `json:"id"`
+	TimeStamp          *TimeStamp              `json:"created"`
+	Name               string                  `json:"name"`
+	Title              string                  `json:"title"`
+	MimeType           string                  `json:"mimetype"`
+	FileType           string                  `json:"filetype"`
+	PrettyType         string                  `json:"pretty_type"`
+	User               slackobject.UserID      `json:"user"`
+	Mode               string                  `json:"mode"`
+	Editable           bool                    `json:"editable"`
+	IsExternal         bool                    `json:"is_external"`
+	ExternalType       string                  `json:"external_type"`
+	UserName           string                  `json:"username"`
+	Size               int                     `json:"size"`
+	URLPrivate         string                  `json:"url_private"`
+	URLPrivateDownload string                  `json:"url_private_download"`
+	Thumb64            string                  `json:"thumb_64"`
+	Thumb80            string                  `json:"thumb_80"`
+	Thumb360           string                  `json:"thumb_360"`
+	Thumb360Gif        string                  `json:"thumb_360_gif"`
+	Thumb360W          int                     `json:"thumb_360_w"`
+	Thumb360H          int                     `json:"thumb_360_h"`
+	Thumb480           string                  `json:"thumb_480"`
+	Thumb480W          int                     `json:"thumb_480_w"`
+	Thumb480H          int                     `json:"thumb_480_h"`
+	Thumb160           string                  `json:"thumb_160"`
+	Permalink          string                  `json:"permalink"`
+	PermalinkPublic    string                  `json:"permalink_public"`
+	EditLink           string                  `json:"edit_link"`
+	Preview            string                  `json:"preview"`
+	PreviewHighlight   string                  `json:"preview_highlight"`
+	Lines              int                     `json:"lines"`
+	LinesMore          int                     `json:"lines_more"`
+	IsPublic           bool                    `json:"is_public"`
+	PublicURLShared    bool                    `json:"public_url_shared"`
+	DisplayAsBot       bool                    `json:"display_as_bot"`
+	Channels           []slackobject.ChannelID `json:"channels"`
+	Groups             []string                `json:"groups"`
+	Ims                []string                `json:"ims"`
+	InitialComment     *Comment                `json:"initial_comment"`
+	NumStars           int                     `json:"num_stars"`
+	IsStarred          bool                    `json:"is_starred"`
+	PinnedTo           []string                `json:"pinned_to"`
 	Reactions          []struct {
-		Name  string   `json:"name"`
-		Count int      `json:"count"`
-		Users []UserID `json:"users"`
+		Name  string               `json:"name"`
+		Count int                  `json:"count"`
+		Users []slackobject.UserID `json:"users"`
 	} `json:"reactions"`
 	CommentsCount int `json:"comments_count"`
 }
@@ -270,13 +248,13 @@ type GoodBye struct {
 
 type GroupArchived struct {
 	CommonEvent
-	ChannelID ChannelID `json:"channel"`
+	ChannelID slackobject.ChannelID `json:"channel"`
 }
 
 type GroupClosed struct {
 	CommonEvent
-	User      UserID    `json:"user"`
-	ChannelID ChannelID `json:"channel"`
+	User      slackobject.UserID    `json:"user"`
+	ChannelID slackobject.ChannelID `json:"channel"`
 }
 
 type GroupHistoryChanged struct {
@@ -286,12 +264,12 @@ type GroupHistoryChanged struct {
 
 type GroupJoined struct {
 	CommonEvent
-	ChannelID ChannelID `json:"channel"`
+	ChannelID slackobject.ChannelID `json:"channel"`
 }
 
 type GroupLeft struct {
 	CommonEvent
-	ChannelID ChannelID `json:"channel"`
+	ChannelID slackobject.ChannelID `json:"channel"`
 }
 
 type GroupMarked struct {
@@ -301,22 +279,22 @@ type GroupMarked struct {
 
 type GroupOpened struct {
 	CommonEvent
-	User      UserID    `json:"user"`
-	ChannelID ChannelID `json:"channel"`
+	User      slackobject.UserID    `json:"user"`
+	ChannelID slackobject.ChannelID `json:"channel"`
 }
 
 type GroupRenamed struct {
 	CommonEvent
 	Channel struct {
-		ID      ChannelID  `json:"id"`
-		Name    string     `json:"name"`
-		Created *TimeStamp `json:"created"`
+		ID      slackobject.ChannelID `json:"id"`
+		Name    string                `json:"name"`
+		Created *TimeStamp            `json:"created"`
 	} `json:"channel"`
 }
 
 type GroupUnarchived struct {
 	CommonEvent
-	ChannelID ChannelID `json:"channel"`
+	ChannelID slackobject.ChannelID `json:"channel"`
 }
 
 // Hello event is sent from slack when WebSocket connection is successfully established.
@@ -327,18 +305,18 @@ type Hello struct {
 
 type IMClosed struct {
 	CommonEvent
-	User      UserID    `json:"user"`
-	ChannelID ChannelID `json:"channel"`
+	User      slackobject.UserID    `json:"user"`
+	ChannelID slackobject.ChannelID `json:"channel"`
 }
 
 type IMCreated struct {
 	CommonEvent
-	User    UserID `json:"user"`
+	User    slackobject.UserID `json:"user"`
 	Channel struct {
-		ID      ChannelID  `json:"id"`
-		Name    string     `json:"name"`
-		Created *TimeStamp `json:"created"`
-		Creator string     `json:"creator"`
+		ID      slackobject.ChannelID `json:"id"`
+		Name    string                `json:"name"`
+		Created *TimeStamp            `json:"created"`
+		Creator string                `json:"creator"`
 	} `json:"channel"`
 }
 
@@ -354,8 +332,8 @@ type IMMarked struct {
 
 type IMOpened struct {
 	CommonEvent
-	User      UserID    `json:"user"`
-	ChannelID ChannelID `json:"channel"`
+	User      slackobject.UserID    `json:"user"`
+	ChannelID slackobject.ChannelID `json:"channel"`
 }
 
 type PresenceManuallyChanged struct {
@@ -378,10 +356,10 @@ type PresenceManuallyChanged struct {
 //  }
 type Message struct {
 	CommonEvent
-	ChannelID ChannelID  `json:"channel"`
-	Sender    UserID     `json:"user"`
-	Text      string     `json:"text"`
-	TimeStamp *TimeStamp `json:"ts"`
+	ChannelID slackobject.ChannelID `json:"channel"`
+	Sender    slackobject.UserID    `json:"user"`
+	Text      string                `json:"text"`
+	TimeStamp *TimeStamp            `json:"ts"`
 }
 
 // Item can be any object with type of Message, File, or Comment.
@@ -396,19 +374,19 @@ type Item struct {
 
 type PinAdded struct {
 	CommonEvent
-	User      UserID     `json:"user"`
-	ChannelID ChannelID  `json:"channel_id"`
-	TimeStamp *TimeStamp `json:"event_ts"`
-	Item      *Item      `json:"item"`
+	User      slackobject.UserID    `json:"user"`
+	ChannelID slackobject.ChannelID `json:"channel_id"`
+	TimeStamp *TimeStamp            `json:"event_ts"`
+	Item      *Item                 `json:"item"`
 }
 
 type PinRemoved struct {
 	CommonEvent
-	User      UserID     `json:"user"`
-	ChannelID ChannelID  `json:"channel_id"`
-	Item      *Item      `json:"item"`
-	HasPins   bool       `json:"has_pins"`
-	TimeStamp *TimeStamp `json:"event_ts"`
+	User      slackobject.UserID    `json:"user"`
+	ChannelID slackobject.ChannelID `json:"channel_id"`
+	Item      *Item                 `json:"item"`
+	HasPins   bool                  `json:"has_pins"`
+	TimeStamp *TimeStamp            `json:"event_ts"`
 }
 
 type PreferenceChanged struct {
@@ -419,26 +397,26 @@ type PreferenceChanged struct {
 
 type PresenceChange struct {
 	CommonEvent
-	User     UserID `json:"user"`
-	Presence string `json:"presence"`
+	User     slackobject.UserID `json:"user"`
+	Presence string             `json:"presence"`
 }
 
 type ReactionAdded struct {
 	CommonEvent
-	User      UserID     `json:"user"`
-	Reaction  string     `json:"reaction"` // TODO actual value
-	ItemOwner string     `json:"item_user"`
-	Item      *Item      `json:"item"` // TODO message, file, file comment. only ids are given, right?
-	TimeStamp *TimeStamp `json:"event_ts"`
+	User      slackobject.UserID `json:"user"`
+	Reaction  string             `json:"reaction"` // TODO actual value
+	ItemOwner string             `json:"item_user"`
+	Item      *Item              `json:"item"` // TODO message, file, file comment. only ids are given, right?
+	TimeStamp *TimeStamp         `json:"event_ts"`
 }
 
 type ReactionRemoved struct {
 	CommonEvent
-	User      UserID     `json:"user"`
-	Reaction  string     `json:"reaction"` // TODO actual value
-	ItemOwner string     `json:"item_user"`
-	Item      *Item      `json:"item"` // TODO message, file, file comment. only ids are given, right?
-	TimeStamp *TimeStamp `json:"event_ts"`
+	User      slackobject.UserID `json:"user"`
+	Reaction  string             `json:"reaction"` // TODO actual value
+	ItemOwner string             `json:"item_user"`
+	Item      *Item              `json:"item"` // TODO message, file, file comment. only ids are given, right?
+	TimeStamp *TimeStamp         `json:"event_ts"`
 }
 
 // ReconnectURL is currently unsupported and experimental
@@ -449,16 +427,16 @@ type ReconnectURL struct {
 
 type StarAdded struct {
 	CommonEvent
-	User      UserID     `json:"user"`
-	Item      *Item      `json:"item"` // TODO message, file, file comment. only ids are given, right?
-	TimeStamp *TimeStamp `json:"event_ts"`
+	User      slackobject.UserID `json:"user"`
+	Item      *Item              `json:"item"` // TODO message, file, file comment. only ids are given, right?
+	TimeStamp *TimeStamp         `json:"event_ts"`
 }
 
 type StarRemoved struct {
 	CommonEvent
-	User      UserID     `json:"user"`
-	Item      *Item      `json:"item"` // TODO message, file, file comment. only ids are given, right?
-	TimeStamp *TimeStamp `json:"event_ts"`
+	User      slackobject.UserID `json:"user"`
+	Item      *Item              `json:"item"` // TODO message, file, file comment. only ids are given, right?
+	TimeStamp *TimeStamp         `json:"event_ts"`
 }
 
 type SubTeam struct {
@@ -504,14 +482,14 @@ type TeamDomainChanged struct {
 }
 
 type User struct {
-	ID       UserID `json:"id"`
-	Name     string `json:"name"`
-	Deleted  bool   `json:"deleted"`
-	Color    string `json:"color"`
-	RealName string `json:"real_name"`
-	TZ       string `json:"tz"`
-	TZLabel  string `json:"tz_label"`
-	TZOffset int    `json:"tz_offset"`
+	ID       slackobject.UserID `json:"id"`
+	Name     string             `json:"name"`
+	Deleted  bool               `json:"deleted"`
+	Color    string             `json:"color"`
+	RealName string             `json:"real_name"`
+	TZ       string             `json:"tz"`
+	TZLabel  string             `json:"tz_label"`
+	TZOffset int                `json:"tz_offset"`
 	Profile  *struct {
 		FirstName          string `json:"first_name"`
 		LastName           string `json:"last_name"`
@@ -603,8 +581,8 @@ type UserChanged struct {
 
 type UserTyping struct {
 	CommonEvent
-	ChannelID ChannelID `json:"channel"`
-	User      UserID    `json:"user"`
+	ChannelID slackobject.ChannelID `json:"channel"`
+	User      slackobject.UserID    `json:"user"`
 }
 
 // Pong is given when client send Ping.

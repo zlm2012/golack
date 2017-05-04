@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/oklahomer/golack/slackobject"
 	"github.com/tidwall/gjson"
 	"golang.org/x/net/context"
 	"golang.org/x/net/websocket"
@@ -22,7 +23,7 @@ type PayloadReceiver interface {
 }
 
 type PayloadSender interface {
-	Send(ChannelID, string) error
+	Send(slackobject.ChannelID, string) error
 	Ping() error
 }
 
@@ -76,7 +77,7 @@ func (wrapper *connWrapper) Receive() (DecodedPayload, error) {
 	return decoded, err
 }
 
-func (wrapper *connWrapper) Send(channel ChannelID, content string) error {
+func (wrapper *connWrapper) Send(channel slackobject.ChannelID, content string) error {
 	event := NewOutgoingMessage(wrapper.outgoingEventID, channel, content)
 	return websocket.JSON.Send(wrapper.conn, event)
 }
