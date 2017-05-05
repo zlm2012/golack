@@ -9,6 +9,7 @@ import (
 	"golang.org/x/net/context"
 	"golang.org/x/net/websocket"
 	"io"
+	"reflect"
 	"strings"
 )
 
@@ -91,6 +92,106 @@ func (wrapper *connWrapper) Close() error {
 	return wrapper.conn.Close()
 }
 
+var (
+	eventTypeMap = map[EventType]reflect.Type{
+		AccountsChangedEvent:       reflect.TypeOf(&AccountsChanged{}).Elem(),
+		BotAddedEvent:              reflect.TypeOf(&BotAdded{}).Elem(),
+		BotChangedEvent:            reflect.TypeOf(&BotChanged{}).Elem(),
+		ChannelArchivedEvent:       reflect.TypeOf(&ChannelArchived{}).Elem(),
+		ChannelCreatedEvent:        reflect.TypeOf(&ChannelCreated{}).Elem(),
+		ChannelDeletedEvent:        reflect.TypeOf(&ChannelDeleted{}).Elem(),
+		ChannelHistoryChangedEvent: reflect.TypeOf(&ChannelHistoryChanged{}).Elem(),
+		ChannelJoinedEvent:         reflect.TypeOf(&ChannelJoined{}).Elem(),
+		ChannelLeftEvent:           reflect.TypeOf(&ChannelLeft{}).Elem(),
+		ChannelMarkedEvent:         reflect.TypeOf(&ChannelMarked{}).Elem(),
+		ChannelRenameEvent:         reflect.TypeOf(&ChannelRenamed{}).Elem(),
+		ChannelUnarchiveEvent:      reflect.TypeOf(&ChannelUnarchived{}).Elem(),
+		CommandsChangedEvent:       reflect.TypeOf(&CommandsChanged{}).Elem(),
+		DNDUpdatedEvent:            reflect.TypeOf(&DNDUpdated{}).Elem(),
+		DNDUpdatedUserEvent:        reflect.TypeOf(&DNDUpdated{}).Elem(),
+		EmailDomainChangedEvent:    reflect.TypeOf(&EmailDomainChanged{}).Elem(),
+		EmojiChangedEvent:          reflect.TypeOf(&EmojiChanged{}).Elem(),
+		FileChangeEvent:            reflect.TypeOf(&FileChanged{}).Elem(),
+		FileCommentAddedEvent:      reflect.TypeOf(&FileCommentAdded{}).Elem(),
+		FileCommentDeletedEvent:    reflect.TypeOf(&FileCommentDeleted{}).Elem(),
+		FileCommentEditedEvent:     reflect.TypeOf(&FileCommentEdited{}).Elem(),
+		FileCreatedEvent:           reflect.TypeOf(&FileCreated{}).Elem(),
+		FileDeletedEvent:           reflect.TypeOf(&FileDeleted{}).Elem(),
+		FilePublicEvent:            reflect.TypeOf(&FilePublicated{}).Elem(),
+		FileSharedEvent:            reflect.TypeOf(&FileShared{}).Elem(),
+		FileUnsharedEvent:          reflect.TypeOf(&FileUnshared{}).Elem(),
+		GoodByeEvent:               reflect.TypeOf(&GoodBye{}).Elem(),
+		GroupArchiveEvent:          reflect.TypeOf(&GroupArchived{}).Elem(),
+		GroupCloseEvent:            reflect.TypeOf(&GroupClosed{}).Elem(),
+		GroupHistoryChangedEvent:   reflect.TypeOf(&GroupHistoryChanged{}).Elem(),
+		GroupJoinedEvent:           reflect.TypeOf(&GroupJoined{}).Elem(),
+		GroupLeftEvent:             reflect.TypeOf(&GroupLeft{}).Elem(),
+		GroupMarkedEvent:           reflect.TypeOf(&GroupMarked{}).Elem(),
+		GroupOpenEvent:             reflect.TypeOf(&GroupOpened{}).Elem(),
+		GroupRenameEvent:           reflect.TypeOf(&GroupRenamed{}).Elem(),
+		GroupUnarchiveEvent:        reflect.TypeOf(&GroupUnarchived{}).Elem(),
+		HelloEvent:                 reflect.TypeOf(&Hello{}).Elem(),
+		IMCloseEvent:               reflect.TypeOf(&IMClosed{}).Elem(),
+		IMCreatedEvent:             reflect.TypeOf(&IMCreated{}).Elem(),
+		IMHistoryChangedEvent:      reflect.TypeOf(&IMHistoryChanged{}).Elem(),
+		IMMarkedEvent:              reflect.TypeOf(&IMMarked{}).Elem(),
+		IMOpenEvent:                reflect.TypeOf(&IMOpened{}).Elem(),
+		ManualPresenceChangeEvent:  reflect.TypeOf(&PresenceManuallyChanged{}).Elem(),
+		PinAddedEvent:              reflect.TypeOf(&PinAdded{}).Elem(),
+		PinRemovedEvent:            reflect.TypeOf(&PinRemoved{}).Elem(),
+		PrefChangeEvent:            reflect.TypeOf(&PreferenceChanged{}).Elem(),
+		PresenceChangeEvent:        reflect.TypeOf(&PresenceChange{}).Elem(),
+		ReactionAddedEvent:         reflect.TypeOf(&ReactionAdded{}).Elem(),
+		ReactionRemovedEvent:       reflect.TypeOf(&ReactionRemoved{}).Elem(),
+		ReconnectURLEvent:          reflect.TypeOf(&ReconnectURL{}).Elem(),
+		StarAddedEvent:             reflect.TypeOf(&StarAdded{}).Elem(),
+		StarRemovedEvent:           reflect.TypeOf(&StarRemoved{}).Elem(),
+		SubTeamCreatedEvent:        reflect.TypeOf(&SubTeamCreated{}).Elem(),
+		SubTeamSlefAddedEvent:      reflect.TypeOf(&SubTeamSelfAdded{}).Elem(),
+		SubTeamSelfRemovedEvent:    reflect.TypeOf(&SubTeamSelfRemoved{}).Elem(),
+		SubTeamUpdatedEvent:        reflect.TypeOf(&SubTeamUpdated{}).Elem(),
+		TeamDomainChangeEvent:      reflect.TypeOf(&TeamDomainChanged{}).Elem(),
+		TeamJoinEvent:              reflect.TypeOf(&TeamJoined{}).Elem(),
+		TeamMigrationStartedEvent:  reflect.TypeOf(&TeamMigrationStarted{}).Elem(),
+		TeamPlanChangedEvent:       reflect.TypeOf(&TeamPlanChanged{}).Elem(),
+		TeamPrefChangeEvent:        reflect.TypeOf(&TeamPreferenceChanged{}).Elem(),
+		TeamProfileChangeEvent:     reflect.TypeOf(&TeamProfileChanged{}).Elem(),
+		TeamProfileDeleteEvent:     reflect.TypeOf(&TeamProfileDeleted{}).Elem(),
+		TeamProfileReorderEvent:    reflect.TypeOf(&TeamProfileReordered{}).Elem(),
+		TeamRenameEvent:            reflect.TypeOf(&TeamRenamed{}).Elem(),
+		UserChangeEvent:            reflect.TypeOf(&UserChanged{}).Elem(),
+		UserTypingEvent:            reflect.TypeOf(&UserTyping{}).Elem(),
+		PongEvent:                  reflect.TypeOf(&Pong{}).Elem(),
+	}
+	subTypeMap = map[SubType]reflect.Type{
+		BotMessage:       reflect.TypeOf(&MiscMessage{}).Elem(),
+		ChannelArchive:   reflect.TypeOf(&MiscMessage{}).Elem(),
+		ChannelJoin:      reflect.TypeOf(&MiscMessage{}).Elem(),
+		ChannelLeave:     reflect.TypeOf(&MiscMessage{}).Elem(),
+		ChannelName:      reflect.TypeOf(&MiscMessage{}).Elem(),
+		ChannelPurpose:   reflect.TypeOf(&MiscMessage{}).Elem(),
+		ChannelTopic:     reflect.TypeOf(&MiscMessage{}).Elem(),
+		ChannelUnarchive: reflect.TypeOf(&MiscMessage{}).Elem(),
+		FileComment:      reflect.TypeOf(&MiscMessage{}).Elem(),
+		FileMention:      reflect.TypeOf(&MiscMessage{}).Elem(),
+		FileShare:        reflect.TypeOf(&MiscMessage{}).Elem(),
+		GroupArchive:     reflect.TypeOf(&MiscMessage{}).Elem(),
+		GroupJoin:        reflect.TypeOf(&MiscMessage{}).Elem(),
+		GroupLeave:       reflect.TypeOf(&MiscMessage{}).Elem(),
+		GroupName:        reflect.TypeOf(&MiscMessage{}).Elem(),
+		GroupPurpose:     reflect.TypeOf(&MiscMessage{}).Elem(),
+		GroupTopic:       reflect.TypeOf(&MiscMessage{}).Elem(),
+		GroupUnarchive:   reflect.TypeOf(&MiscMessage{}).Elem(),
+		MeMessage:        reflect.TypeOf(&MiscMessage{}).Elem(),
+		MessageChanged:   reflect.TypeOf(&MiscMessage{}).Elem(),
+		MessageDeleted:   reflect.TypeOf(&MiscMessage{}).Elem(),
+		PinnedItem:       reflect.TypeOf(&MiscMessage{}).Elem(),
+		UnpinnedItem:     reflect.TypeOf(&MiscMessage{}).Elem(),
+	}
+	messageEventType        = reflect.TypeOf(&Message{}).Elem()
+	websocketReplyEventType = reflect.TypeOf(&WebSocketReply{}).Elem()
+)
+
 func decodePayload(input json.RawMessage) (DecodedPayload, error) {
 	inputStr := strings.TrimSpace(string(input))
 	if len(inputStr) == 0 {
@@ -98,222 +199,51 @@ func decodePayload(input json.RawMessage) (DecodedPayload, error) {
 	}
 
 	res := gjson.Parse(inputStr)
-	eventType := res.Get("type")
-	if eventType.Exists() {
-		typeVal := eventType.String()
-		switch typeVal {
-		case AccountsChangedEvent:
-			return unmarshal(input, &AccountsChanged{})
-		case BotAddedEvent:
-			return unmarshal(input, &BotAdded{})
-		case BotChangedEvent:
-			return unmarshal(input, &BotChanged{})
-		case ChannelArchivedEvent:
-			return unmarshal(input, &ChannelArchived{})
-		case ChannelCreatedEvent:
-			return unmarshal(input, &ChannelCreated{})
-		case ChannelDeletedEvent:
-			return unmarshal(input, &ChannelDeleted{})
-		case ChannelHistoryChangedEvent:
-			return unmarshal(input, &ChannelHistoryChanged{})
-		case ChannelJoinedEvent:
-			return unmarshal(input, &ChannelJoined{})
-		case ChannelLeftEvent:
-			return unmarshal(input, &ChannelLeft{})
-		case ChannelMarkedEvent:
-			return unmarshal(input, &ChannelMarked{})
-		case ChannelRenameEvent:
-			return unmarshal(input, &ChannelRenamed{})
-		case ChannelUnarchiveEvent:
-			return unmarshal(input, &ChannelUnarchived{})
-		case CommandsChangedEvent:
-			return unmarshal(input, &CommandsChanged{})
-		case DNDUpdatedEvent:
-			return unmarshal(input, &DNDUpdated{})
-		case DNDUpdatedUserEvent:
-			return unmarshal(input, &DNDUpdated{})
-		case EmailDomainChangedEvent:
-			return unmarshal(input, &EmailDomainChanged{})
-		case EmojiChangedEvent:
-			return unmarshal(input, &EmojiChanged{})
-		case FileChangeEvent:
-			return unmarshal(input, &FileChanged{})
-		case FileCommentAddedEvent:
-			return unmarshal(input, &FileCommentAdded{})
-		case FileCommentDeletedEvent:
-			return unmarshal(input, &FileCommentDeleted{})
-		case FileCommentEditedEvent:
-			return unmarshal(input, &FileCommentEdited{})
-		case FileCreatedEvent:
-			return unmarshal(input, &FileCreated{})
-		case FileDeletedEvent:
-			return unmarshal(input, &FileDeleted{})
-		case FilePublicEvent:
-			return unmarshal(input, &FilePublicated{})
-		case FileSharedEvent:
-			return unmarshal(input, &FileShared{})
-		case FileUnsharedEvent:
-			return unmarshal(input, &FileUnshared{})
-		case GoodByeEvent:
-			return unmarshal(input, &GoodBye{})
-		case GroupArchiveEvent:
-			return unmarshal(input, &GroupArchived{})
-		case GroupCloseEvent:
-			return unmarshal(input, &GroupClosed{})
-		case GroupHistoryChangedEvent:
-			return unmarshal(input, &GroupHistoryChanged{})
-		case GroupJoinedEvent:
-			return unmarshal(input, &GroupJoined{})
-		case GroupLeftEvent:
-			return unmarshal(input, &GroupLeft{})
-		case GroupMarkedEvent:
-			return unmarshal(input, &GroupMarked{})
-		case GroupOpenEvent:
-			return unmarshal(input, &GroupOpened{})
-		case GroupRenameEvent:
-			return unmarshal(input, &GroupRenamed{})
-		case GroupUnarchiveEvent:
-			return unmarshal(input, &GroupUnarchived{})
-		case HelloEvent:
-			return unmarshal(input, &Hello{})
-		case IMCloseEvent:
-			return unmarshal(input, &IMClosed{})
-		case IMCreatedEvent:
-			return unmarshal(input, &IMCreated{})
-		case IMHistoryChangedEvent:
-			return unmarshal(input, &IMHistoryChanged{})
-		case IMMarkedEvent:
-			return unmarshal(input, &IMMarked{})
-		case IMOpenEvent:
-			return unmarshal(input, &IMOpened{})
-		case ManualPresenceChangeEvent:
-			return unmarshal(input, &PresenceManuallyChanged{})
-		case MessageEvent:
+	eventTypeValue := res.Get("type")
+	if eventTypeValue.Exists() {
+		eventType := AtoEventType(eventTypeValue.String())
+
+		// See if corresponding type can be found from type value.
+		mapping, ok := eventTypeMap[eventType]
+		if ok {
+			return unmarshal(input, mapping)
+		}
+
+		// If type value is that of MessageEvent, subtype value must be checked to find corresponding type.
+		if eventType == MessageEvent {
 			subType := res.Get("subtype")
 			if subType.Exists() {
-				switch subType.String() {
-				// TODO handle each subtypes
-				case BotMessage:
-					return unmarshal(input, &MiscMessage{})
-				case ChannelArchive:
-					return unmarshal(input, &MiscMessage{})
-				case ChannelJoin:
-					return unmarshal(input, &MiscMessage{})
-				case ChannelLeave:
-					return unmarshal(input, &MiscMessage{})
-				case ChannelName:
-					return unmarshal(input, &MiscMessage{})
-				case ChannelPurpose:
-					return unmarshal(input, &MiscMessage{})
-				case ChannelTopic:
-					return unmarshal(input, &MiscMessage{})
-				case ChannelUnarchive:
-					return unmarshal(input, &MiscMessage{})
-				case FileComment:
-					return unmarshal(input, &MiscMessage{})
-				case FileMention:
-					return unmarshal(input, &MiscMessage{})
-				case FileShare:
-					return unmarshal(input, &MiscMessage{})
-				case GroupArchive:
-					return unmarshal(input, &MiscMessage{})
-				case GroupJoin:
-					return unmarshal(input, &MiscMessage{})
-				case GroupLeave:
-					return unmarshal(input, &MiscMessage{})
-				case GroupName:
-					return unmarshal(input, &MiscMessage{})
-				case GroupPurpose:
-					return unmarshal(input, &MiscMessage{})
-				case GroupTopic:
-					return unmarshal(input, &MiscMessage{})
-				case GroupUnarchive:
-					return unmarshal(input, &MiscMessage{})
-				case MeMessage:
-					return unmarshal(input, &MiscMessage{})
-				case MessageChanged:
-					return unmarshal(input, &MiscMessage{})
-				case MessageDeleted:
-					return unmarshal(input, &MiscMessage{})
-				case PinnedItem:
-					return unmarshal(input, &MiscMessage{})
-				case UnpinnedItem:
-					return unmarshal(input, &MiscMessage{})
-				default:
-					return unmarshal(input, &MiscMessage{})
+				mapping, ok := subTypeMap[AtoSubType(subType.String())]
+				if ok {
+					return unmarshal(input, mapping)
 				}
-			} else {
-				// plain message
-				return unmarshal(input, &Message{})
+
+				// TODO handle unsupported subtype.
 			}
-		case PinAddedEvent:
-			return unmarshal(input, &PinAdded{})
-		case PinRemovedEvent:
-			return unmarshal(input, &PinRemoved{})
-		case PrefChangeEvent:
-			return unmarshal(input, &PreferenceChanged{})
-		case PresenceChangeEvent:
-			return unmarshal(input, &PresenceChange{})
-		case ReactionAddedEvent:
-			return unmarshal(input, &ReactionAdded{})
-		case ReactionRemovedEvent:
-			return unmarshal(input, &ReactionRemoved{})
-		case ReconnectURLEvent:
-			return unmarshal(input, &ReconnectURL{})
-		case StarAddedEvent:
-			return unmarshal(input, &StarAdded{})
-		case StarRemovedEvent:
-			return unmarshal(input, &StarRemoved{})
-		case SubTeamCreatedEvent:
-			return unmarshal(input, &SubTeamCreated{})
-		case SubTeamSlefAddedEvent:
-			return unmarshal(input, &SubTeamSelfAdded{})
-		case SubTeamSelfRemovedEvent:
-			return unmarshal(input, &SubTeamSelfRemoved{})
-		case SubTeamUpdatedEvent:
-			return unmarshal(input, &SubTeamUpdated{})
-		case TeamDomainChangeEvent:
-			return unmarshal(input, &TeamDomainChanged{})
-		case TeamJoinEvent:
-			return unmarshal(input, &TeamJoined{})
-		case TeamMigrationStartedEvent:
-			return unmarshal(input, &TeamMigrationStarted{})
-		case TeamPlanChangedEvent:
-			return unmarshal(input, &TeamPlanChanged{})
-		case TeamPrefChangeEvent:
-			return unmarshal(input, &TeamPreferenceChanged{})
-		case TeamProfileChangeEvent:
-			return unmarshal(input, &TeamProfileChanged{})
-		case TeamProfileDeleteEvent:
-			return unmarshal(input, &TeamProfileDeleted{})
-		case TeamProfileReorderEvent:
-			return unmarshal(input, &TeamProfileReordered{})
-		case TeamRenameEvent:
-			return unmarshal(input, &TeamRenamed{})
-		case UserChangeEvent:
-			return unmarshal(input, &UserChanged{})
-		case UserTypingEvent:
-			return unmarshal(input, &UserTyping{})
-		case PongEvent:
-			return unmarshal(input, &Pong{})
-		default:
-			return nil, NewMalformedPayloadError(fmt.Sprintf(`unsupported event type "%s" is given: %s`, typeVal, input))
+
+			// If subtype is not given, then this is a plain message.
+			return unmarshal(input, messageEventType)
 		}
+
+		// event type is given, but there is no matching type.
+		return nil, NewMalformedPayloadError(fmt.Sprintf(`unsupported event type "%s" is given: %s`, eventTypeValue.String(), input))
 	}
 
 	if res.Get("reply_to").Exists() && res.Get("ok").Exists() {
 		// https://api.slack.com/rtm#handling_responses
 		// When incoming object can't be treated as Event, try treat this as WebSocketReply.
-		return unmarshal(input, &WebSocketReply{})
+		return unmarshal(input, websocketReplyEventType)
 	}
 
 	return nil, NewMalformedPayloadError(fmt.Sprintf("given json object has unknown structure. can not handle: %s.", input))
 }
 
-func unmarshal(input json.RawMessage, mapping interface{}) (DecodedPayload, error) {
-	if err := json.Unmarshal(input, mapping); err != nil {
+func unmarshal(input json.RawMessage, mapping reflect.Type) (DecodedPayload, error) {
+	payload := reflect.New(mapping).Interface()
+	err := json.Unmarshal(input, &payload)
+	if err != nil {
 		return nil, NewMalformedPayloadError(err.Error())
 	}
 
-	return mapping, nil
+	return payload, nil
 }

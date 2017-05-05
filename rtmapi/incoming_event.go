@@ -369,7 +369,7 @@ type Item struct {
 	Message   *Message   `json:"message"`
 	File      *File      `json:"file"`
 	Comment   *Comment   `json:"comment"`
-	Timestamp *TimeStamp `json:"ts"`
+	TimeStamp *TimeStamp `json:"ts"`
 }
 
 type PinAdded struct {

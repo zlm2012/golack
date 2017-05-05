@@ -198,80 +198,87 @@ func TestConnWrapper_Close(t *testing.T) {
 	}
 }
 
-func TestDecodePayload(t *testing.T) {
+func Test_decodePayload(t *testing.T) {
 	type output struct {
 		payload reflect.Type
 		err     interface{}
 	}
 	var decodeTests = []struct {
 		input  string
-		output output
+		output *output
 	}{
 		{
-			`{"type": "message", "channel": "C2147483705", "user": "U2147483697", "text": "Hello, world!", "ts": "1355517523.000005", "edited": { "user": "U2147483697", "ts": "1355517536.000001"}}`,
-			output{
-				reflect.TypeOf(&Message{}),
-				nil,
+			input: `{"type": "channel_rename", "channel": {"id":"C02XXXXX", "name":"new_name", "created":1360782804}}`,
+			output: &output{
+				payload: reflect.TypeOf(&ChannelRenamed{}),
+				err:     nil,
+			},
+		},
+		{
+			input: `{"type": "message", "channel": "C2147483705", "user": "U2147483697", "text": "Hello, world!", "ts": "1355517523.000005", "edited": { "user": "U2147483697", "ts": "1355517536.000001"}}`,
+			output: &output{
+				payload: reflect.TypeOf(&Message{}),
+				err:     nil,
 			},
 		},
 		{
 			// type is valid and hence mapped to Message, but can not be parsed since the timestamp format is illegal.
-			`{"type": "message", "ts": "invalid timestamp"}`,
-			output{
-				nil,
-				reflect.TypeOf(&MalformedPayloadError{}),
+			input: `{"type": "message", "ts": "invalid timestamp"}`,
+			output: &output{
+				payload: nil,
+				err:     reflect.TypeOf(&MalformedPayloadError{}),
 			},
 		},
 		{
-			`{"type": "message", "subtype": "channel_join", "text": "<@UXXXXX|bobby> has joined the channel", "ts": "1403051575.000407", "user": "U023BECGF"}`,
-			output{
-				reflect.TypeOf(&MiscMessage{}),
-				nil,
+			input: `{"type": "message", "subtype": "channel_join", "text": "<@UXXXXX|bobby> has joined the channel", "ts": "1403051575.000407", "user": "U023BECGF"}`,
+			output: &output{
+				payload: reflect.TypeOf(&MiscMessage{}),
+				err:     nil,
 			},
 		},
 		{
 			// invalid type
-			`{"type": "unsupportedEventType"}`,
-			output{
-				nil,
-				reflect.TypeOf(&MalformedPayloadError{}),
+			input: `{"type": "unsupportedEventType"}`,
+			output: &output{
+				payload: nil,
+				err:     reflect.TypeOf(&MalformedPayloadError{}),
 			},
 		},
 		{
-			`{"ok": true, "reply_to": 1, "ts": "1355517523.000005", "text": "Hello world"}`,
-			output{
-				reflect.TypeOf(&WebSocketReply{}),
-				nil,
+			input: `{"ok": true, "reply_to": 1, "ts": "1355517523.000005", "text": "Hello world"}`,
+			output: &output{
+				payload: reflect.TypeOf(&WebSocketReply{}),
+				err:     nil,
 			},
 		},
 		{
 			// required fields are not given
-			`{"what": true}`,
-			output{
-				nil,
-				reflect.TypeOf(&MalformedPayloadError{}),
+			input: `{"what": true}`,
+			output: &output{
+				payload: nil,
+				err:     reflect.TypeOf(&MalformedPayloadError{}),
 			},
 		},
 		{
 			// not valid json structure
-			`malformedJson`,
-			output{
-				nil,
-				reflect.TypeOf(&MalformedPayloadError{}),
+			input: `malformedJson`,
+			output: &output{
+				payload: nil,
+				err:     reflect.TypeOf(&MalformedPayloadError{}),
 			},
 		},
 		{
-			"　",
-			output{
-				nil,
-				ErrEmptyPayload,
+			input: "　",
+			output: &output{
+				payload: nil,
+				err:     ErrEmptyPayload,
 			},
 		},
 		{
-			"\r",
-			output{
-				nil,
-				ErrEmptyPayload,
+			input: "\r",
+			output: &output{
+				payload: nil,
+				err:     ErrEmptyPayload,
 			},
 		},
 	}

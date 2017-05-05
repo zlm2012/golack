@@ -1,6 +1,7 @@
 package rtmapi
 
 import (
+	"encoding/json"
 	"strconv"
 	"strings"
 	"time"
@@ -17,13 +18,19 @@ type TimeStamp struct {
 	OriginalValue string
 }
 
-// UnmarshalText parses a given slack timestamp to time.Time.
+// UnmarshalJSON parses a given slack timestamp to time.Time.
 // This method is mainly used by encode/json.
-func (timeStamp *TimeStamp) UnmarshalText(b []byte) error {
-	str := string(b)
-	timeStamp.OriginalValue = str
+func (timeStamp *TimeStamp) UnmarshalJSON(b []byte) error {
+	// First accept both string form of "1355517536.000001" and integer form of 1355517536
+	var n json.Number
+	err := json.Unmarshal(b, &n)
+	if err != nil {
+		return err
+	}
+	timeStamp.OriginalValue = n.String()
 
-	i, err := strconv.ParseInt(strings.Split(str, ".")[0], 10, 64)
+	// Convert accepted value to time.Time representation.
+	i, err := strconv.ParseInt(strings.Split(n.String(), ".")[0], 10, 64)
 	if err != nil {
 		return err
 	}

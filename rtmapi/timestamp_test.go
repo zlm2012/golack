@@ -7,9 +7,22 @@ import (
 	"time"
 )
 
-func TestTimeStamp_UnmarshalText(t *testing.T) {
+func TestTimeStamp_UnmarshalJSON(t *testing.T) {
 	timeStamp := &TimeStamp{}
-	if err := timeStamp.UnmarshalText([]byte("1355517536.000001")); err != nil {
+	if err := timeStamp.UnmarshalJSON([]byte("1355517536.000001")); err != nil {
+		t.Fatalf("error on unmarshal slack timestamp: %s.", err.Error())
+	}
+
+	expectedTime := time.Unix(1355517536, 0)
+
+	if !timeStamp.Time.Equal(expectedTime) {
+		t.Errorf("unmarshaled time is wrong: %s. expected: %s.", timeStamp.Time.String(), expectedTime.String())
+	}
+}
+
+func TestTimeStamp_UnmarshalJSON_Number(t *testing.T) {
+	timeStamp := &TimeStamp{}
+	if err := timeStamp.UnmarshalJSON([]byte(strconv.Itoa(1355517536))); err != nil {
 		t.Fatalf("error on unmarshal slack timestamp: %s.", err.Error())
 	}
 
@@ -23,7 +36,7 @@ func TestTimeStamp_UnmarshalText(t *testing.T) {
 func TestTimeStamp_UnmarshalText_Malformed(t *testing.T) {
 	invalidInput := "FooBar"
 	timeStamp := &TimeStamp{}
-	if err := timeStamp.UnmarshalText([]byte(invalidInput)); err == nil {
+	if err := timeStamp.UnmarshalJSON([]byte(invalidInput)); err == nil {
 		t.Error("error is not returned.")
 	}
 }

@@ -102,15 +102,19 @@ var (
 // UnmarshalText parses a given event value to EventType.
 // This method is mainly used by encode/json.
 func (eventType *EventType) UnmarshalText(b []byte) error {
-	str := string(b)
+	*eventType = AtoEventType(string(b))
+	return nil
+}
+
+// AtoEventType converts given string to corresponding EventType.
+func AtoEventType(str string) EventType {
 	for _, val := range possibleEvents {
 		if str == val.String() {
-			*eventType = val
-			return nil
+			return val
 		}
 	}
-	*eventType = UnsupportedEvent
-	return nil
+
+	return UnsupportedEvent
 }
 
 // String returns the stringified event name, which corresponds to the one sent from/to slack RTM endpoint.
@@ -179,15 +183,19 @@ var (
 // UnmarshalText parses a given subtype value to SubType
 // This method is mainly used by encode/json.
 func (subType *SubType) UnmarshalText(b []byte) error {
-	str := string(b)
+	*subType = AtoSubType(string(b))
+	return nil
+}
+
+// AtoSubType converts given string to corresponding SubType.
+func AtoSubType(str string) SubType {
 	for _, val := range possibleSubTypes {
 		if str == val.String() {
-			*subType = val
-			return nil
+			return val
 		}
 	}
-	*subType = Empty
-	return nil
+
+	return Empty
 }
 
 // String returns the stringified subtype name, which corresponds to the one sent from/to slack RTM endpoint.
