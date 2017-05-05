@@ -2,79 +2,110 @@ package rtmapi
 
 import (
 	"bytes"
-	"encoding/json"
 	"strings"
 	"testing"
 )
 
-func TestUnmarshalEventType(t *testing.T) {
-	var eventType EventType
-	if err := eventType.UnmarshalText([]byte(HelloEvent)); err != nil {
-		t.Errorf("error on valid event type unmarshal. %s.", err.Error())
-		return
-	}
+func TestEventType_UnmarshalText(t *testing.T) {
+	for _, given := range possibleEvents {
+		var eventType EventType
+		if err := eventType.UnmarshalText([]byte(given)); err != nil {
+			t.Errorf("Unexpected error on valid EventType unmarshal: %s.", err.Error())
+			continue
+		}
 
-	if strings.Compare(string(eventType), string(HelloEvent)) != 0 {
-		t.Errorf("event type, %s, is wrong. expecting %s.", eventType, HelloEvent)
+		if strings.Compare(string(eventType), string(given)) != 0 {
+			t.Errorf("Unexpected EventType was returned: %s. Expected: %s.", eventType, given)
+		}
 	}
 }
 
-func TestUnmarshalInvalidEventType(t *testing.T) {
+func TestEventType_UnmarshalText_UnsupportedEvent(t *testing.T) {
 	var eventType EventType
-	if err := eventType.UnmarshalText([]byte("INVALID")); err != nil {
-		t.Errorf("error on event type unmarshal, where it should be UNKNOWN. %s.", err.Error())
+	if err := eventType.UnmarshalText([]byte("UNKNOWN")); err != nil {
+		t.Errorf("Unexpected error on EventTyep unmarshal: %s.", err.Error())
 		return
 	}
 
 	if strings.Compare(string(eventType), string(UnsupportedEvent)) != 0 {
-		t.Errorf("event type, %s, is wrong. expecting %s.", eventType, UnsupportedEvent)
+		t.Errorf("Unexpected EventType was returned: %s. Expected: %s.", eventType, UnsupportedEvent)
 	}
 }
 
-func TestMarshalEventType(t *testing.T) {
-	eventType := EventType(HelloEvent)
-	if b, e := eventType.MarshalText(); e == nil {
-		if !bytes.Equal(b, []byte(HelloEvent)) {
-			t.Errorf("marshaled value is wrong %s. expected %s.", string(b), string(HelloEvent))
+func TestEventType_MarshalText(t *testing.T) {
+	for _, given := range possibleEvents {
+		text, err := given.MarshalText()
+		if err != nil {
+			t.Errorf("Unexpected error on EventType marshal: %s.", err.Error())
+			continue
 		}
-	} else {
-		t.Errorf("error on marshal slack event type. %s.", e.Error())
+
+		if !bytes.Equal(text, []byte(given)) {
+			t.Errorf("Unexpected value is returned: %s. Expected: %s.", string(text), string(given))
+		}
 	}
 }
 
-func TestMarshalZeroValuedEventType(t *testing.T) {
+func TestEventType_MarshalText_ZeroValue(t *testing.T) {
 	var eventType EventType
-	if b, e := eventType.MarshalText(); e == nil {
-		if !bytes.Equal(b, []byte(UnsupportedEvent)) {
-			t.Errorf("marshaled value is wrong %s. expected %s.", string(b), string(UnsupportedEvent))
-		}
-	} else {
-		t.Errorf("error on marshal slack event type. %s.", e.Error())
+	text, err := eventType.MarshalText()
+
+	if err != nil {
+		t.Fatalf("Unexpected error on EventType marshal: %s.", err.Error())
+	}
+
+	if !bytes.Equal(text, []byte(UnsupportedEvent)) {
+		t.Errorf("Unexpected value is returned: %s. Expected: %s.", string(text), string(UnsupportedEvent))
 	}
 }
 
-func TestUnmarshalCommonEvent(t *testing.T) {
-	messageEvent := []byte(`{"type": "message"}`)
-	parsedEvent := CommonEvent{}
-	if err := json.Unmarshal(messageEvent, &parsedEvent); err != nil {
-		t.Errorf("error on parsing given JSON structure. %s. %s.", string(messageEvent), err.Error())
-		return
-	}
+func TestSubType_UnmarshalText(t *testing.T) {
+	for _, given := range possibleSubTypes {
+		var subType SubType
+		if err := subType.UnmarshalText([]byte(given)); err != nil {
+			t.Errorf("Unexpected error on SubType unmarshal: %s.", err.Error())
+			continue
+		}
 
-	if parsedEvent.Type != MessageEvent {
-		t.Errorf("type field is not properly parsed. %s", parsedEvent.Type)
+		if strings.Compare(string(subType), string(given)) != 0 {
+			t.Errorf("Unexpected value is returned: %s. Expected: %s.", subType, given)
+		}
 	}
-
 }
 
-func TestMarshalCommonEvent(t *testing.T) {
-	event := CommonEvent{Type: MessageEvent}
-	if b, err := json.Marshal(event); err == nil {
-		if !strings.Contains(string(b), string(MessageEvent)) {
-			t.Errorf(`returned text doesn't contain "message". %s.`, string(b))
-		}
-	} else {
-		t.Errorf("error on json.Marshal. %s.", err.Error())
+func TestSubType_UnmarshalText_Empty(t *testing.T) {
+	var subType SubType
+	if err := subType.UnmarshalText([]byte("")); err != nil {
+		t.Fatalf("Unexpected error on SubType unmarshal: %s.", err.Error())
 	}
 
+	if strings.Compare(string(subType), string(Empty)) != 0 {
+		t.Errorf("Unexpected value is returned: %s. Expected: %s.", subType, Empty)
+	}
+}
+
+func TestSubType_MarshalText(t *testing.T) {
+	for _, given := range possibleSubTypes {
+		text, err := given.MarshalText()
+		if err != nil {
+			t.Errorf("Unexpected error on SubType marshal: %s.", err.Error())
+			continue
+		}
+
+		if !bytes.Equal(text, []byte(given)) {
+			t.Errorf("Unexpected value is returned: %s. Expected: %s.", string(text), string(given))
+		}
+	}
+}
+
+func TestSubType_MarshalText_ZeroValue(t *testing.T) {
+	var subType SubType
+	text, err := subType.MarshalText()
+	if err != nil {
+		t.Fatalf("Unexpected error on SubType marshal: %s.", err.Error())
+	}
+
+	if !bytes.Equal(text, []byte("")) {
+		t.Errorf("Unexpected value is returned: %s. Expected: %s.", string(text), string(""))
+	}
 }
