@@ -452,7 +452,7 @@ type SubTeam struct {
 	Deleted     *TimeStamp `json:"date_delete"`
 	CreatedBy   string     `json:"created_by"`
 	UpdatedBy   string     `json:"updated_by"`
-	UserCount   string     `json:"user_count"`
+	UserCount   int        `json:"user_count"`
 }
 
 type SubTeamCreated struct {
