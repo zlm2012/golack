@@ -61,12 +61,12 @@ func New(config *Config, options ...Option) *Golack {
 
 func (g *Golack) StartRTMSession(ctx context.Context) (*webapi.RTMStart, error) {
 	rtmStart := &webapi.RTMStart{}
-	if err := g.webClient.Get(ctx, "rtm.start", nil, &rtmStart); err != nil {
+	if err := g.webClient.Get(ctx, "rtm.start", nil, rtmStart); err != nil {
 		return nil, err
 	}
 
 	if rtmStart.OK != true {
-		return nil, fmt.Errorf("Error on rtm.start : %s", rtmStart.Error)
+		return nil, fmt.Errorf("failed rtm.start request: %s", rtmStart.Error)
 	}
 
 	return rtmStart, nil
@@ -74,9 +74,13 @@ func (g *Golack) StartRTMSession(ctx context.Context) (*webapi.RTMStart, error) 
 
 func (g *Golack) PostMessage(ctx context.Context, postMessage *webapi.PostMessage) (*webapi.APIResponse, error) {
 	response := &webapi.APIResponse{}
-	err := g.webClient.Post(ctx, "chat.postMessage", postMessage.ToURLValues(), &response)
+	err := g.webClient.Post(ctx, "chat.postMessage", postMessage.ToURLValues(), response)
 	if err != nil {
 		return nil, err
+	}
+
+	if response.OK != true {
+		return nil, fmt.Errorf("failed chat.postMessage request: %s", response.Error)
 	}
 
 	return response, nil
