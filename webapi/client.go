@@ -3,13 +3,14 @@ package webapi
 import (
 	"encoding/json"
 	"fmt"
-	"golang.org/x/net/context"
-	"golang.org/x/net/context/ctxhttp"
 	"io/ioutil"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
 	"time"
+
+	"golang.org/x/net/context"
+	"golang.org/x/net/context/ctxhttp"
 )
 
 const (
@@ -21,12 +22,30 @@ type Config struct {
 	RequestTimeout time.Duration
 }
 
-type Client struct {
-	config *Config
+type ClientOption func(*Client)
+
+func WithHTTPClient(httpClient *http.Client) ClientOption {
+	return func(c *Client) {
+		c.httpClient = httpClient
+	}
 }
 
-func NewClient(config *Config) *Client {
-	return &Client{config: config}
+type Client struct {
+	config     *Config
+	httpClient *http.Client
+}
+
+func NewClient(config *Config, options ...ClientOption) *Client {
+	c := &Client{config: config}
+	for _, opt := range options {
+		opt(c)
+	}
+
+	if c.httpClient == nil {
+		c.httpClient = http.DefaultClient
+	}
+
+	return c
 }
 
 func buildEndpoint(slackMethod, token string, queryParams *url.Values) *url.URL {
@@ -49,12 +68,14 @@ func (client *Client) Get(ctx context.Context, slackMethod string, queryParams *
 
 	reqCtx, cancel := context.WithTimeout(ctx, client.config.RequestTimeout)
 	defer cancel()
-	resp, err := ctxhttp.Get(reqCtx, http.DefaultClient, endpoint.String())
+	resp, err := ctxhttp.Get(reqCtx, client.httpClient, endpoint.String())
 	if err != nil {
 		return err
 	}
 
 	defer resp.Body.Close()
+	// Usually, the API returns a JSON structure with status code 200.
+	// https://api.slack.com/web#evaluating_responses
 	if resp.StatusCode != http.StatusOK {
 		return statusErr(resp)
 	}
@@ -72,9 +93,12 @@ func (client *Client) Get(ctx context.Context, slackMethod string, queryParams *
 }
 
 func statusErr(resp *http.Response) error {
-	reqDump, reqErr := httputil.DumpRequestOut(resp.Request, true)
-	if reqErr != nil {
-		reqDump = []byte("N/A")
+	reqDump := []byte("N/A")
+	if resp.Request != nil {
+		dump, err := httputil.DumpRequestOut(resp.Request, true)
+		if err != nil {
+			reqDump = dump
+		}
 	}
 
 	resDump, resErr := httputil.DumpResponse(resp, true)
@@ -90,12 +114,14 @@ func (client *Client) Post(ctx context.Context, slackMethod string, bodyParam ur
 
 	reqCtx, cancel := context.WithTimeout(ctx, client.config.RequestTimeout)
 	defer cancel()
-	resp, err := ctxhttp.PostForm(reqCtx, http.DefaultClient, endpoint.String(), bodyParam)
+	resp, err := ctxhttp.PostForm(reqCtx, client.httpClient, endpoint.String(), bodyParam)
 	if err != nil {
 		return err
 	}
 
 	defer resp.Body.Close()
+	// Usually, the API returns a JSON structure with status code 200.
+	// https://api.slack.com/web#evaluating_responses
 	if resp.StatusCode != http.StatusOK {
 		return statusErr(resp)
 	}

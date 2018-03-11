@@ -2,10 +2,12 @@ package golack
 
 import (
 	"fmt"
+	"net/url"
+	"time"
+
 	"github.com/oklahomer/golack/rtmapi"
 	"github.com/oklahomer/golack/webapi"
 	"golang.org/x/net/context"
-	"time"
 )
 
 type Config struct {
@@ -23,25 +25,48 @@ func NewConfig() *Config {
 	}
 }
 
-type Golack struct {
-	webClient *webapi.Client
+type WebClient interface {
+	Get(ctx context.Context, slackMethod string, queryParams *url.Values, intf interface{}) error
+	Post(ctx context.Context, slackMethod string, bodyParam url.Values, intf interface{}) error
 }
 
-func New(config *Config) *Golack {
-	webClient := webapi.NewClient(&webapi.Config{Token: config.Token, RequestTimeout: config.RequestTimeout})
-	return &Golack{
-		webClient: webClient,
+type Option func(*Golack)
+
+func WithWebClient(wc WebClient) Option {
+	return func(g *Golack) {
+		g.webClient = wc
 	}
+}
+
+type Golack struct {
+	webClient WebClient
+}
+
+func New(config *Config, options ...Option) *Golack {
+	g := &Golack{}
+	for _, opt := range options {
+		opt(g)
+	}
+
+	if g.webClient == nil {
+		apiConfig := &webapi.Config{
+			Token:          config.Token,
+			RequestTimeout: config.RequestTimeout,
+		}
+		g.webClient = webapi.NewClient(apiConfig)
+	}
+
+	return g
 }
 
 func (g *Golack) StartRTMSession(ctx context.Context) (*webapi.RTMStart, error) {
 	rtmStart := &webapi.RTMStart{}
-	if err := g.webClient.Get(ctx, "rtm.start", nil, &rtmStart); err != nil {
+	if err := g.webClient.Get(ctx, "rtm.start", nil, rtmStart); err != nil {
 		return nil, err
 	}
 
 	if rtmStart.OK != true {
-		return nil, fmt.Errorf("Error on rtm.start : %s", rtmStart.Error)
+		return nil, fmt.Errorf("failed rtm.start request: %s", rtmStart.Error)
 	}
 
 	return rtmStart, nil
@@ -49,9 +74,13 @@ func (g *Golack) StartRTMSession(ctx context.Context) (*webapi.RTMStart, error) 
 
 func (g *Golack) PostMessage(ctx context.Context, postMessage *webapi.PostMessage) (*webapi.APIResponse, error) {
 	response := &webapi.APIResponse{}
-	err := g.webClient.Post(ctx, "chat.postMessage", postMessage.ToURLValues(), &response)
+	err := g.webClient.Post(ctx, "chat.postMessage", postMessage.ToURLValues(), response)
 	if err != nil {
 		return nil, err
+	}
+
+	if response.OK != true {
+		return nil, fmt.Errorf("failed chat.postMessage request: %s", response.Error)
 	}
 
 	return response, nil

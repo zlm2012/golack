@@ -1,29 +1,70 @@
 package golack
 
 import (
-	"github.com/jarcoal/httpmock"
+	"net/url"
+	"testing"
+
 	"github.com/oklahomer/golack/webapi"
 	"golang.org/x/net/context"
-	"testing"
 )
 
+type DummyWebClient struct {
+	GetFunc  func(ctx context.Context, slackMethod string, queryParams *url.Values, intf interface{}) error
+	PostFunc func(ctx context.Context, slackMethod string, bodyParam url.Values, intf interface{}) error
+}
+
+func (wc *DummyWebClient) Get(ctx context.Context, slackMethod string, queryParams *url.Values, intf interface{}) error {
+	return wc.GetFunc(ctx, slackMethod, queryParams, intf)
+}
+
+func (wc *DummyWebClient) Post(ctx context.Context, slackMethod string, bodyParam url.Values, intf interface{}) error {
+	return wc.PostFunc(ctx, slackMethod, bodyParam, intf)
+}
+
+func TestWithWebClient(t *testing.T) {
+	webClient := &DummyWebClient{}
+	option := WithWebClient(webClient)
+	golack := &Golack{}
+
+	option(golack)
+
+	if golack.webClient != webClient {
+		t.Errorf("Specified WebClient is not set.")
+	}
+}
+
+func TestNew(t *testing.T) {
+	config := &Config{}
+	optionCalled := false
+
+	golack := New(config, func(_ *Golack) { optionCalled = true })
+
+	if golack == nil {
+		t.Fatal("Returned *Golack is nil.")
+	}
+
+	if !optionCalled {
+		t.Error("Option is not called.")
+	}
+}
+
 func TestGolack_StartRTMSession(t *testing.T) {
-	httpmock.Activate()
-	defer httpmock.DeactivateAndReset()
+	webClient := &DummyWebClient{
+		GetFunc: func(_ context.Context, slackMethod string, _ *url.Values, intf interface{}) error {
+			if slackMethod != "rtm.start" {
+				t.Errorf("Requesting path is not correct: %s.", slackMethod)
+			}
+			start := intf.(*webapi.RTMStart)
+			start.APIResponse = webapi.APIResponse{OK: true}
+			start.URL = "https://localhost/foo"
+			start.Self = nil
+			return nil
+		},
+	}
+	golack := &Golack{
+		webClient: webClient,
+	}
 
-	jsonResponder, _ := httpmock.NewJsonResponder(
-		200,
-		&webapi.RTMStart{
-			APIResponse: webapi.APIResponse{OK: true},
-			URL:         "https://localhost/foo",
-			Self:        nil})
-
-	httpmock.RegisterResponder(
-		"GET",
-		"https://slack.com/api/rtm.start",
-		jsonResponder)
-
-	golack := New(NewConfig())
 	rtmStart, err := golack.StartRTMSession(context.TODO())
 
 	if err != nil {
@@ -36,18 +77,19 @@ func TestGolack_StartRTMSession(t *testing.T) {
 }
 
 func TestGolack_PostMessage(t *testing.T) {
-	httpmock.Activate()
-	defer httpmock.DeactivateAndReset()
-
-	response := &webapi.APIResponse{OK: true}
-	jsonResponder, _ := httpmock.NewJsonResponder(200, response)
-	httpmock.RegisterResponder(
-		"POST",
-		"https://slack.com/api/chat.postMessage",
-		jsonResponder)
+	webClient := &DummyWebClient{
+		PostFunc: func(ctx context.Context, slackMethod string, bodyParam url.Values, intf interface{}) error {
+			response := intf.(*webapi.APIResponse)
+			response.OK = true
+			response.Error = ""
+			return nil
+		},
+	}
 
 	postMessage := webapi.NewPostMessage("channel", "my message")
-	golack := New(NewConfig())
+	golack := &Golack{
+		webClient: webClient,
+	}
 	response, err := golack.PostMessage(context.TODO(), postMessage)
 
 	if err != nil {

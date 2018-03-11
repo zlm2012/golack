@@ -1,12 +1,14 @@
 package webapi
 
 import (
-	"github.com/jarcoal/httpmock"
-	"golang.org/x/net/context"
+	"encoding/json"
 	"net/http"
+	"net/http/httptest"
 	"net/url"
 	"testing"
 	"time"
+
+	"golang.org/x/net/context"
 )
 
 type GetResponseDummy struct {
@@ -14,18 +16,38 @@ type GetResponseDummy struct {
 	Foo string
 }
 
+func TestWithHTTPClient(t *testing.T) {
+	httpClient := &http.Client{}
+	option := WithHTTPClient(httpClient)
+	client := &Client{}
+
+	option(client)
+
+	if client.httpClient != httpClient {
+		t.Errorf("Specified htt.Client is not set")
+	}
+}
+
 func TestNewClient(t *testing.T) {
 	config := &Config{Token: "abc", RequestTimeout: 1 * time.Second}
-	client := NewClient(config)
+	optionCalled := false
+	client := NewClient(config, func(*Client) { optionCalled = true })
 
 	if client == nil {
-		t.Fatal("client is nil.")
+		t.Fatal("Returned client is nil.")
 	}
 
 	if client.config != config {
-		t.Errorf("returned client does not have assigned config: %#v.", client.config)
+		t.Errorf("Returned client does not have assigned config: %#v.", client.config)
 	}
 
+	if !optionCalled {
+		t.Error("ClientOption is not called.")
+	}
+
+	if client.httpClient != http.DefaultClient {
+		t.Errorf("When WithHTTPClient is not given, http.DefaultClient must be set: %+v", client.httpClient)
+	}
 }
 
 func Test_buildEndpoint(t *testing.T) {
@@ -52,17 +74,19 @@ func Test_buildEndpoint(t *testing.T) {
 }
 
 func TestClient_Get(t *testing.T) {
-	httpmock.Activate()
-	defer httpmock.DeactivateAndReset()
-
 	returningResponse := &GetResponseDummy{
 		APIResponse: APIResponse{OK: true},
 		Foo:         "bar",
 	}
-	responder, _ := httpmock.NewJsonResponder(200, returningResponse)
-	httpmock.RegisterResponder("GET", "https://slack.com/api/foo", responder)
+	tripper := buildRoundTripper(http.MethodGet, "/api/foo", returningResponse)
+	client := &Client{
+		config: &Config{
+			Token:          "abc",
+			RequestTimeout: 3 * time.Second,
+		},
+		httpClient: &http.Client{Transport: tripper},
+	}
 
-	client := &Client{config: &Config{Token: "abc", RequestTimeout: 3 * time.Second}}
 	returnedResponse := &GetResponseDummy{}
 	err := client.Get(context.TODO(), "foo", nil, returnedResponse)
 
@@ -80,36 +104,42 @@ func TestClient_Get(t *testing.T) {
 }
 
 func TestClient_Get_StatusError(t *testing.T) {
-	httpmock.Activate()
-	defer httpmock.DeactivateAndReset()
-
-	statusCode := 404
-	responder := func(req *http.Request) (*http.Response, error) {
-		resp := httpmock.NewStringResponse(statusCode, "foo bar")
-		resp.Request = req // To let *http.Response.Request work
-		return resp, nil
+	mux := http.NewServeMux()
+	mux.HandleFunc("/api/foo", func(w http.ResponseWriter, req *http.Request) {
+		w.WriteHeader(http.StatusInternalServerError)
+	})
+	tripper := &localRoundTripper{mux: mux}
+	client := &Client{
+		config: &Config{
+			Token:          "abc",
+			RequestTimeout: 3 * time.Second,
+		},
+		httpClient: &http.Client{Transport: tripper},
 	}
-	httpmock.RegisterResponder("GET", "https://slack.com/api/foo", responder)
 
-	client := &Client{config: &Config{Token: "abc", RequestTimeout: 3 * time.Second}}
-	returnedResponse := &GetResponseDummy{}
-	err := client.Get(context.TODO(), "foo", nil, returnedResponse)
+	err := client.Get(context.TODO(), "foo", nil, &GetResponseDummy{})
 
 	if err == nil {
-		t.Errorf("error should return when %d is given.", statusCode)
+		t.Error("error should return when 404 is given.")
 	}
 }
 
 func TestClient_Get_JSONError(t *testing.T) {
-	httpmock.Activate()
-	defer httpmock.DeactivateAndReset()
+	mux := http.NewServeMux()
+	mux.HandleFunc("/api/foo", func(w http.ResponseWriter, req *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("invalid json"))
+	})
+	tripper := &localRoundTripper{mux: mux}
+	client := &Client{
+		config: &Config{
+			Token:          "abc",
+			RequestTimeout: 3 * time.Second,
+		},
+		httpClient: &http.Client{Transport: tripper},
+	}
 
-	responder := httpmock.NewStringResponder(200, "invalid json")
-	httpmock.RegisterResponder("GET", "https://slack.com/api/foo", responder)
-
-	client := &Client{config: &Config{Token: "abc", RequestTimeout: 3 * time.Second}}
-	returnedResponse := &GetResponseDummy{}
-	err := client.Get(context.TODO(), "foo", nil, returnedResponse)
+	err := client.Get(context.TODO(), "foo", nil, &GetResponseDummy{})
 
 	if err == nil {
 		t.Error("error should return")
@@ -117,13 +147,15 @@ func TestClient_Get_JSONError(t *testing.T) {
 }
 
 func TestClient_Post(t *testing.T) {
-	httpmock.Activate()
-	defer httpmock.DeactivateAndReset()
+	tripper := buildRoundTripper(http.MethodPost, "/api/foo", &APIResponse{OK: true})
+	client := &Client{
+		config: &Config{
+			Token:          "abc",
+			RequestTimeout: 3 * time.Second,
+		},
+		httpClient: &http.Client{Transport: tripper},
+	}
 
-	responder, _ := httpmock.NewJsonResponder(200, &APIResponse{OK: true})
-	httpmock.RegisterResponder("POST", "https://slack.com/api/foo", responder)
-
-	client := &Client{config: &Config{Token: "abc", RequestTimeout: 3 * time.Second}}
 	returnedResponse := &APIResponse{}
 	err := client.Post(context.TODO(), "foo", url.Values{}, returnedResponse)
 
@@ -133,22 +165,56 @@ func TestClient_Post(t *testing.T) {
 }
 
 func TestPostStatusError(t *testing.T) {
-	httpmock.Activate()
-	defer httpmock.DeactivateAndReset()
-
-	statusCode := 404
-	responder := func(req *http.Request) (*http.Response, error) {
-		resp := httpmock.NewStringResponse(statusCode, "foo bar")
-		resp.Request = req // To let *http.Response.Request work
-		return resp, nil
+	mux := http.NewServeMux()
+	mux.HandleFunc("/api/foo", func(w http.ResponseWriter, req *http.Request) {
+		w.WriteHeader(http.StatusInternalServerError)
+	})
+	tripper := &localRoundTripper{mux: mux}
+	client := &Client{
+		config: &Config{
+			Token:          "abc",
+			RequestTimeout: 3 * time.Second,
+		},
+		httpClient: &http.Client{Transport: tripper},
 	}
-	httpmock.RegisterResponder("POST", "https://slack.com/api/foo", responder)
 
-	client := &Client{config: &Config{Token: "abc", RequestTimeout: 3 * time.Second}}
 	returnedResponse := &APIResponse{}
 	err := client.Post(context.TODO(), "foo", url.Values{}, returnedResponse)
 
 	if err == nil {
-		t.Errorf("error should return when %d is given.", statusCode)
+		t.Error("error should return when 500 is given.")
 	}
+}
+
+func buildRoundTripper(method string, path string, response interface{}) *localRoundTripper {
+	mux := http.NewServeMux()
+	mux.HandleFunc(path, func(w http.ResponseWriter, req *http.Request) {
+		if req.Method != method {
+			code := http.StatusMethodNotAllowed
+			http.Error(w, http.StatusText(code), code)
+		}
+		bytes, err := json.Marshal(response)
+		if err != nil {
+			code := http.StatusInternalServerError
+			http.Error(w, http.StatusText(code), code)
+		}
+
+		w.WriteHeader(http.StatusOK)
+		_, err = w.Write(bytes)
+		if err != nil {
+			code := http.StatusInternalServerError
+			http.Error(w, http.StatusText(code), code)
+		}
+	})
+	return &localRoundTripper{mux: mux}
+}
+
+type localRoundTripper struct {
+	mux *http.ServeMux
+}
+
+func (l *localRoundTripper) RoundTrip(req *http.Request) (*http.Response, error) {
+	w := httptest.NewRecorder()
+	l.mux.ServeHTTP(w, req)
+	return w.Result(), nil
 }
