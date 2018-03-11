@@ -74,6 +74,8 @@ func (client *Client) Get(ctx context.Context, slackMethod string, queryParams *
 	}
 
 	defer resp.Body.Close()
+	// Usually, the API returns a JSON structure with status code 200.
+	// https://api.slack.com/web#evaluating_responses
 	if resp.StatusCode != http.StatusOK {
 		return statusErr(resp)
 	}
@@ -91,9 +93,12 @@ func (client *Client) Get(ctx context.Context, slackMethod string, queryParams *
 }
 
 func statusErr(resp *http.Response) error {
-	reqDump, reqErr := httputil.DumpRequestOut(resp.Request, true)
-	if reqErr != nil {
-		reqDump = []byte("N/A")
+	reqDump := []byte("N/A")
+	if resp.Request != nil {
+		dump, err := httputil.DumpRequestOut(resp.Request, true)
+		if err != nil {
+			reqDump = dump
+		}
 	}
 
 	resDump, resErr := httputil.DumpResponse(resp, true)
@@ -115,6 +120,8 @@ func (client *Client) Post(ctx context.Context, slackMethod string, bodyParam ur
 	}
 
 	defer resp.Body.Close()
+	// Usually, the API returns a JSON structure with status code 200.
+	// https://api.slack.com/web#evaluating_responses
 	if resp.StatusCode != http.StatusOK {
 		return statusErr(resp)
 	}
