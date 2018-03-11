@@ -14,18 +14,38 @@ type GetResponseDummy struct {
 	Foo string
 }
 
+func TestWithHTTPClient(t *testing.T) {
+	httpClient := &http.Client{}
+	option := WithHTTPClient(httpClient)
+	client := &Client{}
+
+	option(client)
+
+	if client.httpClient != httpClient {
+		t.Errorf("Specified htt.Client is not set")
+	}
+}
+
 func TestNewClient(t *testing.T) {
 	config := &Config{Token: "abc", RequestTimeout: 1 * time.Second}
-	client := NewClient(config)
+	optionCalled := false
+	client := NewClient(config, func(*Client) { optionCalled = true })
 
 	if client == nil {
-		t.Fatal("client is nil.")
+		t.Fatal("Returned client is nil.")
 	}
 
 	if client.config != config {
-		t.Errorf("returned client does not have assigned config: %#v.", client.config)
+		t.Errorf("Returned client does not have assigned config: %#v.", client.config)
 	}
 
+	if !optionCalled {
+		t.Error("ClientOption is not called.")
+	}
+
+	if client.httpClient != http.DefaultClient {
+		t.Errorf("When WithHTTPClient is not given, http.DefaultClient must be set: %+v", client.httpClient)
+	}
 }
 
 func Test_buildEndpoint(t *testing.T) {
