@@ -2,10 +2,12 @@ package golack
 
 import (
 	"fmt"
+	"net/url"
+	"time"
+
 	"github.com/oklahomer/golack/rtmapi"
 	"github.com/oklahomer/golack/webapi"
 	"golang.org/x/net/context"
-	"time"
 )
 
 type Config struct {
@@ -23,15 +25,38 @@ func NewConfig() *Config {
 	}
 }
 
-type Golack struct {
-	webClient *webapi.Client
+type WebClient interface {
+	Get(ctx context.Context, slackMethod string, queryParams *url.Values, intf interface{}) error
+	Post(ctx context.Context, slackMethod string, bodyParam url.Values, intf interface{}) error
 }
 
-func New(config *Config) *Golack {
-	webClient := webapi.NewClient(&webapi.Config{Token: config.Token, RequestTimeout: config.RequestTimeout})
-	return &Golack{
-		webClient: webClient,
+type Option func(*Golack)
+
+func WithWebClient(wc WebClient) Option {
+	return func(g *Golack) {
+		g.webClient = wc
 	}
+}
+
+type Golack struct {
+	webClient WebClient
+}
+
+func New(config *Config, options ...Option) *Golack {
+	g := &Golack{}
+	for _, opt := range options {
+		opt(g)
+	}
+
+	if g.webClient == nil {
+		apiConfig := &webapi.Config{
+			Token:          config.Token,
+			RequestTimeout: config.RequestTimeout,
+		}
+		g.webClient = webapi.NewClient(apiConfig)
+	}
+
+	return g
 }
 
 func (g *Golack) StartRTMSession(ctx context.Context) (*webapi.RTMStart, error) {
