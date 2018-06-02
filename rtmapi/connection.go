@@ -4,18 +4,28 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/oklahomer/golack/slackobject"
-	"github.com/tidwall/gjson"
-	"golang.org/x/net/context"
-	"golang.org/x/net/websocket"
 	"io"
 	"reflect"
 	"strings"
+
+	"github.com/gorilla/websocket"
+	"github.com/oklahomer/golack/slackobject"
+	"github.com/tidwall/gjson"
+	"golang.org/x/net/context"
 )
 
 var (
 	ErrEmptyPayload = errors.New("empty payload was given")
 )
+
+type UnexpectedMessageTypeError struct {
+	MessageType int
+	Payload     []byte
+}
+
+func (e *UnexpectedMessageTypeError) Error() string {
+	return fmt.Sprintf("unexpected message type, %d, is given: %s", e.MessageType, e.Payload)
+}
 
 type DecodedPayload interface{}
 
@@ -36,7 +46,7 @@ type Connection interface {
 
 // Connect connects to Slack WebSocket server.
 func Connect(_ context.Context, url string) (Connection, error) {
-	conn, err := websocket.Dial(url, "", "http://localhost")
+	conn, _, err := websocket.DefaultDialer.Dial(url, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -65,13 +75,14 @@ func newConnectionWrapper(conn *websocket.Conn) Connection {
 // Receive is a blocking method to receive payload from WebSocket connection.
 // When connection is closed in the middle of this method call, this immediately returns error.
 func (wrapper *connWrapper) Receive() (DecodedPayload, error) {
-	// Slack's RTM events and reply all have different form
-	// so websocket.JSON.Receive can only work with json.RawMessage,
-	// which ends up with multiple json.Unmarshal calls for proper mapping.
-	payload := []byte{}
-	err := websocket.Message.Receive(wrapper.conn, &payload)
+	messageType, payload, err := wrapper.conn.ReadMessage()
 	if err != nil {
 		return nil, err
+	}
+
+	// Only TextMessage is supported by RTM API.
+	if messageType != websocket.TextMessage {
+		return nil, &UnexpectedMessageTypeError{MessageType: messageType, Payload: payload}
 	}
 
 	decoded, err := decodePayload(payload)
@@ -80,12 +91,12 @@ func (wrapper *connWrapper) Receive() (DecodedPayload, error) {
 
 func (wrapper *connWrapper) Send(channel slackobject.ChannelID, content string) error {
 	event := NewOutgoingMessage(wrapper.outgoingEventID, channel, content)
-	return websocket.JSON.Send(wrapper.conn, event)
+	return wrapper.conn.WriteJSON(event)
 }
 
 func (wrapper *connWrapper) Ping() error {
 	ping := NewPing(wrapper.outgoingEventID)
-	return websocket.JSON.Send(wrapper.conn, ping)
+	return wrapper.conn.WriteJSON(ping)
 }
 
 func (wrapper *connWrapper) Close() error {

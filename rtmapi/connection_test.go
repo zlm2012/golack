@@ -3,10 +3,9 @@ package rtmapi
 import (
 	"errors"
 	"fmt"
+	"github.com/gorilla/websocket"
 	"github.com/oklahomer/golack/slackobject"
 	"golang.org/x/net/context"
-	"golang.org/x/net/websocket"
-	"io"
 	"net/http"
 	"net/http/httptest"
 	"reflect"
@@ -18,20 +17,45 @@ import (
 var webSocketServerAddress string
 var once sync.Once
 
-func echoServer(ws *websocket.Conn) {
-	defer ws.Close()
-	io.Copy(ws, ws)
+func echoServer(w http.ResponseWriter, r *http.Request) {
+	upgrader := websocket.Upgrader{}
+	c, err := upgrader.Upgrade(w, r, nil)
+	if err != nil {
+		panic(fmt.Errorf("failed to upgrade protocol: %s", err.Error()))
+	}
+	defer c.Close()
+
+	for {
+		mt, message, err := c.ReadMessage()
+		if err != nil {
+			_, ok := err.(*websocket.CloseError)
+			if !ok {
+				panic(fmt.Errorf("failed to receive message: %s", err.Error()))
+			}
+			break
+		}
+		err = c.WriteMessage(mt, message)
+		if err != nil {
+			panic(fmt.Errorf("failed to send message. type: %d. error: %s", mt, err.Error()))
+		}
+	}
 }
 
-func pingServer(ws *websocket.Conn) {
-	defer ws.Close()
+func pingServer(w http.ResponseWriter, r *http.Request) {
+	upgrader := websocket.Upgrader{}
+	c, err := upgrader.Upgrade(w, r, nil)
+	if err != nil {
+		panic(fmt.Errorf("failed to upgrade protocol: %s", err.Error()))
+	}
+	defer c.Close()
+
 	res := &Pong{}
-	websocket.JSON.Send(ws, res)
+	c.WriteJSON(res)
 }
 
 func startServer() {
-	http.Handle("/echo", websocket.Handler(echoServer))
-	http.Handle("/ping", websocket.Handler(pingServer))
+	http.HandleFunc("/echo", echoServer)
+	http.HandleFunc("/ping", pingServer)
 	server := httptest.NewServer(nil)
 	webSocketServerAddress = server.Listener.Addr().String()
 }
@@ -46,9 +70,8 @@ func TestConnect(t *testing.T) {
 		t.Fatalf("webSocket connection error: %s.", err.Error())
 	}
 
-	connWrapper := connection.(*connWrapper)
-	if !connWrapper.conn.IsClientConn() {
-		t.Fatal("connection is not client originated")
+	if connection == nil {
+		t.Fatalf("Connection is not reurned.")
 	}
 }
 
@@ -60,17 +83,11 @@ func TestConnect_Fail(t *testing.T) {
 	_, err := Connect(context.TODO(), url)
 
 	if err == nil {
-		t.Fatal("expected error is not returned.", err)
+		t.Fatal("expected error is not returned.")
 	}
 
-	dialErr, ok := err.(*websocket.DialError)
-	if !ok {
-		t.Fatalf("unexpected error struct is returned: %#v.", err)
-	}
-
-	_, ok = dialErr.Err.(*websocket.ProtocolError)
-	if !ok {
-		t.Fatalf("unexpected error struct is returned: %#v.", err)
+	if err != websocket.ErrBadHandshake {
+		t.Fatalf("Unexpected error is returned: %s.", err.Error())
 	}
 }
 
@@ -99,7 +116,7 @@ func TestConnWrapper_Receive(t *testing.T) {
 	once.Do(startServer)
 
 	url := fmt.Sprintf("ws://%s%s", webSocketServerAddress, "/echo")
-	conn, err := websocket.Dial(url, "", "http://localhost")
+	conn, _, err := websocket.DefaultDialer.Dial(url, nil)
 	if err != nil {
 		t.Fatal("can't establish connection with test server")
 	}
@@ -113,7 +130,7 @@ func TestConnWrapper_Receive(t *testing.T) {
 	input := fmt.Sprintf(`{"type": "message", "channel": "%s", "user": "%s", "text": "%s", "ts": "%s"}`, channelID.String(), userID.String(), text, slackTimestamp)
 
 	connWrapper := newConnectionWrapper(conn)
-	conn.Write([]byte(input))
+	conn.WriteMessage(websocket.TextMessage, []byte(input))
 	decodedPayload, err := connWrapper.Receive()
 	if err != nil {
 		t.Fatalf("error on payload reception: %s.", err.Error())
@@ -149,7 +166,7 @@ func TestConnWrapper_Send(t *testing.T) {
 	once.Do(startServer)
 
 	url := fmt.Sprintf("ws://%s%s", webSocketServerAddress, "/echo")
-	conn, err := websocket.Dial(url, "", "http://localhost")
+	conn, _, err := websocket.DefaultDialer.Dial(url, nil)
 	if err != nil {
 		t.Fatal("can't establish connection with test server")
 	}
@@ -166,7 +183,7 @@ func TestConnWrapper_Ping(t *testing.T) {
 	once.Do(startServer)
 
 	url := fmt.Sprintf("ws://%s%s", webSocketServerAddress, "/ping")
-	conn, err := websocket.Dial(url, "", "http://localhost")
+	conn, _, err := websocket.DefaultDialer.Dial(url, nil)
 	if err != nil {
 		t.Fatal("can't establish connection with test server")
 	}
@@ -182,7 +199,7 @@ func TestConnWrapper_Close(t *testing.T) {
 	once.Do(startServer)
 
 	url := fmt.Sprintf("ws://%s%s", webSocketServerAddress, "/echo")
-	conn, err := websocket.Dial(url, "", "http://localhost")
+	conn, _, err := websocket.DefaultDialer.Dial(url, nil)
 	if err != nil {
 		t.Fatal("can't establish connection with test server")
 	}
@@ -292,7 +309,7 @@ func Test_decodePayload(t *testing.T) {
 			t.Errorf("Test No. %d. expected return type of %s, but was %#v", testCnt, testSet.output.payload.Name(), err)
 		}
 		if e := testSet.output.err; e != nil {
-			if reflect.TypeOf(e) == reflect.TypeOf(errors.New("Dummy")) {
+			if reflect.TypeOf(e) == reflect.TypeOf(errors.New("dummy")) {
 				// pre-declared error instance is returned.
 				if e != err {
 					t.Errorf("expected error is not returned. test #%d. error: %#v.", testCnt, err)
