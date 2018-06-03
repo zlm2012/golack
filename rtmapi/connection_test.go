@@ -264,7 +264,7 @@ func Test_decodePayload(t *testing.T) {
 		{
 			input: `{"ok": true, "reply_to": 1, "ts": "1355517523.000005", "text": "Hello world"}`,
 			output: &output{
-				payload: reflect.TypeOf(&WebSocketReply{}),
+				payload: reflect.TypeOf(&WebSocketOKReply{}),
 				err:     nil,
 			},
 		},

@@ -199,8 +199,9 @@ var (
 		PinnedItem:       reflect.TypeOf(&MiscMessage{}).Elem(),
 		UnpinnedItem:     reflect.TypeOf(&MiscMessage{}).Elem(),
 	}
-	messageEventType        = reflect.TypeOf(&Message{}).Elem()
-	websocketReplyEventType = reflect.TypeOf(&WebSocketReply{}).Elem()
+	messageEventType          = reflect.TypeOf(&Message{}).Elem()
+	websocketReplyOKEventType = reflect.TypeOf(&WebSocketOKReply{}).Elem()
+	websocketReplyNGEventType = reflect.TypeOf(&WebSocketNGReply{}).Elem()
 )
 
 func decodePayload(input json.RawMessage) (DecodedPayload, error) {
@@ -240,10 +241,12 @@ func decodePayload(input json.RawMessage) (DecodedPayload, error) {
 		return nil, NewMalformedPayloadError(fmt.Sprintf(`unsupported event type "%s" is given: %s`, eventTypeValue.String(), input))
 	}
 
+	// https://api.slack.com/rtm#handling_responses
 	if res.Get("reply_to").Exists() && res.Get("ok").Exists() {
-		// https://api.slack.com/rtm#handling_responses
-		// When incoming object can't be treated as Event, try treat this as WebSocketReply.
-		return unmarshal(input, websocketReplyEventType)
+		if res.Get("ok").Bool() {
+			return unmarshal(input, websocketReplyOKEventType)
+		}
+		return unmarshal(input, websocketReplyNGEventType)
 	}
 
 	return nil, NewMalformedPayloadError(fmt.Sprintf("given json object has unknown structure. can not handle: %s.", input))
