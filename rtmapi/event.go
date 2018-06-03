@@ -134,9 +134,10 @@ func (eventType *EventType) MarshalText() ([]byte, error) {
 	return []byte(str), nil
 }
 
-// CommonEvent takes care of some common fields all incoming/outgoing event MUST have.
-// https://api.slack.com/rtm#events
-type CommonEvent struct {
+// TypedEvent takes care of events that have "type" field in its JSON representation.
+// The API document, https://api.slack.com/rtm#events, states as follows:
+// "Every event has a type property which describes the type of event."
+type TypedEvent struct {
 	Type EventType `json:"type,omitempty"`
 }
 

@@ -8,9 +8,9 @@ import (
 
 func TestMarshalPingEvent(t *testing.T) {
 	ping := &Ping{
-		OutgoingCommonEvent: OutgoingCommonEvent{
-			ID:          1,
-			CommonEvent: CommonEvent{Type: PingEvent},
+		OutgoingEvent: OutgoingEvent{
+			ID:         1,
+			TypedEvent: TypedEvent{Type: PingEvent},
 		},
 	}
 	val, err := json.Marshal(ping)
