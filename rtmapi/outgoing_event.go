@@ -19,7 +19,6 @@ type OutgoingCommonEvent struct {
 // https://api.slack.com/rtm#sending_messages
 type OutgoingMessage struct {
 	OutgoingCommonEvent
-	ID      uint                  `json:"id"`
 	Channel slackobject.ChannelID `json:"channel"`
 	Text    string                `json:"text"`
 }
