@@ -8,6 +8,11 @@ import (
 // Event is passed to client in a form of JSON string, which has a field named "type."
 type EventType string
 
+// EventTyper represents an RTM API payload with "type."
+type EventTyper interface {
+	EventType() EventType
+}
+
 // List of available EventTypes
 const (
 	UnsupportedEvent           EventType = "unsupported"
@@ -141,6 +146,12 @@ type TypedEvent struct {
 	Type EventType `json:"type,omitempty"`
 }
 
+var _ EventTyper = TypedEvent{}
+
+func (te TypedEvent) EventType() EventType {
+	return te.Type
+}
+
 // SubType may given as a part of message payload to describe detailed content.
 type SubType string
 
@@ -220,7 +231,7 @@ func (subType *SubType) MarshalText() ([]byte, error) {
 // See SubType field to distinguish corresponding event struct.
 // https://api.slack.com/events/message#message_subtypes
 type CommonMessage struct {
-	Type EventType `json:"type"`
+	TypedEvent
 
 	// Regular user message and some miscellaneous message share the common type of "message."
 	// So take a look at subtype to distinguish. Regular user message has empty subtype.

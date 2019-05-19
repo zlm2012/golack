@@ -217,8 +217,9 @@ func TestConnWrapper_Close(t *testing.T) {
 
 func Test_decodePayload(t *testing.T) {
 	type output struct {
-		payload reflect.Type
-		err     interface{}
+		eventType EventType
+		payload   reflect.Type
+		err       interface{}
 	}
 	var decodeTests = []struct {
 		input  string
@@ -227,15 +228,17 @@ func Test_decodePayload(t *testing.T) {
 		{
 			input: `{"type": "channel_rename", "channel": {"id":"C02XXXXX", "name":"new_name", "created":1360782804}}`,
 			output: &output{
-				payload: reflect.TypeOf(&ChannelRenamed{}),
-				err:     nil,
+				eventType: ChannelRenameEvent,
+				payload:   reflect.TypeOf(&ChannelRenamed{}),
+				err:       nil,
 			},
 		},
 		{
 			input: `{"type": "message", "channel": "C2147483705", "user": "U2147483697", "text": "Hello, world!", "ts": "1355517523.000005", "edited": { "user": "U2147483697", "ts": "1355517536.000001"}}`,
 			output: &output{
-				payload: reflect.TypeOf(&Message{}),
-				err:     nil,
+				eventType: MessageEvent,
+				payload:   reflect.TypeOf(&Message{}),
+				err:       nil,
 			},
 		},
 		{
@@ -249,8 +252,9 @@ func Test_decodePayload(t *testing.T) {
 		{
 			input: `{"type": "message", "subtype": "channel_join", "text": "<@UXXXXX|bobby> has joined the channel", "ts": "1403051575.000407", "user": "U023BECGF"}`,
 			output: &output{
-				payload: reflect.TypeOf(&MiscMessage{}),
-				err:     nil,
+				eventType: MessageEvent,
+				payload:   reflect.TypeOf(&MiscMessage{}),
+				err:       nil,
 			},
 		},
 		{
@@ -306,7 +310,13 @@ func Test_decodePayload(t *testing.T) {
 		payload, err := decodePayload(inputByte)
 
 		if testSet.output.payload != reflect.TypeOf(payload) {
-			t.Errorf("Test No. %d. expected return type of %s, but was %#v", testCnt, testSet.output.payload.Name(), err)
+			t.Errorf("Test No. %d. expected return type of %s, but was %#v.", testCnt, testSet.output.payload.Name(), err)
+		}
+		if testSet.output.eventType != "" {
+			eventType := payload.(EventTyper).EventType()
+			if testSet.output.eventType != eventType {
+				t.Errorf("Test No. %d. expected EventType %s, but was %s.", testCnt, testSet.output.eventType, eventType)
+			}
 		}
 		if e := testSet.output.err; e != nil {
 			if reflect.TypeOf(e) == reflect.TypeOf(errors.New("dummy")) {
