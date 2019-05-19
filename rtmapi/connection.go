@@ -1,6 +1,7 @@
 package rtmapi
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -11,7 +12,6 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/oklahomer/golack/slackobject"
 	"github.com/tidwall/gjson"
-	"golang.org/x/net/context"
 )
 
 var (

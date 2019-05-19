@@ -1,11 +1,11 @@
 package rtmapi
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"github.com/gorilla/websocket"
 	"github.com/oklahomer/golack/slackobject"
-	"golang.org/x/net/context"
 	"net/http"
 	"net/http/httptest"
 	"reflect"

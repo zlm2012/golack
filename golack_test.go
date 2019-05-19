@@ -1,11 +1,10 @@
 package golack
 
 import (
+	"context"
+	"github.com/oklahomer/golack/webapi"
 	"net/url"
 	"testing"
-
-	"github.com/oklahomer/golack/webapi"
-	"golang.org/x/net/context"
 )
 
 type DummyWebClient struct {
