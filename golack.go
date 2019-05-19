@@ -1,13 +1,13 @@
 package golack
 
 import (
+	"context"
 	"fmt"
 	"net/url"
 	"time"
 
 	"github.com/oklahomer/golack/rtmapi"
 	"github.com/oklahomer/golack/webapi"
-	"golang.org/x/net/context"
 )
 
 type Config struct {

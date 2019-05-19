@@ -1,16 +1,15 @@
 package webapi
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
+	"strings"
 	"time"
-
-	"golang.org/x/net/context"
-	"golang.org/x/net/context/ctxhttp"
 )
 
 const (
@@ -64,31 +63,37 @@ func buildEndpoint(slackMethod, token string, queryParams *url.Values) *url.URL 
 }
 
 func (client *Client) Get(ctx context.Context, slackMethod string, queryParams *url.Values, intf interface{}) error {
+	// Prepare request
 	endpoint := buildEndpoint(slackMethod, client.config.Token, queryParams)
-
-	reqCtx, cancel := context.WithTimeout(ctx, client.config.RequestTimeout)
-	defer cancel()
-	resp, err := ctxhttp.Get(reqCtx, client.httpClient, endpoint.String())
+	req, err := http.NewRequest(http.MethodGet, endpoint.String(), nil)
 	if err != nil {
 		return err
 	}
+	reqCtx, cancel := context.WithTimeout(ctx, client.config.RequestTimeout)
+	defer cancel()
+	req.WithContext(reqCtx)
 
+	// Do request
+	resp, err := client.httpClient.Do(req)
+	if err != nil {
+		return err
+	}
 	defer resp.Body.Close()
+
 	// Usually, the API returns a JSON structure with status code 200.
 	// https://api.slack.com/web#evaluating_responses
 	if resp.StatusCode != http.StatusOK {
 		return statusErr(resp)
 	}
 
+	// Handle response body
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return err
 	}
-
 	if err := json.Unmarshal(body, &intf); err != nil {
 		return err
 	}
-
 	return nil
 }
 
@@ -110,30 +115,37 @@ func statusErr(resp *http.Response) error {
 }
 
 func (client *Client) Post(ctx context.Context, slackMethod string, bodyParam url.Values, intf interface{}) error {
+	// Prepare request
 	endpoint := buildEndpoint(slackMethod, client.config.Token, nil)
-
-	reqCtx, cancel := context.WithTimeout(ctx, client.config.RequestTimeout)
-	defer cancel()
-	resp, err := ctxhttp.PostForm(reqCtx, client.httpClient, endpoint.String(), bodyParam)
+	req, err := http.NewRequest("POST", endpoint.String(), strings.NewReader(bodyParam.Encode()))
 	if err != nil {
 		return err
 	}
+	reqCtx, cancel := context.WithTimeout(ctx, client.config.RequestTimeout)
+	defer cancel()
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	req.WithContext(reqCtx)
 
+	// Do request
+	resp, err := client.httpClient.Do(req)
+	if err != nil {
+		return err
+	}
 	defer resp.Body.Close()
+
 	// Usually, the API returns a JSON structure with status code 200.
 	// https://api.slack.com/web#evaluating_responses
 	if resp.StatusCode != http.StatusOK {
 		return statusErr(resp)
 	}
 
+	// Handle response body
 	response, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return err
 	}
-
 	if err := json.Unmarshal(response, &intf); err != nil {
 		return err
 	}
-
 	return nil
 }

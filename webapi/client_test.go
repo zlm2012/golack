@@ -1,14 +1,13 @@
 package webapi
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
 	"testing"
 	"time"
-
-	"golang.org/x/net/context"
 )
 
 type GetResponseDummy struct {
@@ -157,7 +156,9 @@ func TestClient_Post(t *testing.T) {
 	}
 
 	returnedResponse := &APIResponse{}
-	err := client.Post(context.TODO(), "foo", url.Values{}, returnedResponse)
+	values := url.Values{}
+	values.Set("foo", "bar")
+	err := client.Post(context.TODO(), "foo", values, returnedResponse)
 
 	if err != nil {
 		t.Errorf("something is wrong. %#v", err)
