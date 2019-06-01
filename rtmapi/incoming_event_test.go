@@ -22,7 +22,7 @@ var expectedPayloads = map[EventType]EventTyper{
 			ID:    "B024BE7LH",
 			AppID: "A4H1JB4AZ",
 			Name:  "hugbot",
-			Icons: &struct {
+			Icon: &struct {
 				Image48 string `json:"image_48"`
 			}{
 				Image48: "https://slack.com/path/to/hugbot_48.png",
@@ -34,7 +34,7 @@ var expectedPayloads = map[EventType]EventTyper{
 			ID:    "B024BE7LH",
 			AppID: "A4H1JB4AZ",
 			Name:  "hugbot",
-			Icons: &struct {
+			Icon: &struct {
 				Image48 string `json:"image_48"`
 			}{
 				Image48: "https://slack.com/path/to/hugbot_48.png",
@@ -43,14 +43,14 @@ var expectedPayloads = map[EventType]EventTyper{
 	},
 	ChannelArchivedEvent: &ChannelArchived{
 		ChannelID: "C024BE91L",
-		User:      "U024BE7LH",
+		UserID:    "U024BE7LH",
 	},
 	ChannelCreatedEvent: &ChannelCreated{
 		Channel: &struct {
-			ID      slackobject.ChannelID `json:"id"`
-			Name    string                `json:"name"`
-			Created *TimeStamp            `json:"created"`
-			Creator string                `json:"creator"`
+			ID        slackobject.ChannelID `json:"id"`
+			Name      string                `json:"name"`
+			Created   *TimeStamp            `json:"created"`
+			CreatorID slackobject.UserID    `json:"creator"`
 		}{
 			ID:   "C024BE91L",
 			Name: "fun",
@@ -58,7 +58,7 @@ var expectedPayloads = map[EventType]EventTyper{
 				Time:          time.Unix(1360782804, 0),
 				OriginalValue: "1360782804",
 			},
-			Creator: "U024BE7LH",
+			CreatorID: "U024BE7LH",
 		},
 	},
 	ChannelDeletedEvent: &ChannelDeleted{
@@ -111,7 +111,7 @@ var expectedPayloads = map[EventType]EventTyper{
 	},
 	ChannelUnarchiveEvent: &ChannelUnarchived{
 		ChannelID: "C024BE91L",
-		User:      "U024BE7LH",
+		UserID:    "U024BE7LH",
 	},
 	CommandsChangedEvent: &CommandsChanged{
 		TimeStamp: &TimeStamp{
@@ -120,7 +120,7 @@ var expectedPayloads = map[EventType]EventTyper{
 		},
 	},
 	DNDUpdatedEvent: &DNDUpdated{
-		User: "U1234",
+		UserID: "U1234",
 		DNDStatus: &struct {
 			Enabled            bool       `json:"dnd_enabled"`
 			NextStartTimeStamp *TimeStamp `json:"next_dnd_start_ts"`
@@ -145,7 +145,7 @@ var expectedPayloads = map[EventType]EventTyper{
 		},
 	},
 	DNDUpdatedUserEvent: &DNDUpdatedUser{
-		User: "U1234",
+		UserID: "U1234",
 		DNDStatus: &struct {
 			Enabled            bool       `json:"dnd_enabled"`
 			NextStartTimeStamp *TimeStamp `json:"next_dnd_start_ts"`
@@ -198,7 +198,7 @@ var expectedPayloads = map[EventType]EventTyper{
 				Time:          time.Unix(1360782804, 0),
 				OriginalValue: "1360782804",
 			},
-			User:    "U1234",
+			UserID:  "U1234",
 			Content: "comment content",
 		},
 	},
@@ -224,7 +224,7 @@ var expectedPayloads = map[EventType]EventTyper{
 				Time:          time.Unix(1360782804, 0),
 				OriginalValue: "1360782804",
 			},
-			User:    "U1234",
+			UserID:  "U1234",
 			Content: "comment content",
 		},
 	},
@@ -243,7 +243,7 @@ var expectedPayloads = map[EventType]EventTyper{
 			OriginalValue: "1361482916.000004",
 		},
 	},
-	FilePublicEvent: &FilePublicated{
+	FilePublicEvent: &FilePublished{
 		FileID: "F2147483862",
 		File: &struct {
 			ID slackobject.FileID `json:"id"`
@@ -272,7 +272,7 @@ var expectedPayloads = map[EventType]EventTyper{
 		ChannelID: "G024BE91L",
 	},
 	GroupCloseEvent: &GroupClosed{
-		User:      "U024BE7LH",
+		UserID:    "U024BE7LH",
 		ChannelID: "G024BE91L",
 	},
 	GroupDeletedEvent: &GroupDeleted{
@@ -310,11 +310,11 @@ var expectedPayloads = map[EventType]EventTyper{
 		},
 	},
 	GroupOpenEvent: &GroupOpened{
-		User:      "U024BE7LH",
+		UserID:    "U024BE7LH",
 		ChannelID: "G024BE91L",
 	},
 	GroupRenameEvent: &GroupRenamed{
-		Channel: struct {
+		Channel: &struct {
 			ID      slackobject.ChannelID `json:"id"`
 			Name    string                `json:"name"`
 			Created *TimeStamp            `json:"created"`
@@ -332,12 +332,12 @@ var expectedPayloads = map[EventType]EventTyper{
 	},
 	HelloEvent: &Hello{},
 	IMCloseEvent: &IMClosed{
-		User:      "U024BE7LH",
+		UserID:    "U024BE7LH",
 		ChannelID: "D024BE91L",
 	},
 	IMCreatedEvent: &IMCreated{
-		User: "U024BE7LH",
-		Channel: struct {
+		UserID: "U024BE7LH",
+		Channel: &struct {
 			ID slackobject.ChannelID `json:"id"`
 		}{
 			ID: "D024BE91L",
@@ -360,22 +360,22 @@ var expectedPayloads = map[EventType]EventTyper{
 		},
 	},
 	IMOpenEvent: &IMOpened{
-		User:      "U024BE7LH",
+		UserID:    "U024BE7LH",
 		ChannelID: "D024BE91L",
 	},
 	ManualPresenceChangeEvent: &PresenceManuallyChanged{
 		Presence: "away",
 	},
 	MemberJoinedChannelEvent: &MemberJoinedChannel{
-		User:        "W06GH7XHN",
+		UserID:      "W06GH7XHN",
 		ChannelID:   "C0698JE0H",
 		ChannelType: "C",
-		Team:        "T024BE7LD",
-		Inviter:     "U123456789",
+		TeamID:      "T024BE7LD",
+		InviterID:   "U123456789",
 	},
 	MessageEvent: &Message{
 		ChannelID: "C2147483705",
-		Sender:    "U2147483697",
+		SenderID:  "U2147483697",
 		Text:      "Hello world",
 		TimeStamp: &TimeStamp{
 			Time:          time.Unix(1355517523, 0),
@@ -383,7 +383,7 @@ var expectedPayloads = map[EventType]EventTyper{
 		},
 	},
 	PinAddedEvent: &PinAdded{
-		User:      "U024BE7LH",
+		UserID:    "U024BE7LH",
 		ChannelID: "C02ELGNBH",
 		TimeStamp: &TimeStamp{
 			Time:          time.Unix(1360782804, 0),
@@ -391,7 +391,7 @@ var expectedPayloads = map[EventType]EventTyper{
 		},
 	},
 	PinRemovedEvent: &PinRemoved{
-		User:      "U024BE7LH",
+		UserID:    "U024BE7LH",
 		ChannelID: "C02ELGNBH",
 		HasPins:   false,
 		TimeStamp: &TimeStamp{
@@ -404,28 +404,28 @@ var expectedPayloads = map[EventType]EventTyper{
 		Value: "dense",
 	},
 	PresenceChangeEvent: &PresenceChange{
-		User:     "U024BE7LH",
+		UserID:   "U024BE7LH",
 		Presence: "away",
 	},
 	PresenceQueryEvent: &PresenceQuery{
-		IDs: []slackobject.UserID{
+		UserIDs: []slackobject.UserID{
 			"U061F7AUR",
 			"W123456",
 		},
 	},
 	PresenceSubEvent: &PresenceSubscribe{
-		IDs: []slackobject.UserID{
+		UserIDs: []slackobject.UserID{
 			"U061F7AUR",
 			"W123456",
 		},
 	},
 	ReactionAddedEvent: &ReactionAdded{
-		User:      "U024BE7LH",
-		Reaction:  "thumbsup",
-		ItemOwner: "U0G9QF9C6",
+		UserID:      "U024BE7LH",
+		Reaction:    "thumbsup",
+		ItemOwnerID: "U0G9QF9C6",
 		Item: &Item{
-			Type:    "message",
-			Channel: "C0G9QF9GZ",
+			Type:      "message",
+			ChannelID: "C0G9QF9GZ",
 			TimeStamp: &TimeStamp{
 				Time:          time.Unix(1360782400, 0),
 				OriginalValue: "1360782400.498405",
@@ -437,12 +437,12 @@ var expectedPayloads = map[EventType]EventTyper{
 		},
 	},
 	ReactionRemovedEvent: &ReactionRemoved{
-		User:      "U024BE7LH",
-		Reaction:  "thumbsup",
-		ItemOwner: "U0G9QF9C6",
+		UserID:      "U024BE7LH",
+		Reaction:    "thumbsup",
+		ItemOwnerID: "U0G9QF9C6",
 		Item: &Item{
-			Type:    "message",
-			Channel: "C0G9QF9GZ",
+			Type:      "message",
+			ChannelID: "C0G9QF9GZ",
 			TimeStamp: &TimeStamp{
 				Time:          time.Unix(1360782400, 0),
 				OriginalValue: "1360782400.498405",
@@ -455,10 +455,10 @@ var expectedPayloads = map[EventType]EventTyper{
 	},
 	ReconnectURLEvent: &ReconnectURL{},
 	StarAddedEvent: &StarAdded{
-		User: "U024BE7LH",
+		UserID: "U024BE7LH",
 		Item: &Item{
-			Type:    "message",
-			Channel: "C0G9QF9GZ",
+			Type:      "message",
+			ChannelID: "C0G9QF9GZ",
 			TimeStamp: &TimeStamp{
 				Time:          time.Unix(1360782400, 0),
 				OriginalValue: "1360782400.498405",
@@ -470,10 +470,10 @@ var expectedPayloads = map[EventType]EventTyper{
 		},
 	},
 	StarRemovedEvent: &StarRemoved{
-		User: "U024BE7LH",
+		UserID: "U024BE7LH",
 		Item: &Item{
-			Type:    "message",
-			Channel: "C0G9QF9GZ",
+			Type:      "message",
+			ChannelID: "C0G9QF9GZ",
 			TimeStamp: &TimeStamp{
 				Time:          time.Unix(1360782400, 0),
 				OriginalValue: "1360782400.498405",
@@ -506,7 +506,7 @@ var expectedPayloads = map[EventType]EventTyper{
 				OriginalValue: "1446746793",
 			},
 			AutoType:  "",
-			CreatedBy: "U060RNRCZ",
+			CreatorID: "U060RNRCZ",
 			UpdatedBy: "U060RNRCZ",
 			UserCount: 10,
 		},
@@ -518,17 +518,17 @@ var expectedPayloads = map[EventType]EventTyper{
 			Time:          time.Unix(1446670362, 0),
 			OriginalValue: "1446670362",
 		},
-		Update: &TimeStamp{
+		Updated: &TimeStamp{
 			Time:          time.Unix(1492906952, 0),
 			OriginalValue: "1492906952",
 		},
-		AddedUsers: []slackobject.UserID{
+		AddedUserIDs: []slackobject.UserID{
 			"U060RNRCZ",
 			"U060ULRC0",
 			"U061309JM",
 		},
 		AddedUserCount: 3,
-		RemovedUsers: []slackobject.UserID{
+		RemovedUserIDs: []slackobject.UserID{
 			"U06129G2V",
 		},
 		RemovedUsersCount: 1,
@@ -561,10 +561,10 @@ var expectedPayloads = map[EventType]EventTyper{
 				OriginalValue: "0",
 			},
 			AutoType:  "admin",
-			CreatedBy: "USLACKBOT",
+			CreatorID: "USLACKBOT",
 			UpdatedBy: "U060RNRCZ",
 			UserCount: 4,
-			Users: []slackobject.UserID{
+			UserIDs: []slackobject.UserID{
 				"U060RNRCZ",
 				"U060ULRC0",
 				"U06129G2V",
@@ -642,7 +642,7 @@ var expectedPayloads = map[EventType]EventTyper{
 	},
 	UserTypingEvent: &UserTyping{
 		ChannelID: "C02ELGNBH",
-		User:      "U024BE7LH",
+		UserID:    "U024BE7LH",
 	},
 }
 

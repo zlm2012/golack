@@ -20,15 +20,15 @@ type OutgoingEvent struct {
 // https://api.slack.com/rtm#sending_messages
 type OutgoingMessage struct {
 	OutgoingEvent
-	Channel slackobject.ChannelID `json:"channel"`
-	Text    string                `json:"text"`
+	ChannelID slackobject.ChannelID `json:"channel"`
+	Text      string                `json:"text"`
 }
 
 // NewOutgoingMessage is a constructor to create new OutgoingMessage instance with given arguments.
 func NewOutgoingMessage(eventID *OutgoingEventID, channel slackobject.ChannelID, text string) *OutgoingMessage {
 	return &OutgoingMessage{
-		Channel: channel,
-		Text:    text,
+		ChannelID: channel,
+		Text:      text,
 		OutgoingEvent: OutgoingEvent{
 			ID: eventID.Next(),
 			TypedEvent: TypedEvent{

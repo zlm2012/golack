@@ -41,3 +41,9 @@ type SubTeamID string
 func (id SubTeamID) String() string {
 	return string(id)
 }
+
+type CommentID string
+
+func (id CommentID) String() string {
+	return string(id)
+}

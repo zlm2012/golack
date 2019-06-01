@@ -35,7 +35,7 @@ type UserProfile struct {
 	Title              string `json:"title"`
 }
 
-// User contains all the information of a user
+// SenderID contains all the information of a user
 type User struct {
 	User              string      `json:"user"`
 	Name              string      `json:"name"`

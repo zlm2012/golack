@@ -2,7 +2,7 @@ package rtmapi
 
 import "sync"
 
-// OutgoingEventID manages posting payloads' unique IDs.
+// OutgoingEventID manages posting payloads' unique UserIDs.
 // https://api.slack.com/rtm#sending_messages
 type OutgoingEventID struct {
 	id    uint
