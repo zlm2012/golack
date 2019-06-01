@@ -12,7 +12,7 @@ type Bot struct {
 	ID    slackobject.BotID `json:"id"`
 	AppID slackobject.AppID `json:"app_id"`
 	Name  string            `json:"name"`
-	Icons *struct {
+	Icon  *struct {
 		Image48 string `json:"image_48"`
 	} `json:"icons"`
 }
@@ -30,16 +30,16 @@ type BotChanged struct {
 type ChannelArchived struct {
 	TypedEvent
 	ChannelID slackobject.ChannelID `json:"channel"`
-	User      slackobject.UserID    `json:"user"`
+	UserID    slackobject.UserID    `json:"user"`
 }
 
 type ChannelCreated struct {
 	TypedEvent
 	Channel *struct {
-		ID      slackobject.ChannelID `json:"id"`
-		Name    string                `json:"name"`
-		Created *TimeStamp            `json:"created"`
-		Creator string                `json:"creator"`
+		ID        slackobject.ChannelID `json:"id"`
+		Name      string                `json:"name"`
+		Created   *TimeStamp            `json:"created"`
+		CreatorID slackobject.UserID    `json:"creator"`
 	} `json:"channel"`
 }
 
@@ -91,7 +91,7 @@ type ChannelRenamed struct {
 type ChannelUnarchived struct {
 	TypedEvent
 	ChannelID slackobject.ChannelID `json:"channel"`
-	User      slackobject.UserID    `json:"user"`
+	UserID    slackobject.UserID    `json:"user"`
 }
 
 type CommandsChanged struct {
@@ -101,7 +101,7 @@ type CommandsChanged struct {
 
 type DNDUpdated struct {
 	TypedEvent
-	User      slackobject.UserID `json:"user"`
+	UserID    slackobject.UserID `json:"user"`
 	DNDStatus *struct {
 		Enabled            bool       `json:"dnd_enabled"`
 		NextStartTimeStamp *TimeStamp `json:"next_dnd_start_ts"`
@@ -113,7 +113,7 @@ type DNDUpdated struct {
 
 type DNDUpdatedUser struct {
 	TypedEvent
-	User      slackobject.UserID `json:"user"`
+	UserID    slackobject.UserID `json:"user"`
 	DNDStatus *struct {
 		Enabled            bool       `json:"dnd_enabled"`
 		NextStartTimeStamp *TimeStamp `json:"next_dnd_start_ts"`
@@ -135,10 +135,10 @@ type EmojiChanged struct {
 }
 
 type Comment struct {
-	ID      string             `json:"id"`
-	Created *TimeStamp         `json:"created"`
-	User    slackobject.UserID `json:"user"`
-	Content string             `json:"comment"`
+	ID      slackobject.CommentID `json:"id"`
+	Created *TimeStamp            `json:"created"`
+	UserID  slackobject.UserID    `json:"user"`
+	Content string                `json:"comment"`
 }
 
 // https://api.slack.com/types/file
@@ -153,7 +153,7 @@ type File struct {
 	MimeType           string                  `json:"mimetype"`
 	FileType           string                  `json:"filetype"`
 	PrettyType         string                  `json:"pretty_type"`
-	User               slackobject.UserID      `json:"user"`
+	UserID             slackobject.UserID      `json:"user"`
 	Mode               string                  `json:"mode"`
 	Editable           bool                    `json:"editable"`
 	IsExternal         bool                    `json:"is_external"`
@@ -182,7 +182,7 @@ type File struct {
 	IsPublic           bool                    `json:"is_public"`
 	PublicURLShared    bool                    `json:"public_url_shared"`
 	DisplayAsBot       bool                    `json:"display_as_bot"`
-	Channels           []slackobject.ChannelID `json:"channels"`
+	ChannelIDs         []slackobject.ChannelID `json:"channels"`
 	Groups             []string                `json:"groups"`
 	Ims                []string                `json:"ims"`
 	InitialComment     *Comment                `json:"initial_comment"`
@@ -190,9 +190,9 @@ type File struct {
 	IsStarred          bool                    `json:"is_starred"`
 	PinnedTo           []string                `json:"pinned_to"`
 	Reactions          []*struct {
-		Name  string               `json:"name"`
-		Count int                  `json:"count"`
-		Users []slackobject.UserID `json:"users"`
+		Name    string               `json:"name"`
+		Count   int                  `json:"count"`
+		UserIDs []slackobject.UserID `json:"users"`
 	} `json:"reactions"`
 	CommentsCount int `json:"comments_count"`
 }
@@ -252,11 +252,11 @@ type FileCreated struct {
 
 type FileDeleted struct {
 	TypedEvent
-	FileID    string     `json:"file_id"`
-	TimeStamp *TimeStamp `json:"event_ts"`
+	FileID    slackobject.FileID `json:"file_id"`
+	TimeStamp *TimeStamp         `json:"event_ts"`
 }
 
-type FilePublicated struct {
+type FilePublished struct {
 	TypedEvent
 	FileID slackobject.FileID `json:"file_id"`
 	File   *struct {
@@ -297,7 +297,7 @@ type GroupArchived struct {
 
 type GroupClosed struct {
 	TypedEvent
-	User      slackobject.UserID    `json:"user"`
+	UserID    slackobject.UserID    `json:"user"`
 	ChannelID slackobject.ChannelID `json:"channel"`
 }
 
@@ -328,13 +328,13 @@ type GroupMarked struct {
 
 type GroupOpened struct {
 	TypedEvent
-	User      slackobject.UserID    `json:"user"`
+	UserID    slackobject.UserID    `json:"user"`
 	ChannelID slackobject.ChannelID `json:"channel"`
 }
 
 type GroupRenamed struct {
 	TypedEvent
-	Channel struct {
+	Channel *struct {
 		ID      slackobject.ChannelID `json:"id"`
 		Name    string                `json:"name"`
 		Created *TimeStamp            `json:"created"`
@@ -354,14 +354,14 @@ type Hello struct {
 
 type IMClosed struct {
 	TypedEvent
-	User      slackobject.UserID    `json:"user"`
+	UserID    slackobject.UserID    `json:"user"`
 	ChannelID slackobject.ChannelID `json:"channel"`
 }
 
 type IMCreated struct {
 	TypedEvent
-	User    slackobject.UserID `json:"user"`
-	Channel struct {
+	UserID  slackobject.UserID `json:"user"`
+	Channel *struct {
 		ID slackobject.ChannelID `json:"id"`
 	} `json:"channel"`
 }
@@ -378,7 +378,7 @@ type IMMarked struct {
 
 type IMOpened struct {
 	TypedEvent
-	User      slackobject.UserID    `json:"user"`
+	UserID    slackobject.UserID    `json:"user"`
 	ChannelID slackobject.ChannelID `json:"channel"`
 }
 
@@ -389,11 +389,11 @@ type PresenceManuallyChanged struct {
 
 type MemberJoinedChannel struct {
 	TypedEvent
-	User        slackobject.UserID    `json:"user"`
+	UserID      slackobject.UserID    `json:"user"`
 	ChannelID   slackobject.ChannelID `json:"channel"`
 	ChannelType string                `json:"channel_type"` // C or G. ref. https://api.slack.com/events/member_joined_channel
-	Team        slackobject.TeamID    `json:"team"`
-	Inviter     slackobject.UserID    `json:"inviter"` // Empty when the user joins by herself. ref. https://api.slack.com/events/member_joined_channel
+	TeamID      slackobject.TeamID    `json:"team"`
+	InviterID   slackobject.UserID    `json:"inviter"` // Empty when the user joins by herself. ref. https://api.slack.com/events/member_joined_channel
 }
 
 // Message represent message event on RTM.
@@ -412,24 +412,24 @@ type MemberJoinedChannel struct {
 type Message struct {
 	TypedEvent
 	ChannelID slackobject.ChannelID `json:"channel"`
-	Sender    slackobject.UserID    `json:"user"`
+	SenderID  slackobject.UserID    `json:"user"`
 	Text      string                `json:"text"`
 	TimeStamp *TimeStamp            `json:"ts"`
 }
 
 // Item can be any object with type of Message, File, or Comment.
 type Item struct {
-	Type      string     `json:"type"`
-	Channel   string     `json:"channel"`
-	Message   *Message   `json:"message"`
-	File      *File      `json:"file"`
-	Comment   *Comment   `json:"comment"`
-	TimeStamp *TimeStamp `json:"ts"`
+	Type      string                `json:"type"`
+	ChannelID slackobject.ChannelID `json:"channel"`
+	Message   *Message              `json:"message"`
+	File      *File                 `json:"file"`
+	Comment   *Comment              `json:"comment"`
+	TimeStamp *TimeStamp            `json:"ts"`
 }
 
 type PinAdded struct {
 	TypedEvent
-	User      slackobject.UserID    `json:"user"`
+	UserID    slackobject.UserID    `json:"user"`
 	ChannelID slackobject.ChannelID `json:"channel_id"`
 	TimeStamp *TimeStamp            `json:"event_ts"`
 	Item      *Item                 `json:"item"`
@@ -437,7 +437,7 @@ type PinAdded struct {
 
 type PinRemoved struct {
 	TypedEvent
-	User      slackobject.UserID    `json:"user"`
+	UserID    slackobject.UserID    `json:"user"`
 	ChannelID slackobject.ChannelID `json:"channel_id"`
 	Item      *Item                 `json:"item"`
 	HasPins   bool                  `json:"has_pins"`
@@ -452,36 +452,36 @@ type PreferenceChanged struct {
 
 type PresenceChange struct {
 	TypedEvent
-	User     slackobject.UserID `json:"user"`
+	UserID   slackobject.UserID `json:"user"`
 	Presence string             `json:"presence"`
 }
 
 type PresenceQuery struct {
 	TypedEvent
-	IDs []slackobject.UserID `json:"ids"`
+	UserIDs []slackobject.UserID `json:"ids"`
 }
 
 type PresenceSubscribe struct {
 	TypedEvent
-	IDs []slackobject.UserID `json:"ids"`
+	UserIDs []slackobject.UserID `json:"ids"`
 }
 
 type ReactionAdded struct {
 	TypedEvent
-	User      slackobject.UserID `json:"user"`
-	Reaction  string             `json:"reaction"` // TODO actual value
-	ItemOwner slackobject.UserID `json:"item_user"`
-	Item      *Item              `json:"item"` // TODO message, file, file comment. only ids are given, right?
-	TimeStamp *TimeStamp         `json:"event_ts"`
+	UserID      slackobject.UserID `json:"user"`
+	Reaction    string             `json:"reaction"` // TODO actual value
+	ItemOwnerID slackobject.UserID `json:"item_user"`
+	Item        *Item              `json:"item"` // TODO message, file, file comment. only ids are given, right?
+	TimeStamp   *TimeStamp         `json:"event_ts"`
 }
 
 type ReactionRemoved struct {
 	TypedEvent
-	User      slackobject.UserID `json:"user"`
-	Reaction  string             `json:"reaction"` // TODO actual value
-	ItemOwner string             `json:"item_user"`
-	Item      *Item              `json:"item"` // TODO message, file, file comment. only ids are given, right?
-	TimeStamp *TimeStamp         `json:"event_ts"`
+	UserID      slackobject.UserID `json:"user"`
+	Reaction    string             `json:"reaction"` // TODO actual value
+	ItemOwnerID string             `json:"item_user"`
+	Item        *Item              `json:"item"` // TODO message, file, file comment. only ids are given, right?
+	TimeStamp   *TimeStamp         `json:"event_ts"`
 }
 
 // ReconnectURL is currently unsupported and experimental
@@ -492,14 +492,14 @@ type ReconnectURL struct {
 
 type StarAdded struct {
 	TypedEvent
-	User      slackobject.UserID `json:"user"`
+	UserID    slackobject.UserID `json:"user"`
 	Item      *Item              `json:"item"` // TODO message, file, file comment. only ids are given, right?
 	TimeStamp *TimeStamp         `json:"event_ts"`
 }
 
 type StarRemoved struct {
 	TypedEvent
-	User      slackobject.UserID `json:"user"`
+	UserID    slackobject.UserID `json:"user"`
 	Item      *Item              `json:"item"` // TODO message, file, file comment. only ids are given, right?
 	TimeStamp *TimeStamp         `json:"event_ts"`
 }
@@ -516,10 +516,10 @@ type SubTeam struct {
 	Updated     *TimeStamp            `json:"date_update"`
 	Deleted     *TimeStamp            `json:"date_delete"`
 	AutoType    string                `json:"auto_type"`
-	CreatedBy   slackobject.UserID    `json:"created_by"`
+	CreatorID   slackobject.UserID    `json:"created_by"`
 	UpdatedBy   string                `json:"updated_by"`
 	UserCount   int                   `json:"user_count,string"`
-	Users       []slackobject.UserID  `json:"users"`
+	UserIDs     []slackobject.UserID  `json:"users"`
 }
 
 type SubTeamCreated struct {
@@ -532,10 +532,10 @@ type SubTeamMembersChanged struct {
 	SubTeamID         slackobject.SubTeamID `json:"subteam_id"`
 	TeamID            slackobject.TeamID    `json:"team_id"`
 	PreviousUpdate    *TimeStamp            `json:"date_previous_update"`
-	Update            *TimeStamp            `json:"date_update"`
-	AddedUsers        []slackobject.UserID  `json:"added_users"`
+	Updated           *TimeStamp            `json:"date_update"`
+	AddedUserIDs      []slackobject.UserID  `json:"added_users"`
 	AddedUserCount    int                   `json:"added_users_count,string"`
-	RemovedUsers      []slackobject.UserID  `json:"removed_users"`
+	RemovedUserIDs    []slackobject.UserID  `json:"removed_users"`
 	RemovedUsersCount int                   `json:"removed_users_count,string"`
 }
 
@@ -663,7 +663,7 @@ type UserChanged struct {
 type UserTyping struct {
 	TypedEvent
 	ChannelID slackobject.ChannelID `json:"channel"`
-	User      slackobject.UserID    `json:"user"`
+	UserID    slackobject.UserID    `json:"user"`
 }
 
 // Pong is given when client send Ping.

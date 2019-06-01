@@ -128,7 +128,7 @@ var (
 		FileCommentEditedEvent:     reflect.TypeOf(&FileCommentEdited{}).Elem(),
 		FileCreatedEvent:           reflect.TypeOf(&FileCreated{}).Elem(),
 		FileDeletedEvent:           reflect.TypeOf(&FileDeleted{}).Elem(),
-		FilePublicEvent:            reflect.TypeOf(&FilePublicated{}).Elem(),
+		FilePublicEvent:            reflect.TypeOf(&FilePublished{}).Elem(),
 		FileSharedEvent:            reflect.TypeOf(&FileShared{}).Elem(),
 		FileUnsharedEvent:          reflect.TypeOf(&FileUnshared{}).Elem(),
 		GoodByeEvent:               reflect.TypeOf(&GoodBye{}).Elem(),
