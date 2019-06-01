@@ -1,0 +1,6 @@
+{
+  "type": "team_plan_change",
+  "plan": "std",
+  "can_add_ura": false,
+  "paid_features": ["feature1", "feature2"]
+}
