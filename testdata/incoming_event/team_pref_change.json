@@ -1,0 +1,5 @@
+{
+  "type": "team_pref_change",
+  "name": "slackbot_responses_only_admins",
+  "value": true
+}

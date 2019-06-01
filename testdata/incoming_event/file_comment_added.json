@@ -1,0 +1,13 @@
+{
+  "type": "file_comment_added",
+  "comment": {
+    "id": "C12345",
+    "created": 1360782804,
+    "user": "U1234",
+    "comment": "comment content"
+  },
+  "file_id": "F2147483862",
+  "file": {
+    "id": "F2147483862"
+  }
+}

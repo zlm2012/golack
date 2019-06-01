@@ -45,6 +45,7 @@ const (
 	GoodByeEvent                         = "goodbye"
 	GroupArchiveEvent                    = "group_archive"
 	GroupCloseEvent                      = "group_close"
+	GroupDeletedEvent                    = "group_deleted"
 	GroupHistoryChangedEvent             = "group_history_changed"
 	GroupJoinedEvent                     = "group_joined"
 	GroupLeftEvent                       = "group_left"
@@ -59,18 +60,22 @@ const (
 	IMMarkedEvent                        = "im_marked"
 	IMOpenEvent                          = "im_open"
 	ManualPresenceChangeEvent            = "manual_presence_change"
+	MemberJoinedChannelEvent             = "member_joined_channel"
 	MessageEvent                         = "message"
 	PinAddedEvent                        = "pin_added"
 	PinRemovedEvent                      = "pin_removed"
 	PrefChangeEvent                      = "pref_change"
 	PresenceChangeEvent                  = "presence_change"
+	PresenceQueryEvent                   = "presence_query"
+	PresenceSubEvent                     = "presence_sub"
 	ReactionAddedEvent                   = "reaction_added"
 	ReactionRemovedEvent                 = "reaction_removed"
 	ReconnectURLEvent                    = "reconnect_url"
 	StarAddedEvent                       = "star_added"
 	StarRemovedEvent                     = "star_removed"
 	SubTeamCreatedEvent                  = "subteam_created"
-	SubTeamSlefAddedEvent                = "subteam_self_added"
+	SubTeamMembersChangedEvent           = "subteam_members_changed"
+	SubTeamSelfAddedEvent                = "subteam_self_added"
 	SubTeamSelfRemovedEvent              = "subteam_self_removed"
 	SubTeamUpdatedEvent                  = "subteam_updated"
 	TeamDomainChangeEvent                = "team_domain_change"
@@ -94,11 +99,11 @@ var (
 		ChannelHistoryChangedEvent, ChannelJoinedEvent, ChannelLeftEvent, ChannelMarkedEvent, ChannelRenameEvent, ChannelUnarchiveEvent,
 		CommandsChangedEvent, DNDUpdatedEvent, DNDUpdatedUserEvent, EmailDomainChangedEvent, EmojiChangedEvent, FileChangeEvent,
 		FileCommentAddedEvent, FileCommentDeletedEvent, FileCommentEditedEvent, FileCreatedEvent, FileDeletedEvent, FilePublicEvent,
-		FileSharedEvent, FileUnsharedEvent, GoodByeEvent, GroupArchiveEvent, GroupCloseEvent, GroupHistoryChangedEvent, GroupJoinedEvent,
+		FileSharedEvent, FileUnsharedEvent, GoodByeEvent, GroupArchiveEvent, GroupCloseEvent, GroupDeletedEvent, GroupHistoryChangedEvent, GroupJoinedEvent,
 		GroupLeftEvent, GroupMarkedEvent, GroupOpenEvent, GroupRenameEvent, GroupUnarchiveEvent, HelloEvent, IMCloseEvent, IMCreatedEvent,
-		IMHistoryChangedEvent, IMMarkedEvent, IMOpenEvent, ManualPresenceChangeEvent, MessageEvent, PinAddedEvent, PinRemovedEvent,
-		PrefChangeEvent, PresenceChangeEvent, ReactionAddedEvent, ReactionRemovedEvent, ReconnectURLEvent, StarAddedEvent, StarRemovedEvent,
-		SubTeamCreatedEvent, SubTeamSlefAddedEvent, SubTeamSelfRemovedEvent, SubTeamUpdatedEvent, TeamDomainChangeEvent, TeamJoinEvent,
+		IMHistoryChangedEvent, IMMarkedEvent, IMOpenEvent, ManualPresenceChangeEvent, MemberJoinedChannelEvent, MessageEvent, PinAddedEvent, PinRemovedEvent,
+		PrefChangeEvent, PresenceChangeEvent, PresenceQueryEvent, PresenceSubEvent, ReactionAddedEvent, ReactionRemovedEvent, ReconnectURLEvent, StarAddedEvent, StarRemovedEvent,
+		SubTeamCreatedEvent, SubTeamMembersChangedEvent, SubTeamSelfAddedEvent, SubTeamSelfRemovedEvent, SubTeamUpdatedEvent, TeamDomainChangeEvent, TeamJoinEvent,
 		TeamMigrationStartedEvent, TeamPlanChangedEvent, TeamPrefChangeEvent, TeamProfileChangeEvent, TeamProfileDeleteEvent, TeamProfileReorderEvent,
 		TeamRenameEvent, UserChangeEvent, UserTypingEvent, PingEvent, PongEvent,
 	}
