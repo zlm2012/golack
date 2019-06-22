@@ -58,6 +58,13 @@ type PostMessage struct {
 	IconEmoji   string
 }
 
+// WithAttachments sets/overrides attachments parameter for current PostMessage.
+// See https://api.slack.com/docs/message-attachments
+func (message *PostMessage) WithAttachments(attachments []*MessageAttachment) *PostMessage {
+	message.Attachments = attachments
+	return message
+}
+
 // WithLinkNames sets/overrides link_names parameter for current PostMessage.
 // See https://api.slack.com/methods/chat.postMessage#formatting
 func (message *PostMessage) WithLinkNames(linkNames int) *PostMessage {
@@ -119,19 +126,11 @@ func (message *PostMessage) ToURLValues() url.Values {
 // By default this sets commonly used settings as much as possible. e.g. link_names=1, unfurl_links=true, etc...
 // To override those settings and add some extra settings including username, icon_url, or icon_emoji, call setter methods start with With***.
 func NewPostMessage(channelID slackobject.ChannelID, text string) *PostMessage {
-	return NewPostMessageWithAttachments(channelID, text, nil)
-}
-
-// NewPostMessage creates PostMessage instance with given channel, text settings, attachments.
-// By default this sets commonly used settings as much as possible. e.g. link_names=1, unfurl_links=true, etc...
-// To override those settings and add some extra settings including username, icon_url, or icon_emoji, call setter methods start with With***.
-func NewPostMessageWithAttachments(channelID slackobject.ChannelID, text string, attachments []*MessageAttachment) *PostMessage {
 	return &PostMessage{
 		ChannelID:   channelID,
 		Text:        text,
 		Parse:       ParseModeFull,
 		LinkNames:   1,
-		Attachments: attachments,
 		UnfurlLinks: true,
 		UnfurlMedia: true,
 	}

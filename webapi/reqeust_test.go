@@ -46,30 +46,21 @@ func TestNewPostMessage(t *testing.T) {
 	}
 }
 
-func TestNewPostMessageWithAttachments(t *testing.T) {
-	channelID := slackobject.ChannelID("myChannel")
-	text := "myText"
-	attachment := &MessageAttachment{}
-	message := NewPostMessageWithAttachments(channelID, text, []*MessageAttachment{attachment})
+func TestPostMessageWithAttachments(t *testing.T) {
+	message := &PostMessage{}
+	attachments := []*MessageAttachment{
+		{
+			Text: "foo",
+		},
+	}
+	message.WithAttachments(attachments)
 
-	if message == nil {
-		t.Fatal("new PostMessage instance is not returned.")
+	if len(message.Attachments) != 1 {
+		t.Fatal("Given attachments are not set.")
 	}
 
-	if message.ChannelID != channelID {
-		t.Errorf("expected channel is not set: %s.", message.ChannelID)
-	}
-
-	if message.Text != text {
-		t.Errorf("expected text is not set: %s.", message.Text)
-	}
-
-	if message.Attachments == nil || len(message.Attachments) == 0 {
-		t.Fatal("given MessageAttachment is not set.")
-	}
-
-	if message.Attachments[0] != attachment {
-		t.Errorf("expected attachment is not set: %#v.", message.Attachments[0])
+	if message.Attachments[0] != attachments[0] {
+		t.Error("Given attachments are not set.")
 	}
 }
 
