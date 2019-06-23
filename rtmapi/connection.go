@@ -210,6 +210,7 @@ var (
 )
 
 func decodePayload(input json.RawMessage) (DecodedPayload, error) {
+	fmt.Printf("Recieved payload: %s\n", string(input))
 	inputStr := strings.TrimSpace(string(input))
 	if len(inputStr) == 0 {
 		return nil, ErrEmptyPayload
