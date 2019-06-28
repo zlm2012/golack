@@ -20,17 +20,25 @@ type OutgoingEvent struct {
 // https://api.slack.com/rtm#sending_messages
 type OutgoingMessage struct {
 	OutgoingEvent
-	ChannelID slackobject.ChannelID `json:"channel"`
-	Text      string                `json:"text"`
+	ChannelID       slackobject.ChannelID `json:"channel"`
+	Text            string                `json:"text"`
+	ThreadTimeStamp *TimeStamp            `json:"thread_ts,omitempty"` // https://api.slack.com/docs/message-threading
 }
 
-// NewOutgoingMessage is a constructor to create new OutgoingMessage instance with given arguments.
-func NewOutgoingMessage(eventID *OutgoingEventID, channel slackobject.ChannelID, text string) *OutgoingMessage {
+// WithThreadTimeStamp sets given ts value to payload.
+// See https://api.slack.com/docs/message-threading#using_the_web_api
+func (message *OutgoingMessage) WithThreadTimeStamp(ts *TimeStamp) *OutgoingMessage {
+	message.ThreadTimeStamp = ts
+	return message
+}
+
+// NewOutgoingMessage is a constructor to create new OutgoingMessage instance with given required arguments.
+// Call With* methods to set optional fields.
+func NewOutgoingMessage(channel slackobject.ChannelID, text string) *OutgoingMessage {
 	return &OutgoingMessage{
 		ChannelID: channel,
 		Text:      text,
 		OutgoingEvent: OutgoingEvent{
-			ID: eventID.Next(),
 			TypedEvent: TypedEvent{
 				Type: MessageEvent,
 			},
