@@ -411,10 +411,11 @@ type MemberJoinedChannel struct {
 //  }
 type Message struct {
 	TypedEvent
-	ChannelID slackobject.ChannelID `json:"channel"`
-	SenderID  slackobject.UserID    `json:"user"`
-	Text      string                `json:"text"`
-	TimeStamp *TimeStamp            `json:"ts"`
+	ChannelID       slackobject.ChannelID `json:"channel"`
+	SenderID        slackobject.UserID    `json:"user"`
+	Text            string                `json:"text"`
+	TimeStamp       *TimeStamp            `json:"ts"`
+	ThreadTimeStamp *TimeStamp            `json:"thread_ts"` // https://api.slack.com/docs/message-threading
 }
 
 // Item can be any object with type of Message, File, or Comment.
