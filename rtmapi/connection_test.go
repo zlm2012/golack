@@ -173,9 +173,13 @@ func TestConnWrapper_Send(t *testing.T) {
 	defer conn.Close()
 
 	connWrapper := newConnectionWrapper(conn)
-	var channelID slackobject.ChannelID = "dummy channel"
-	if err := connWrapper.Send(channelID, "hello"); err != nil {
+	message := &OutgoingMessage{}
+	if err := connWrapper.Send(message); err != nil {
 		t.Errorf("error on sending message over WebSocket connection. %#v.", err)
+	}
+
+	if message.ID == 0 {
+		t.Errorf("Send() method must append message id.")
 	}
 }
 

@@ -45,17 +45,19 @@ type MessageAttachment struct {
 // PostMessage is a payload to be sent with chat.postMessage method.
 // See https://api.slack.com/methods/chat.postMessage
 type PostMessage struct {
-	ChannelID   slackobject.ChannelID
-	Text        string
-	Parse       ParseMode
-	LinkNames   int
-	Attachments []*MessageAttachment
-	UnfurlLinks bool
-	UnfurlMedia bool
-	UserName    string
-	AsUser      bool
-	IconURL     string
-	IconEmoji   string
+	ChannelID       slackobject.ChannelID
+	Text            string
+	Parse           ParseMode
+	LinkNames       int
+	Attachments     []*MessageAttachment
+	UnfurlLinks     bool
+	UnfurlMedia     bool
+	UserName        string
+	AsUser          bool
+	IconURL         string
+	IconEmoji       string
+	ReplyBroadcast  bool
+	ThreadTimeStamp string
 }
 
 // WithAttachments sets/overrides attachments parameter for current PostMessage.
@@ -76,6 +78,21 @@ func (message *PostMessage) WithLinkNames(linkNames int) *PostMessage {
 // See https://api.slack.com/docs/message-formatting#parsing_modes
 func (message *PostMessage) WithParse(parse ParseMode) *PostMessage {
 	message.Parse = parse
+	return message
+}
+
+// WithReplyBroadcast sets optional boolean value so the thread response can be broadcasted.
+// Thread identifier must be present with WithThreadTimeStamp() to use this option.
+// See https://api.slack.com/docs/message-threading#using_the_web_api
+func (message *PostMessage) WithReplyBroadcast(broadcast bool) *PostMessage {
+	message.ReplyBroadcast = broadcast
+	return message
+}
+
+// WithThreadTimeStamp sets given ts value to payload.
+// See https://api.slack.com/docs/message-threading#using_the_web_api
+func (message *PostMessage) WithThreadTimeStamp(ts string) *PostMessage {
+	message.ThreadTimeStamp = ts
 	return message
 }
 
@@ -105,6 +122,10 @@ func (message *PostMessage) ToURLValues() url.Values {
 	values.Add("unfurl_links", strconv.FormatBool(message.UnfurlLinks))
 	values.Add("unfurl_media", strconv.FormatBool(message.UnfurlMedia))
 	values.Add("as_user", strconv.FormatBool(message.AsUser))
+	if message.ThreadTimeStamp != "" {
+		values.Add("thread_ts", message.ThreadTimeStamp)
+		values.Add("reply_broadcast", strconv.FormatBool(message.ReplyBroadcast))
+	}
 	if message.UserName != "" {
 		values.Add("username", message.UserName)
 	}

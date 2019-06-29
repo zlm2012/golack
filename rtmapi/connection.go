@@ -10,7 +10,6 @@ import (
 	"strings"
 
 	"github.com/gorilla/websocket"
-	"github.com/oklahomer/golack/slackobject"
 	"github.com/tidwall/gjson"
 )
 
@@ -34,7 +33,7 @@ type PayloadReceiver interface {
 }
 
 type PayloadSender interface {
-	Send(slackobject.ChannelID, string) error
+	Send(*OutgoingMessage) error
 	Ping() error
 }
 
@@ -89,9 +88,11 @@ func (wrapper *connWrapper) Receive() (DecodedPayload, error) {
 	return decoded, err
 }
 
-func (wrapper *connWrapper) Send(channel slackobject.ChannelID, content string) error {
-	event := NewOutgoingMessage(wrapper.outgoingEventID, channel, content)
-	return wrapper.conn.WriteJSON(event)
+func (wrapper *connWrapper) Send(message *OutgoingMessage) error {
+	// ID must be unique per connection.
+	// Manage this value at here.
+	message.ID = wrapper.outgoingEventID.Next()
+	return wrapper.conn.WriteJSON(message)
 }
 
 func (wrapper *connWrapper) Ping() error {
