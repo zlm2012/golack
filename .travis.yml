@@ -10,16 +10,11 @@ go:
 before_install:
   - export PATH=$HOME/gopath/bin:$PATH
   - go get github.com/mattn/goveralls
-  - go get github.com/modocache/gover
 
 script:
   - go test -race ./...
-  - go test -coverprofile=golack.coverprofile .
-  - go test -coverprofile=rtmapi.coverprofile ./rtmapi
-  - go test -coverprofile=slackobject.coverprofile ./slackobject
-  - go test -coverprofile=webapi.coverprofile ./webapi
-  - gover
-  - goveralls -coverprofile=gover.coverprofile -service=travis-ci
+  - go test -coverprofile=coverage.out -cover ./...
+  - goveralls -coverprofile=coverage.out -service=travis-ci
 
 matrix:
   allow_failures:
