@@ -1,11 +1,13 @@
 package rtmapi
 
-import "github.com/oklahomer/golack/slackobject"
+import (
+	"github.com/oklahomer/golack/event"
+)
 
 // OutgoingEvent takes care of some common fields all outgoing event MUST have.
 // https://api.slack.com/rtm#events
 type OutgoingEvent struct {
-	TypedEvent
+	event.TypedEvent
 
 	// ID is an unique identifier that client declares.
 	// https://api.slack.com/rtm#sending_messages
@@ -20,27 +22,27 @@ type OutgoingEvent struct {
 // https://api.slack.com/rtm#sending_messages
 type OutgoingMessage struct {
 	OutgoingEvent
-	ChannelID       slackobject.ChannelID `json:"channel"`
-	Text            string                `json:"text"`
-	ThreadTimeStamp *TimeStamp            `json:"thread_ts,omitempty"` // https://api.slack.com/docs/message-threading
+	ChannelID       event.ChannelID  `json:"channel"`
+	Text            string           `json:"text"`
+	ThreadTimeStamp *event.TimeStamp `json:"thread_ts,omitempty"` // https://api.slack.com/docs/message-threading
 }
 
 // WithThreadTimeStamp sets given ts value to payload.
 // See https://api.slack.com/docs/message-threading#using_the_web_api
-func (message *OutgoingMessage) WithThreadTimeStamp(ts *TimeStamp) *OutgoingMessage {
+func (message *OutgoingMessage) WithThreadTimeStamp(ts *event.TimeStamp) *OutgoingMessage {
 	message.ThreadTimeStamp = ts
 	return message
 }
 
 // NewOutgoingMessage is a constructor to create new OutgoingMessage instance with given required arguments.
 // Call With* methods to set optional fields.
-func NewOutgoingMessage(channel slackobject.ChannelID, text string) *OutgoingMessage {
+func NewOutgoingMessage(channel event.ChannelID, text string) *OutgoingMessage {
 	return &OutgoingMessage{
 		ChannelID: channel,
 		Text:      text,
 		OutgoingEvent: OutgoingEvent{
-			TypedEvent: TypedEvent{
-				Type: MessageEvent,
+			TypedEvent: event.TypedEvent{
+				Type: "message",
 			},
 		},
 	}
@@ -57,7 +59,7 @@ func NewPing(eventID *OutgoingEventID) *Ping {
 	return &Ping{
 		OutgoingEvent: OutgoingEvent{
 			ID:         eventID.Next(),
-			TypedEvent: TypedEvent{Type: PingEvent},
+			TypedEvent: event.TypedEvent{Type: "ping"},
 		},
 	}
 }

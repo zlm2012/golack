@@ -1,7 +1,7 @@
 package webapi
 
 import (
-	"github.com/oklahomer/golack/slackobject"
+	"github.com/oklahomer/golack/event"
 	"strconv"
 	"testing"
 )
@@ -29,7 +29,7 @@ func TestParseMode_String(t *testing.T) {
 }
 
 func TestNewPostMessage(t *testing.T) {
-	channelID := slackobject.ChannelID("myChannel")
+	channelID := event.ChannelID("myChannel")
 	text := "myText"
 	message := NewPostMessage(channelID, text)
 
@@ -104,7 +104,7 @@ func TestPostMessage_WithUnfurlMedia(t *testing.T) {
 }
 
 func TestPostMessage_ToURLValues(t *testing.T) {
-	channelID := slackobject.ChannelID("myChannel")
+	channelID := event.ChannelID("myChannel")
 	text := "myText"
 	parse := ParseModeFull
 	linkNames := 1

@@ -2,7 +2,7 @@ package webapi
 
 import (
 	"encoding/json"
-	"github.com/oklahomer/golack/slackobject"
+	"github.com/oklahomer/golack/event"
 	"net/url"
 	"strconv"
 )
@@ -45,7 +45,7 @@ type MessageAttachment struct {
 // PostMessage is a payload to be sent with chat.postMessage method.
 // See https://api.slack.com/methods/chat.postMessage
 type PostMessage struct {
-	ChannelID       slackobject.ChannelID
+	ChannelID       event.ChannelID
 	Text            string
 	Parse           ParseMode
 	LinkNames       int
@@ -146,7 +146,7 @@ func (message *PostMessage) ToURLValues() url.Values {
 // NewPostMessage creates PostMessage instance with given channel and text settings.
 // By default this sets commonly used settings as much as possible. e.g. link_names=1, unfurl_links=true, etc...
 // To override those settings and add some extra settings including username, icon_url, or icon_emoji, call setter methods start with With***.
-func NewPostMessage(channelID slackobject.ChannelID, text string) *PostMessage {
+func NewPostMessage(channelID event.ChannelID, text string) *PostMessage {
 	return &PostMessage{
 		ChannelID:   channelID,
 		Text:        text,

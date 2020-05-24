@@ -1,10 +1,13 @@
 package rtmapi
 
-import "testing"
+import (
+	"github.com/oklahomer/golack/event"
+	"testing"
+)
 
 func TestNewMalformedPayloadError(t *testing.T) {
 	str := "myError"
-	err := NewMalformedPayloadError(str)
+	err := event.NewMalformedPayloadError(str)
 
 	if err == nil {
 		t.Fatal("error instance is not returned.")
@@ -17,7 +20,7 @@ func TestNewMalformedPayloadError(t *testing.T) {
 
 func TestMalformedPayloadError_Error(t *testing.T) {
 	str := "myErr"
-	err := MalformedPayloadError{Err: str}
+	err := event.MalformedPayloadError{Err: str}
 
 	if err.Error() != str {
 		t.Errorf("expected error string is not returned: %s.", err.Error())

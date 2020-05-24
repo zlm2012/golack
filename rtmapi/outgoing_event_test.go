@@ -2,7 +2,7 @@ package rtmapi
 
 import (
 	"encoding/json"
-	"github.com/oklahomer/golack/slackobject"
+	"github.com/oklahomer/golack/event"
 	"strings"
 	"testing"
 )
@@ -11,7 +11,7 @@ func TestMarshalPingEvent(t *testing.T) {
 	ping := &Ping{
 		OutgoingEvent: OutgoingEvent{
 			ID:         1,
-			TypedEvent: TypedEvent{Type: PingEvent},
+			TypedEvent: event.TypedEvent{Type: "ping"},
 		},
 	}
 	val, err := json.Marshal(ping)
@@ -32,7 +32,7 @@ func TestUnmarshalPingEvent(t *testing.T) {
 		return
 	}
 
-	if ping.Type != PingEvent {
+	if ping.Type != "ping" {
 		t.Errorf("something is wrong with unmarshaled result. %#v.", ping)
 	}
 
@@ -42,7 +42,7 @@ func TestUnmarshalPingEvent(t *testing.T) {
 }
 
 func TestNewOutgoingMessage(t *testing.T) {
-	channelID := slackobject.ChannelID("channel")
+	channelID := event.ChannelID("channel")
 	message := "dummy message"
 
 	outgoingMessage := NewOutgoingMessage(channelID, message)
@@ -57,7 +57,7 @@ func TestNewOutgoingMessage(t *testing.T) {
 }
 
 func TestOutgoingMessage_WithThreadTimeStamp(t *testing.T) {
-	timeStamp := &TimeStamp{}
+	timeStamp := &event.TimeStamp{}
 	message := &OutgoingMessage{}
 
 	message.WithThreadTimeStamp(timeStamp)

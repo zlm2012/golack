@@ -5,10 +5,11 @@ import (
 	"errors"
 	"fmt"
 	"github.com/gorilla/websocket"
-	"github.com/oklahomer/golack/slackobject"
+	"github.com/oklahomer/golack/event"
 	"net/http"
 	"net/http/httptest"
 	"reflect"
+	"strconv"
 	"sync"
 	"testing"
 	"time"
@@ -122,8 +123,8 @@ func TestConnWrapper_Receive(t *testing.T) {
 	}
 	defer conn.Close()
 
-	var channelID slackobject.ChannelID = "C12345"
-	var userID slackobject.UserID = "U6789"
+	var channelID event.ChannelID = "C12345"
+	var userID event.UserID = "U6789"
 	text := "Hello world!"
 	timestamp := 1355517523
 	slackTimestamp := fmt.Sprintf("%d.000005", timestamp)
@@ -136,7 +137,7 @@ func TestConnWrapper_Receive(t *testing.T) {
 		t.Fatalf("error on payload reception: %s.", err.Error())
 	}
 
-	message, ok := decodedPayload.(*Message)
+	message, ok := decodedPayload.(*event.Message)
 	if !ok {
 		t.Fatalf("received payload is not Message: %#v.", message)
 	}
@@ -220,120 +221,122 @@ func TestConnWrapper_Close(t *testing.T) {
 }
 
 func Test_decodePayload(t *testing.T) {
-	type output struct {
-		eventType EventType
-		payload   reflect.Type
-		err       interface{}
+	type expected struct {
+		value interface{}
+		err   interface{}
 	}
-	var decodeTests = []struct {
-		input  string
-		output *output
+	tests := []struct {
+		input    string
+		expected *expected
 	}{
 		{
-			input: `{"type": "channel_rename", "channel": {"id":"C02XXXXX", "name":"new_name", "created":1360782804}}`,
-			output: &output{
-				eventType: ChannelRenameEvent,
-				payload:   reflect.TypeOf(&ChannelRenamed{}),
-				err:       nil,
+			input: `{"reply_to": 1234, "type": "pong", "time": 1403299273342}`,
+			expected: &expected{
+				value: &Pong{
+					TypedEvent: event.TypedEvent{
+						Type: "pong",
+					},
+					ReplyTo: 1234,
+				},
 			},
 		},
 		{
-			input: `{"type": "message", "channel": "C2147483705", "user": "U2147483697", "text": "Hello, world!", "ts": "1355517523.000005", "edited": { "user": "U2147483697", "ts": "1355517536.000001"}}`,
-			output: &output{
-				eventType: MessageEvent,
-				payload:   reflect.TypeOf(&Message{}),
-				err:       nil,
+			input: `{"ok": true, "reply_to": 1, "ts": "1355517523.000005", "text": "Hello world"}`,
+			expected: &expected{
+				value: &OKReply{
+					Reply: Reply{
+						OK:      true,
+						ReplyTo: 1,
+					},
+					TimeStamp: &event.TimeStamp{
+						Time:          time.Unix(1355517523, 0),
+						OriginalValue: "1355517523.000005",
+					},
+					Text: "Hello world",
+				},
 			},
 		},
 		{
-			// type is valid and hence mapped to Message, but can not be parsed since the timestamp format is illegal.
-			input: `{"type": "message", "ts": "invalid timestamp"}`,
-			output: &output{
-				payload: nil,
-				err:     reflect.TypeOf(&MalformedPayloadError{}),
-			},
-		},
-		{
-			input: `{"type": "message", "subtype": "channel_join", "text": "<@UXXXXX|bobby> has joined the channel", "ts": "1403051575.000407", "user": "U023BECGF"}`,
-			output: &output{
-				eventType: MessageEvent,
-				payload:   reflect.TypeOf(&MiscMessage{}),
-				err:       nil,
+			input: `{"ok": false, "reply_to": 1, "error": {"code": 2, "msg": "message text is missing"}}`,
+			expected: &expected{
+				value: &NGReply{
+					Reply: Reply{
+						OK:      false,
+						ReplyTo: 1,
+					},
+					Error: ReplyErrorReason{
+						Code:    2,
+						Message: "message text is missing",
+					},
+				},
 			},
 		},
 		{
 			// invalid type
 			input: `{"type": "unsupportedEventType"}`,
-			output: &output{
-				payload: nil,
-				err:     reflect.TypeOf(&MalformedPayloadError{}),
-			},
-		},
-		{
-			input: `{"ok": true, "reply_to": 1, "ts": "1355517523.000005", "text": "Hello world"}`,
-			output: &output{
-				payload: reflect.TypeOf(&WebSocketOKReply{}),
-				err:     nil,
+			expected: &expected{
+				err: reflect.TypeOf(&event.MalformedPayloadError{}),
 			},
 		},
 		{
 			// required fields are not given
 			input: `{"what": true}`,
-			output: &output{
-				payload: nil,
-				err:     reflect.TypeOf(&MalformedPayloadError{}),
+			expected: &expected{
+				value: nil,
+				err:   reflect.TypeOf(&event.MalformedPayloadError{}),
 			},
 		},
 		{
 			// not valid json structure
 			input: `malformedJson`,
-			output: &output{
-				payload: nil,
-				err:     reflect.TypeOf(&MalformedPayloadError{}),
+			expected: &expected{
+				err: reflect.TypeOf(&event.MalformedPayloadError{}),
 			},
 		},
 		{
 			input: "　",
-			output: &output{
-				payload: nil,
-				err:     ErrEmptyPayload,
+			expected: &expected{
+				err: event.ErrEmptyPayload,
 			},
 		},
 		{
 			input: "\r",
-			output: &output{
-				payload: nil,
-				err:     ErrEmptyPayload,
+			expected: &expected{
+				err: event.ErrEmptyPayload,
 			},
 		},
 	}
 
-	for i, testSet := range decodeTests {
-		testCnt := i + 1
-		inputByte := []byte(testSet.input)
-		payload, err := decodePayload(inputByte)
+	for i, tt := range tests {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			payload, err := decodePayload([]byte(tt.input))
 
-		if testSet.output.payload != reflect.TypeOf(payload) {
-			t.Errorf("Test No. %d. expected return type of %s, but was %#v.", testCnt, testSet.output.payload.Name(), err)
-		}
-		if testSet.output.eventType != "" {
-			eventType := payload.(EventTyper).EventType()
-			if testSet.output.eventType != eventType {
-				t.Errorf("Test No. %d. expected EventType %s, but was %s.", testCnt, testSet.output.eventType, eventType)
+			if tt.expected.value != nil {
+				if err != nil {
+					t.Fatalf("Unexpected error is returned: %#v", err)
+				}
+
+				if !reflect.DeepEqual(payload, tt.expected.value) {
+					t.Fatalf("Expected %#v but was %#v", tt.expected.value, payload)
+				}
+
+				return
 			}
-		}
-		if e := testSet.output.err; e != nil {
-			if reflect.TypeOf(e) == reflect.TypeOf(errors.New("dummy")) {
+
+			expectedErr := tt.expected.err
+			// See if pre-declared error instance is returned
+			if reflect.TypeOf(expectedErr) == reflect.TypeOf(errors.New("DUMMY")) {
 				// pre-declared error instance is returned.
-				if e != err {
-					t.Errorf("expected error is not returned. test #%d. error: %#v.", testCnt, err)
+				if expectedErr != err {
+					t.Fatalf("Expected error is not returned: %#v", err)
 				}
-			} else {
-				// new error instance of specific error struct is returned.
-				if e != reflect.TypeOf(err) {
-					t.Errorf("unexpected error type is returned on test #%d. error: %#v.", testCnt, err)
-				}
+				return
 			}
-		}
+
+			// Error type comparison is required
+			if expectedErr != reflect.TypeOf(err) {
+				t.Fatalf("Unexpected error type is returned: %#v.", err)
+			}
+		})
 	}
 }

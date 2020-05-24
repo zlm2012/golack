@@ -1,4 +1,4 @@
-package slackobject
+package event
 
 type AppID string
 

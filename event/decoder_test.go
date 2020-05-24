@@ -1,8 +1,7 @@
-package rtmapi
+package event
 
 import (
 	"fmt"
-	"github.com/oklahomer/golack/slackobject"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -12,12 +11,16 @@ import (
 	"time"
 )
 
-// https://api.slack.com/rtm
-// TypedEvent field does not have to be set in each declaration.
-// In testStructure(), there is a cheat to set corresponding TypedEvent field.
-var expectedPayloads = map[EventType]EventTyper{
-	AccountsChangedEvent: &AccountsChanged{},
-	BotAddedEvent: &BotAdded{
+var expectedPayloads = map[string]interface{}{
+	"accounts_changed": &AccountsChanged{
+		TypedEvent{
+			Type: "accounts_changed",
+		},
+	},
+	"bot_added": &BotAdded{
+		TypedEvent: TypedEvent{
+			Type: "bot_added",
+		},
 		Bot: &Bot{
 			ID:    "B024BE7LH",
 			AppID: "A4H1JB4AZ",
@@ -29,7 +32,10 @@ var expectedPayloads = map[EventType]EventTyper{
 			},
 		},
 	},
-	BotChangedEvent: &BotChanged{
+	"bot_changed": &BotChanged{
+		TypedEvent: TypedEvent{
+			Type: "bot_changed",
+		},
 		Bot: &Bot{
 			ID:    "B024BE7LH",
 			AppID: "A4H1JB4AZ",
@@ -41,16 +47,22 @@ var expectedPayloads = map[EventType]EventTyper{
 			},
 		},
 	},
-	ChannelArchivedEvent: &ChannelArchived{
+	"channel_archive": &ChannelArchived{
+		TypedEvent: TypedEvent{
+			Type: "channel_archive",
+		},
 		ChannelID: "C024BE91L",
 		UserID:    "U024BE7LH",
 	},
-	ChannelCreatedEvent: &ChannelCreated{
+	"channel_created": &ChannelCreated{
+		TypedEvent: TypedEvent{
+			Type: "channel_created",
+		},
 		Channel: &struct {
-			ID        slackobject.ChannelID `json:"id"`
-			Name      string                `json:"name"`
-			Created   *TimeStamp            `json:"created"`
-			CreatorID slackobject.UserID    `json:"creator"`
+			ID        ChannelID  `json:"id"`
+			Name      string     `json:"name"`
+			Created   *TimeStamp `json:"created"`
+			CreatorID UserID     `json:"creator"`
 		}{
 			ID:   "C024BE91L",
 			Name: "fun",
@@ -61,11 +73,17 @@ var expectedPayloads = map[EventType]EventTyper{
 			CreatorID: "U024BE7LH",
 		},
 	},
-	ChannelDeletedEvent: &ChannelDeleted{
+	"channel_deleted": &ChannelDeleted{
+		TypedEvent: TypedEvent{
+			Type: "channel_deleted",
+		},
 		ChannelID: "C024BE91L",
 	},
-	ChannelHistoryChangedEvent: &ChannelHistoryChanged{
-		historyChangedEvent: historyChangedEvent{
+	"channel_history_changed": &ChannelHistoryChanged{
+		TypedEvent: TypedEvent{
+			Type: "channel_history_changed",
+		},
+		ChangedHistory: ChangedHistory{
 			Latest: &TimeStamp{
 				Time:          time.Unix(1358877455, 0),
 				OriginalValue: "1358877455.000010",
@@ -80,14 +98,23 @@ var expectedPayloads = map[EventType]EventTyper{
 			},
 		},
 	},
-	ChannelJoinedEvent: &ChannelJoined{
+	"channel_joined": &ChannelJoined{
+		TypedEvent: TypedEvent{
+			Type: "channel_joined",
+		},
 		ChannelID: "C024BE91L",
 	},
-	ChannelLeftEvent: &ChannelLeft{
+	"channel_left": &ChannelLeft{
+		TypedEvent: TypedEvent{
+			Type: "channel_left",
+		},
 		ChannelID: "C024BE91L",
 	},
-	ChannelMarkedEvent: &ChannelMarked{
-		markedAsReadEvent: markedAsReadEvent{
+	"channel_marked": &ChannelMarked{
+		TypedEvent: TypedEvent{
+			Type: "channel_marked",
+		},
+		MarkedAsRead: MarkedAsRead{
 			ChannelID: "C024BE91L",
 			TimeStamp: &TimeStamp{
 				Time:          time.Unix(1401383885, 0),
@@ -95,11 +122,14 @@ var expectedPayloads = map[EventType]EventTyper{
 			},
 		},
 	},
-	ChannelRenameEvent: &ChannelRenamed{
+	"channel_rename": &ChannelRenamed{
+		TypedEvent: TypedEvent{
+			Type: "channel_rename",
+		},
 		Channel: &struct {
-			ID      slackobject.ChannelID `json:"id"`
-			Name    string                `json:"name"`
-			Created *TimeStamp            `json:"created"`
+			ID      ChannelID  `json:"id"`
+			Name    string     `json:"name"`
+			Created *TimeStamp `json:"created"`
 		}{
 			ID:   "C02ELGNBH",
 			Name: "new_name",
@@ -109,17 +139,26 @@ var expectedPayloads = map[EventType]EventTyper{
 			},
 		},
 	},
-	ChannelUnarchiveEvent: &ChannelUnarchived{
+	"channel_unarchive": &ChannelUnarchived{
+		TypedEvent: TypedEvent{
+			Type: "channel_unarchive",
+		},
 		ChannelID: "C024BE91L",
 		UserID:    "U024BE7LH",
 	},
-	CommandsChangedEvent: &CommandsChanged{
+	"commands_changed": &CommandsChanged{
+		TypedEvent: TypedEvent{
+			Type: "commands_changed",
+		},
 		TimeStamp: &TimeStamp{
 			Time:          time.Unix(1361482916, 0),
 			OriginalValue: "1361482916.000004",
 		},
 	},
-	DNDUpdatedEvent: &DNDUpdated{
+	"dnd_updated": &DNDUpdated{
+		TypedEvent: TypedEvent{
+			Type: "dnd_updated",
+		},
 		UserID: "U1234",
 		DNDStatus: &struct {
 			Enabled            bool       `json:"dnd_enabled"`
@@ -144,7 +183,10 @@ var expectedPayloads = map[EventType]EventTyper{
 			},
 		},
 	},
-	DNDUpdatedUserEvent: &DNDUpdatedUser{
+	"dnd_updated_user": &DNDUpdatedUser{
+		TypedEvent: TypedEvent{
+			Type: "dnd_updated_user",
+		},
 		UserID: "U1234",
 		DNDStatus: &struct {
 			Enabled            bool       `json:"dnd_enabled"`
@@ -162,14 +204,20 @@ var expectedPayloads = map[EventType]EventTyper{
 			},
 		},
 	},
-	EmailDomainChangedEvent: &EmailDomainChanged{
+	"email_domain_changed": &EmailDomainChanged{
+		TypedEvent: TypedEvent{
+			Type: "email_domain_changed",
+		},
 		EmailDomain: "example.com",
 		TimeStamp: &TimeStamp{
 			Time:          time.Unix(1360782804, 0),
 			OriginalValue: "1360782804.083113",
 		},
 	},
-	EmojiChangedEvent: &EmojiChanged{
+	"emoji_changed": &EmojiChanged{
+		TypedEvent: TypedEvent{
+			Type: "emoji_changed",
+		},
 		Subtype: "remove",
 		Names:   []string{"picard_facepalm"},
 		TimeStamp: &TimeStamp{
@@ -177,18 +225,24 @@ var expectedPayloads = map[EventType]EventTyper{
 			OriginalValue: "1361482916.000004",
 		},
 	},
-	FileChangeEvent: &FileChanged{
+	"file_change": &FileChanged{
+		TypedEvent: TypedEvent{
+			Type: "file_change",
+		},
 		FileID: "F2147483862",
 		File: &struct {
-			ID slackobject.FileID `json:"id"`
+			ID FileID `json:"id"`
 		}{
 			ID: "F2147483862",
 		},
 	},
-	FileCommentAddedEvent: &FileCommentAdded{
+	"file_comment_added": &FileCommentAdded{
+		TypedEvent: TypedEvent{
+			Type: "file_comment_added",
+		},
 		FileID: "F2147483862",
 		File: &struct {
-			ID slackobject.FileID `json:"id"`
+			ID FileID `json:"id"`
 		}{
 			ID: "F2147483862",
 		},
@@ -202,19 +256,25 @@ var expectedPayloads = map[EventType]EventTyper{
 			Content: "comment content",
 		},
 	},
-	FileCommentDeletedEvent: &FileCommentDeleted{
+	"file_comment_deleted": &FileCommentDeleted{
+		TypedEvent: TypedEvent{
+			Type: "file_comment_deleted",
+		},
 		CommentID: "Fc67890",
 		FileID:    "F2147483862",
 		File: &struct {
-			ID slackobject.FileID `json:"id"`
+			ID FileID `json:"id"`
 		}{
 			ID: "F2147483862",
 		},
 	},
-	FileCommentEditedEvent: &FileCommentEdited{
+	"file_comment_edited": &FileCommentEdited{
+		TypedEvent: TypedEvent{
+			Type: "file_comment_edited",
+		},
 		FileID: "F2147483862",
 		File: &struct {
-			ID slackobject.FileID `json:"id"`
+			ID FileID `json:"id"`
 		}{
 			ID: "F2147483862",
 		},
@@ -228,58 +288,89 @@ var expectedPayloads = map[EventType]EventTyper{
 			Content: "comment content",
 		},
 	},
-	FileCreatedEvent: &FileCreated{
+	"file_created": &FileCreated{
+		TypedEvent: TypedEvent{
+			Type: "file_created",
+		},
 		FileID: "F2147483862",
 		File: &struct {
-			ID slackobject.FileID `json:"id"`
+			ID FileID `json:"id"`
 		}{
 			ID: "F2147483862",
 		},
 	},
-	FileDeletedEvent: &FileDeleted{
+	"file_deleted": &FileDeleted{
+		TypedEvent: TypedEvent{
+			Type: "file_deleted",
+		},
 		FileID: "F2147483862",
 		TimeStamp: &TimeStamp{
 			Time:          time.Unix(1361482916, 0),
 			OriginalValue: "1361482916.000004",
 		},
 	},
-	FilePublicEvent: &FilePublished{
+	"file_public": &FilePublished{
+		TypedEvent: TypedEvent{
+			Type: "file_public",
+		},
 		FileID: "F2147483862",
 		File: &struct {
-			ID slackobject.FileID `json:"id"`
+			ID FileID `json:"id"`
 		}{
 			ID: "F2147483862",
 		},
 	},
-	FileSharedEvent: &FileShared{
+	"file_shared": &FileShared{
+		TypedEvent: TypedEvent{
+			Type: "file_shared",
+		},
 		FileID: "F2147483862",
 		File: &struct {
-			ID slackobject.FileID `json:"id"`
+			ID FileID `json:"id"`
 		}{
 			ID: "F2147483862",
 		},
 	},
-	FileUnsharedEvent: &FileUnshared{
+	"file_unshared": &FileUnshared{
+		TypedEvent: TypedEvent{
+			Type: "file_unshared",
+		},
 		FileID: "F2147483862",
 		File: &struct {
-			ID slackobject.FileID `json:"id"`
+			ID FileID `json:"id"`
 		}{
 			ID: "F2147483862",
 		},
 	},
-	GoodByeEvent: &GoodBye{},
-	GroupArchiveEvent: &GroupArchived{
+	"goodbye": &GoodBye{
+		TypedEvent: TypedEvent{
+			Type: "goodbye",
+		},
+	},
+	"group_archive": &GroupArchived{
+		TypedEvent: TypedEvent{
+			Type: "group_archive",
+		},
 		ChannelID: "G024BE91L",
 	},
-	GroupCloseEvent: &GroupClosed{
+	"group_close": &GroupClosed{
+		TypedEvent: TypedEvent{
+			Type: "group_close",
+		},
 		UserID:    "U024BE7LH",
 		ChannelID: "G024BE91L",
 	},
-	GroupDeletedEvent: &GroupDeleted{
+	"group_deleted": &GroupDeleted{
+		TypedEvent: TypedEvent{
+			Type: "group_deleted",
+		},
 		ChannelID: "G0QN9RGTT",
 	},
-	GroupHistoryChangedEvent: &GroupHistoryChanged{
-		historyChangedEvent: historyChangedEvent{
+	"group_history_changed": &GroupHistoryChanged{
+		TypedEvent: TypedEvent{
+			Type: "group_history_changed",
+		},
+		ChangedHistory: ChangedHistory{
 			Latest: &TimeStamp{
 				Time:          time.Unix(1358877455, 0),
 				OriginalValue: "1358877455.000010",
@@ -294,14 +385,23 @@ var expectedPayloads = map[EventType]EventTyper{
 			},
 		},
 	},
-	GroupJoinedEvent: &GroupJoined{
+	"group_joined": &GroupJoined{
+		TypedEvent: TypedEvent{
+			Type: "group_joined",
+		},
 		ChannelID: "G0QN9RGTT",
 	},
-	GroupLeftEvent: &GroupLeft{
+	"group_left": &GroupLeft{
+		TypedEvent: TypedEvent{
+			Type: "group_left",
+		},
 		ChannelID: "G02ELGNBH",
 	},
-	GroupMarkedEvent: &GroupMarked{
-		markedAsReadEvent: markedAsReadEvent{
+	"group_marked": &GroupMarked{
+		TypedEvent: TypedEvent{
+			Type: "group_marked",
+		},
+		MarkedAsRead: MarkedAsRead{
 			ChannelID: "G024BE91L",
 			TimeStamp: &TimeStamp{
 				Time:          time.Unix(1401383885, 0),
@@ -309,15 +409,21 @@ var expectedPayloads = map[EventType]EventTyper{
 			},
 		},
 	},
-	GroupOpenEvent: &GroupOpened{
+	"group_open": &GroupOpened{
+		TypedEvent: TypedEvent{
+			Type: "group_open",
+		},
 		UserID:    "U024BE7LH",
 		ChannelID: "G024BE91L",
 	},
-	GroupRenameEvent: &GroupRenamed{
+	"group_rename": &GroupRenamed{
+		TypedEvent: TypedEvent{
+			Type: "group_rename",
+		},
 		Channel: &struct {
-			ID      slackobject.ChannelID `json:"id"`
-			Name    string                `json:"name"`
-			Created *TimeStamp            `json:"created"`
+			ID      ChannelID  `json:"id"`
+			Name    string     `json:"name"`
+			Created *TimeStamp `json:"created"`
 		}{
 			ID:   "G02ELGNBH",
 			Name: "new_name",
@@ -327,24 +433,40 @@ var expectedPayloads = map[EventType]EventTyper{
 			},
 		},
 	},
-	GroupUnarchiveEvent: &GroupUnarchived{
+	"group_unarchive": &GroupUnarchived{
+		TypedEvent: TypedEvent{
+			Type: "group_unarchive",
+		},
 		ChannelID: "G024BE91L",
 	},
-	HelloEvent: &Hello{},
-	IMCloseEvent: &IMClosed{
+	"hello": &Hello{
+		TypedEvent: TypedEvent{
+			Type: "hello",
+		},
+	},
+	"im_close": &IMClosed{
+		TypedEvent: TypedEvent{
+			Type: "im_close",
+		},
 		UserID:    "U024BE7LH",
 		ChannelID: "D024BE91L",
 	},
-	IMCreatedEvent: &IMCreated{
+	"im_created": &IMCreated{
+		TypedEvent: TypedEvent{
+			Type: "im_created",
+		},
 		UserID: "U024BE7LH",
 		Channel: &struct {
-			ID slackobject.ChannelID `json:"id"`
+			ID ChannelID `json:"id"`
 		}{
 			ID: "D024BE91L",
 		},
 	},
-	IMHistoryChangedEvent: &IMHistoryChanged{
-		historyChangedEvent: historyChangedEvent{
+	"im_history_changed": &IMHistoryChanged{
+		TypedEvent: TypedEvent{
+			Type: "im_history_changed",
+		},
+		ChangedHistory: ChangedHistory{
 			Latest: &TimeStamp{
 				Time:          time.Unix(1358877455, 0),
 				OriginalValue: "1358877455.000010",
@@ -359,21 +481,45 @@ var expectedPayloads = map[EventType]EventTyper{
 			},
 		},
 	},
-	IMOpenEvent: &IMOpened{
+	"im_marked": &IMMarked{
+		TypedEvent: TypedEvent{
+			Type: "im_marked",
+		},
+		MarkedAsRead: MarkedAsRead{
+			ChannelID: "D024BE91L",
+			TimeStamp: &TimeStamp{
+				Time:          time.Unix(1401383885, 0),
+				OriginalValue: "1401383885.000061",
+			},
+		},
+	},
+	"im_open": &IMOpened{
+		TypedEvent: TypedEvent{
+			Type: "im_open",
+		},
 		UserID:    "U024BE7LH",
 		ChannelID: "D024BE91L",
 	},
-	ManualPresenceChangeEvent: &PresenceManuallyChanged{
+	"manual_presence_change": &PresenceManuallyChanged{
+		TypedEvent: TypedEvent{
+			Type: "manual_presence_change",
+		},
 		Presence: "away",
 	},
-	MemberJoinedChannelEvent: &MemberJoinedChannel{
+	"member_joined_channel": &MemberJoinedChannel{
+		TypedEvent: TypedEvent{
+			Type: "member_joined_channel",
+		},
 		UserID:      "W06GH7XHN",
 		ChannelID:   "C0698JE0H",
 		ChannelType: "C",
 		TeamID:      "T024BE7LD",
 		InviterID:   "U123456789",
 	},
-	MessageEvent: &Message{
+	"message": &Message{
+		TypedEvent: TypedEvent{
+			Type: "message",
+		},
 		ChannelID: "C2147483705",
 		SenderID:  "U2147483697",
 		Text:      "Hello world",
@@ -382,7 +528,10 @@ var expectedPayloads = map[EventType]EventTyper{
 			OriginalValue: "1355517523.000005",
 		},
 	},
-	PinAddedEvent: &PinAdded{
+	"pin_added": &PinAdded{
+		TypedEvent: TypedEvent{
+			Type: "pin_added",
+		},
 		UserID:    "U024BE7LH",
 		ChannelID: "C02ELGNBH",
 		TimeStamp: &TimeStamp{
@@ -390,7 +539,10 @@ var expectedPayloads = map[EventType]EventTyper{
 			OriginalValue: "1360782804.083113",
 		},
 	},
-	PinRemovedEvent: &PinRemoved{
+	"pin_removed": &PinRemoved{
+		TypedEvent: TypedEvent{
+			Type: "pin_removed",
+		},
 		UserID:    "U024BE7LH",
 		ChannelID: "C02ELGNBH",
 		HasPins:   false,
@@ -399,27 +551,42 @@ var expectedPayloads = map[EventType]EventTyper{
 			OriginalValue: "1360782804.083113",
 		},
 	},
-	PrefChangeEvent: &PreferenceChanged{
+	"pref_change": &PreferenceChanged{
+		TypedEvent: TypedEvent{
+			Type: "pref_change",
+		},
 		Name:  "messages_theme",
 		Value: "dense",
 	},
-	PresenceChangeEvent: &PresenceChange{
+	"presence_change": &PresenceChanged{
+		TypedEvent: TypedEvent{
+			Type: "presence_change",
+		},
 		UserID:   "U024BE7LH",
 		Presence: "away",
 	},
-	PresenceQueryEvent: &PresenceQuery{
-		UserIDs: []slackobject.UserID{
+	"presence_query": &PresenceQuery{
+		TypedEvent: TypedEvent{
+			Type: "presence_query",
+		},
+		UserIDs: []UserID{
 			"U061F7AUR",
 			"W123456",
 		},
 	},
-	PresenceSubEvent: &PresenceSubscribe{
-		UserIDs: []slackobject.UserID{
+	"presence_sub": &PresenceSubscribe{
+		TypedEvent: TypedEvent{
+			Type: "presence_sub",
+		},
+		UserIDs: []UserID{
 			"U061F7AUR",
 			"W123456",
 		},
 	},
-	ReactionAddedEvent: &ReactionAdded{
+	"reaction_added": &ReactionAdded{
+		TypedEvent: TypedEvent{
+			Type: "reaction_added",
+		},
 		UserID:      "U024BE7LH",
 		Reaction:    "thumbsup",
 		ItemOwnerID: "U0G9QF9C6",
@@ -436,7 +603,10 @@ var expectedPayloads = map[EventType]EventTyper{
 			OriginalValue: "1360782804.083113",
 		},
 	},
-	ReactionRemovedEvent: &ReactionRemoved{
+	"reaction_removed": &ReactionRemoved{
+		TypedEvent: TypedEvent{
+			Type: "reaction_removed",
+		},
 		UserID:      "U024BE7LH",
 		Reaction:    "thumbsup",
 		ItemOwnerID: "U0G9QF9C6",
@@ -453,8 +623,15 @@ var expectedPayloads = map[EventType]EventTyper{
 			OriginalValue: "1360782804.083113",
 		},
 	},
-	ReconnectURLEvent: &ReconnectURL{},
-	StarAddedEvent: &StarAdded{
+	"reconnect_url": &ReconnectURL{
+		TypedEvent: TypedEvent{
+			Type: "reconnect_url",
+		},
+	},
+	"star_added": &StarAdded{
+		TypedEvent: TypedEvent{
+			Type: "star_added",
+		},
 		UserID: "U024BE7LH",
 		Item: &Item{
 			Type:      "message",
@@ -469,7 +646,10 @@ var expectedPayloads = map[EventType]EventTyper{
 			OriginalValue: "1360782804.083113",
 		},
 	},
-	StarRemovedEvent: &StarRemoved{
+	"star_removed": &StarRemoved{
+		TypedEvent: TypedEvent{
+			Type: "star_removed",
+		},
 		UserID: "U024BE7LH",
 		Item: &Item{
 			Type:      "message",
@@ -484,7 +664,10 @@ var expectedPayloads = map[EventType]EventTyper{
 			OriginalValue: "1360782804.083113",
 		},
 	},
-	SubTeamCreatedEvent: &SubTeamCreated{
+	"subteam_created": &SubTeamCreated{
+		TypedEvent: TypedEvent{
+			Type: "subteam_created",
+		},
 		SubTeam: &SubTeam{
 			ID:          "S0615G0KT",
 			TeamID:      "T060RNRCH",
@@ -511,7 +694,10 @@ var expectedPayloads = map[EventType]EventTyper{
 			UserCount: 10,
 		},
 	},
-	SubTeamMembersChangedEvent: &SubTeamMembersChanged{
+	"subteam_members_changed": &SubTeamMembersChanged{
+		TypedEvent: TypedEvent{
+			Type: "subteam_members_changed",
+		},
 		SubTeamID: "S0614TZR7",
 		TeamID:    "T060RNRCH",
 		PreviousUpdate: &TimeStamp{
@@ -522,24 +708,33 @@ var expectedPayloads = map[EventType]EventTyper{
 			Time:          time.Unix(1492906952, 0),
 			OriginalValue: "1492906952",
 		},
-		AddedUserIDs: []slackobject.UserID{
+		AddedUserIDs: []UserID{
 			"U060RNRCZ",
 			"U060ULRC0",
 			"U061309JM",
 		},
 		AddedUserCount: 3,
-		RemovedUserIDs: []slackobject.UserID{
+		RemovedUserIDs: []UserID{
 			"U06129G2V",
 		},
 		RemovedUsersCount: 1,
 	},
-	SubTeamSelfAddedEvent: &SubTeamSelfAdded{
+	"subteam_self_added": &SubTeamSelfAdded{
+		TypedEvent: TypedEvent{
+			Type: "subteam_self_added",
+		},
 		SubTeamID: "S0615G0KT",
 	},
-	SubTeamSelfRemovedEvent: &SubTeamSelfRemoved{
+	"subteam_self_removed": &SubTeamSelfRemoved{
+		TypedEvent: TypedEvent{
+			Type: "subteam_self_removed",
+		},
 		SubTeamID: "S0615G0KT",
 	},
-	SubTeamUpdatedEvent: &SubTeamUpdated{
+	"subteam_updated": &SubTeamUpdated{
+		TypedEvent: TypedEvent{
+			Type: "subteam_updated",
+		},
 		SubTeam: &SubTeam{
 			ID:          "S0614TZR7",
 			TeamID:      "T060RNRCH",
@@ -564,7 +759,7 @@ var expectedPayloads = map[EventType]EventTyper{
 			CreatorID: "USLACKBOT",
 			UpdatedBy: "U060RNRCZ",
 			UserCount: 4,
-			UserIDs: []slackobject.UserID{
+			UserIDs: []UserID{
 				"U060RNRCZ",
 				"U060ULRC0",
 				"U06129G2V",
@@ -572,15 +767,28 @@ var expectedPayloads = map[EventType]EventTyper{
 			},
 		},
 	},
-	TeamDomainChangeEvent: &TeamDomainChanged{
+	"team_domain_change": &TeamDomainChanged{
+		TypedEvent: TypedEvent{
+			Type: "team_domain_change",
+		},
 		URL:    "https://my.slack.com",
 		Domain: "my",
 	},
-	TeamJoinEvent: &TeamJoined{
+	"team_join": &TeamJoined{
+		TypedEvent: TypedEvent{
+			Type: "team_join",
+		},
 		User: &User{},
 	},
-	TeamMigrationStartedEvent: &TeamMigrationStarted{},
-	TeamPlanChangedEvent: &TeamPlanChanged{
+	"team_migration_started": &TeamMigrationStarted{
+		TypedEvent: TypedEvent{
+			Type: "team_migration_started",
+		},
+	},
+	"team_plan_change": &TeamPlanChanged{
+		TypedEvent: TypedEvent{
+			Type: "team_plan_change",
+		},
 		Plan:      "std",
 		CanAddUra: false,
 		PaidFeatures: []string{
@@ -588,11 +796,17 @@ var expectedPayloads = map[EventType]EventTyper{
 			"feature2",
 		},
 	},
-	TeamPrefChangeEvent: &TeamPreferenceChanged{
+	"team_pref_change": &TeamPreferenceChanged{
+		TypedEvent: TypedEvent{
+			Type: "team_pref_change",
+		},
 		Name:  "slackbot_responses_only_admins",
 		Value: true,
 	},
-	TeamProfileChangeEvent: &TeamProfileChanged{
+	"team_profile_change": &TeamProfileChanged{
+		TypedEvent: TypedEvent{
+			Type: "team_profile_change",
+		},
 		Profile: &struct {
 			Fields []*struct {
 				ID string `json:"id"`
@@ -607,7 +821,10 @@ var expectedPayloads = map[EventType]EventTyper{
 			},
 		},
 	},
-	TeamProfileDeleteEvent: &TeamProfileDeleted{
+	"team_profile_delete": &TeamProfileDeleted{
+		TypedEvent: TypedEvent{
+			Type: "team_profile_delete",
+		},
 		Profile: &struct {
 			Fields []string `json:"fields"`
 		}{
@@ -616,7 +833,10 @@ var expectedPayloads = map[EventType]EventTyper{
 			},
 		},
 	},
-	TeamProfileReorderEvent: &TeamProfileReordered{
+	"team_profile_reorder": &TeamProfileReordered{
+		TypedEvent: TypedEvent{
+			Type: "team_profile_reorder",
+		},
 		Profile: &struct {
 			Fields []*struct {
 				ID    string `json:"id"`
@@ -634,66 +854,123 @@ var expectedPayloads = map[EventType]EventTyper{
 			},
 		},
 	},
-	TeamRenameEvent: &TeamRenamed{
+	"team_rename": &TeamRenamed{
+		TypedEvent: TypedEvent{
+			Type: "team_rename",
+		},
 		Name: "New Team Name Inc.",
 	},
-	UserChangeEvent: &UserChanged{
+	"user_change": &UserChanged{
+		TypedEvent: TypedEvent{
+			Type: "user_change",
+		},
 		User: &User{},
 	},
-	UserTypingEvent: &UserTyping{
+	"user_typing": &UserTyping{
+		TypedEvent: TypedEvent{
+			Type: "user_typing",
+		},
 		ChannelID: "C02ELGNBH",
 		UserID:    "U024BE7LH",
 	},
 }
 
-func Test_decodePayload_all(t *testing.T) {
-	directory := filepath.Join("..", "testdata", "incoming_event")
+func TestDecode(t *testing.T) {
+	directory := filepath.Join("..", "testdata", "event", "decode")
 
+	checked := map[string]bool{}
 	filepath.Walk(directory, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			t.Fatalf("Failed to read testdata directory: %s", err.Error())
 		}
 
-		if !strings.HasSuffix(path, ".json") {
+		if !strings.HasSuffix(path, ".json.golden") {
 			// Skip irrelevant file
 			return nil
 		}
 
 		filename := filepath.Base(path)
 		t.Run(filename, func(t *testing.T) {
-
-			buf, err := ioutil.ReadFile(path)
+			input, err := ioutil.ReadFile(path)
 			if err != nil {
 				t.Fatalf("Failed to read file: %s. Error: %s.", path, err.Error())
 			}
 
-			decodedPayload, err := decodePayload(buf)
+			eventName := strings.TrimSuffix(filename, ".json.golden")
+			checked[eventName] = true
+
+			decoded, err := Decode(input)
 			if err != nil {
 				t.Fatalf("Failed to decode JSON: %s. Error: %s.", path, err.Error())
 			}
 
-			testStructure(decodedPayload, t)
+			typed, ok := decoded.(Typer)
+			if !ok {
+				t.Errorf("Decoded paylaod is not typed event: %#v", input)
+				return
+			}
+
+			expected, ok := expectedPayloads[typed.EventType()]
+			if !ok {
+				t.Fatalf("Expected payload for %s is not defined in test", typed.EventType())
+			}
+
+			compare([]string{typed.EventType()}, reflect.ValueOf(expected), reflect.ValueOf(typed), t)
 		})
 
 		return nil
 	})
-}
 
-func testStructure(payload DecodedPayload, t *testing.T) {
-	typed, ok := payload.(EventTyper)
-	if !ok {
-		t.Errorf("Decoded paylaod is not typed event: %#v", payload)
-		return
+	var missing []string
+	for k := range eventTypeMap {
+		_, ok := checked[k]
+		if !ok {
+			missing = append(missing, k)
+		}
 	}
-
-	expected, ok := expectedPayloads[typed.EventType()]
-	if !ok {
-		t.Fatalf("Expected payload for %s is not defined in test", typed.EventType())
+	if len(missing) > 0 {
+		t.Errorf("Tests for %s are missing", missing)
 	}
+	// TODO add missing test for subtypes
 
-	// A cheat to set TypedEvent field
-	reflect.ValueOf(expected).Elem().FieldByName("Type").Set(reflect.ValueOf(typed.EventType()))
-	compare([]string{typed.EventType().String()}, reflect.ValueOf(expected), reflect.ValueOf(typed), t)
+	t.Run("empty string", func(t *testing.T) {
+		_, err := Decode([]byte(` `))
+		if err != ErrEmptyPayload {
+			t.Fatalf("Expected error is not returned: %#v", err)
+		}
+	})
+
+	t.Run("unknown type", func(t *testing.T) {
+		_, err := Decode([]byte(`{"type": "UNKNOWN_VALUE"`))
+		if err == nil {
+			t.Fatalf("Expected error is not returned: %#v", err)
+		}
+
+		typedErr, ok := err.(*UnknownPayloadTypeError)
+		if !ok {
+			t.Fatalf("Returned error is not UnknownPayloadTypeError but %T", err)
+		}
+
+		if !strings.Contains(typedErr.Error(), "UNKNOWN_VALUE") {
+			t.Errorf("Given error string does not contain field name: %s", typedErr.Error())
+		}
+	})
+
+	t.Run("unknown subtype", func(t *testing.T) {
+		_, err := Decode([]byte(`{"type": "message", "subtype": "UNKNOWN_VALUE"}`))
+		if err == nil {
+			t.Fatalf("Expected error is not returned.")
+		}
+
+		typedErr, ok := err.(*UnknownPayloadTypeError)
+		if !ok {
+			t.Fatalf("Returned error is not UnknownPayloadTypeError but %T", err)
+		}
+
+		if !strings.Contains(typedErr.Error(), "UNKNOWN_VALUE") {
+			t.Errorf("Given error string does not contain field name: %s", typedErr.Error())
+		}
+	})
 }
 
 // compare is similar to reflect.DeepEqual, but this prints out more useful information with error message as below:
