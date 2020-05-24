@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
@@ -87,11 +86,8 @@ func (client *Client) Get(ctx context.Context, slackMethod string, queryParams *
 	}
 
 	// Handle response body
-	body, err := ioutil.ReadAll(resp.Body)
+	err = json.NewDecoder(resp.Body).Decode(&intf)
 	if err != nil {
-		return err
-	}
-	if err := json.Unmarshal(body, &intf); err != nil {
 		return err
 	}
 	return nil
@@ -140,11 +136,8 @@ func (client *Client) Post(ctx context.Context, slackMethod string, bodyParam ur
 	}
 
 	// Handle response body
-	response, err := ioutil.ReadAll(resp.Body)
+	err = json.NewDecoder(resp.Body).Decode(&intf)
 	if err != nil {
-		return err
-	}
-	if err := json.Unmarshal(response, &intf); err != nil {
 		return err
 	}
 	return nil
