@@ -47,3 +47,9 @@ type CommentID string
 func (id CommentID) String() string {
 	return string(id)
 }
+
+type EventID string
+
+func (id EventID) String() string {
+	return string(id)
+}

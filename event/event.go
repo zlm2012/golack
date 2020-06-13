@@ -553,7 +553,6 @@ type TeamRenamed struct {
 }
 
 // TODO add tokens_revoked
-// TODO add url_verification
 
 type UserChanged struct {
 	TypedEvent
