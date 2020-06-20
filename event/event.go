@@ -42,17 +42,46 @@ type AccountsChanged struct {
 // View object: https://api.slack.com/reference/interaction-payloads/views
 type AppHomeOpened struct {
 	TypedEvent
-	UserID    UserID     `json:"user"`
-	ChannelID ChannelID  `json:"channel"`
-	TimeStamp *TimeStamp `json:"event_ts"`
-	Tab       string     `json:"tab"`
-	View      *View      `json:"view"`
+	UserID         UserID     `json:"user"`
+	ChannelID      ChannelID  `json:"channel"`
+	EventTimeStamp *TimeStamp `json:"event_ts"`
+	Tab            string     `json:"tab"`
+	View           *View      `json:"view"`
 }
 
-// TODO add app_mention
-// TODO add app_rate_limited
-// TODO app_requested
-// TODO app_uninstalled
+// AppMention allows your app to subscribe to message events that directly mention your bot user.
+// https://api.slack.com/events/app_mention
+type AppMention struct {
+	TypedEvent
+	UserID         UserID     `json:"user"`
+	Text           string     `json:"text"`
+	TimeStamp      *TimeStamp `json:"ts"`
+	ChannelID      ChannelID  `json:"channel"`
+	EventTimeStamp *TimeStamp `json:"event_ts"`
+}
+
+// AppRateLimited is only dispatched when your app is rate limited on the Events API.
+// https://api.slack.com/events/app_rate_limited
+type AppRateLimited struct {
+	TypedEvent
+	Token             string     `json:"token"`
+	TeamID            string     `json:"team_id"`
+	MinuteRateLimited *TimeStamp `json:"minute_rate_limited"`
+	APIAppID          AppID      `json:"api_app_id"`
+}
+
+// AppRequested contains information about an app that a user on a team has requested to install.
+// https://api.slack.com/events/app_requested
+type AppRequested struct {
+	TypedEvent
+	AppRequest *AppRequest `json:"app_request"`
+}
+
+// AppUninstalled is sent via subscription whenever a Slack app is completely uninstalled.
+// https://api.slack.com/events/app_uninstalled
+type AppUninstalled struct {
+	TypedEvent
+}
 
 type BotAdded struct {
 	TypedEvent
@@ -591,6 +620,47 @@ type UserTyping struct {
 }
 
 // Below comes some types that are commonly shared amongst multiple events
+
+type App struct {
+	ID                     AppID  `json:"id"`
+	Name                   string `json:"name"`
+	Description            string `json:"description"`
+	HelpURL                string `json:"help_url"`
+	PrivacyPolicyURL       string `json:"privacy_policy_url"`
+	AppHomepageURL         string `json:"app_homepage_url"`
+	AppDirectoryURL        string `json:"app_directory_url"`
+	IsAppDirectoryApproved bool   `json:"is_app_directory_approved"`
+	IsInternal             bool   `json:"is_internal"`
+	AdditionalInfo         string `json:"additional_info"`
+}
+
+type AppRequest struct {
+	ID                 string `json:"id"`
+	App                *App   `json:"app"`
+	PreviousResolution *struct {
+		Status string             `json:"status"`
+		Scopes []*AppRequestScope `json:"scopes"`
+	} `json:"previous_resolution"`
+	User *struct {
+		ID    UserID `json:"id"`
+		Name  string `json:"name"`
+		Email string `json:"email"`
+	} `json:"user"`
+	Team *struct {
+		ID     TeamID `json:"id"`
+		Name   string `json:"name"`
+		Domain string `json:"domain"`
+	} `json:"team"`
+	Scopes  []*AppRequestScope `json:"scopes"`
+	Message string             `json:"message"`
+}
+
+type AppRequestScope struct {
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	IsSensitive bool   `json:"is_sensitive"`
+	TokenType   string `json:"token_type"`
+}
 
 type Bot struct {
 	ID    BotID  `json:"id"`

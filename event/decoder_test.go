@@ -23,7 +23,7 @@ var expectedPayloads = map[string]interface{}{
 		},
 		UserID:    "U061F7AUR",
 		ChannelID: "D0LAN2Q65",
-		TimeStamp: &TimeStamp{
+		EventTimeStamp: &TimeStamp{
 			Time:          time.Unix(1515449522000016, 0),
 			OriginalValue: "1515449522000016",
 		},
@@ -73,6 +73,100 @@ var expectedPayloads = map[string]interface{}{
 			ExternalID:         "",
 			AppInstalledTeamID: "T21312902",
 			BotID:              "BSDKSAO2",
+		},
+	},
+	"app_mention": &AppMention{
+		TypedEvent: TypedEvent{
+			Type: "app_mention",
+		},
+		UserID: "U061F7AUR",
+		Text:   "<@U0LAN0Z89> is it everything a river should be?",
+		TimeStamp: &TimeStamp{
+			Time:          time.Unix(1515449522, 0),
+			OriginalValue: "1515449522.000016",
+		},
+		ChannelID: "C0LAN2Q65",
+		EventTimeStamp: &TimeStamp{
+			Time:          time.Unix(1515449522000016, 0),
+			OriginalValue: "1515449522000016",
+		},
+	},
+	"app_rate_limited": &AppRateLimited{
+		TypedEvent: TypedEvent{
+			Type: "app_rate_limited",
+		},
+		Token:  "Jhj5dZrVaK7ZwHHjRyZWjbDl",
+		TeamID: "T123456",
+		MinuteRateLimited: &TimeStamp{
+			Time:          time.Unix(1518467820, 0),
+			OriginalValue: "1518467820",
+		},
+		APIAppID: "A123456",
+	},
+	"app_requested": &AppRequested{
+		TypedEvent: TypedEvent{
+			Type: "app_requested",
+		},
+		AppRequest: &AppRequest{
+			ID: "1234",
+			App: &App{
+				ID:                     "A5678",
+				Name:                   "Brent's app",
+				Description:            "They're good apps, Bront.",
+				HelpURL:                "brontsapp.com",
+				PrivacyPolicyURL:       "brontsapp.com",
+				AppHomepageURL:         "brontsapp.com",
+				AppDirectoryURL:        "https://slack.slack.com/apps/A102ARD7Y",
+				IsAppDirectoryApproved: true,
+				IsInternal:             false,
+				AdditionalInfo:         "none",
+			},
+			PreviousResolution: &struct {
+				Status string             `json:"status"`
+				Scopes []*AppRequestScope `json:"scopes"`
+			}{
+				Status: "approved",
+				Scopes: []*AppRequestScope{
+					{
+						Name:        "app_requested",
+						Description: "allows this app to listen for app install requests",
+						IsSensitive: false,
+						TokenType:   "user",
+					},
+				},
+			},
+			User: &struct {
+				ID    UserID `json:"id"`
+				Name  string `json:"name"`
+				Email string `json:"email"`
+			}{
+				ID:    "U1234",
+				Name:  "Bront",
+				Email: "bront@brent.com",
+			},
+			Team: &struct {
+				ID     TeamID `json:"id"`
+				Name   string `json:"name"`
+				Domain string `json:"domain"`
+			}{
+				ID:     "T1234",
+				Name:   "Brant App Team",
+				Domain: "brantappteam",
+			},
+			Scopes: []*AppRequestScope{
+				{
+					Name:        "app_requested",
+					Description: "allows this app to listen for app install requests",
+					IsSensitive: false,
+					TokenType:   "user",
+				},
+			},
+			Message: "none",
+		},
+	},
+	"app_uninstalled": &AppUninstalled{
+		TypedEvent: TypedEvent{
+			Type: "app_uninstalled",
 		},
 	},
 	"bot_added": &BotAdded{
