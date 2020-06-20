@@ -53,3 +53,21 @@ type EventID string
 func (id EventID) String() string {
 	return string(id)
 }
+
+type BlockID string
+
+func (id BlockID) String() string {
+	return string(id)
+}
+
+type ActionID string
+
+func (id ActionID) String() string {
+	return string(id)
+}
+
+type ViewID string
+
+func (id ViewID) String() string {
+	return string(id)
+}

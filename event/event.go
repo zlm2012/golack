@@ -1,33 +1,54 @@
 package event
 
+import (
+	"encoding/json"
+	"golang.org/x/xerrors"
+)
+
 // TypedEvent takes care of events that have "type" field in its JSON representation.
 //
-// ARM API document, https://api.slack.com/rtm#events, states as follows:
+// RTM API document, https://api.slack.com/rtm#events, states as follows:
 // "Every event has a type property which describes the type of event."
 //
 // Similarly, Events API document, https://api.slack.com/events-api#event_type_structure, states as follows:
 // "The specific name of the event described by its adjacent fields. This field is included with every inner event type."
 type TypedEvent struct {
-	Type string `json:"type,omitempty"`
+	Type string `json:"type"`
 }
 
+var _ Typer = (*TypedEvent)(nil)
+
+// EventType returns the type of event the payload is representing.
 func (t TypedEvent) EventType() string {
 	return t.Type
 }
 
+// Typer defines an interface that all typed event must satisfy.
 type Typer interface {
 	EventType() string
 }
 
 // https://api.slack.com/events
-
 // AccountsChanged event indicates that the list of accounts a user is signed into has changed.
 // https://api.slack.com/events/accounts_changed
 type AccountsChanged struct {
 	TypedEvent
 }
 
-// TODO add app_home_opened
+// AppHomeOpened event represents an event a user clicked into App Home
+// https://api.slack.com/events/app_home_opened
+//
+// Block object:https://api.slack.com/reference/block-kit/blocks#input
+// View object: https://api.slack.com/reference/interaction-payloads/views
+type AppHomeOpened struct {
+	TypedEvent
+	UserID    UserID     `json:"user"`
+	ChannelID ChannelID  `json:"channel"`
+	TimeStamp *TimeStamp `json:"event_ts"`
+	Tab       string     `json:"tab"`
+	View      *View      `json:"view"`
+}
+
 // TODO add app_mention
 // TODO add app_rate_limited
 // TODO app_requested
@@ -714,4 +735,56 @@ type User struct {
 	Has2FA            bool   `json:"has_2fa"`
 	HasFiles          bool   `json:"has_files"`
 	Presence          string `json:"presence"`
+}
+
+type View struct {
+	ID                 ViewID     `json:"id"`
+	TeamID             TeamID     `json:"team_id"`
+	Type               string     `json:"type"`
+	Blocks             []Block    `json:"blocks"`
+	PrivateMetadata    string     `json:"private_metadata"`
+	CallbackID         string     `json:"callback_id"`
+	State              *ViewState `json:"state"`
+	Hash               string     `json:"hash"`
+	ClearOnClose       bool       `json:"clear_on_close"`
+	NotifyOnClose      bool       `json:"notify_on_close"`
+	RootViewID         string     `json:"root_view_id"`
+	AppID              AppID      `json:"app_id"`
+	ExternalID         string     `json:"external_id"`
+	AppInstalledTeamID TeamID     `json:"app_installed_team_id"`
+	BotID              BotID      `json:"bot_id"`
+}
+
+func (v *View) UnmarshalJSON(b []byte) error {
+	type alias View
+	t := &struct {
+		*alias
+		Blocks []json.RawMessage `json:"blocks"`
+	}{
+		alias: (*alias)(v),
+	}
+	err := json.Unmarshal(b, t)
+	if err != nil {
+		return err
+	}
+
+	var blocks []Block
+	for _, elem := range t.Blocks {
+		block, err := UnmarshalBlock(elem)
+		if err != nil {
+			return xerrors.Errorf("failed to unmarshal given block: %w", err)
+		}
+		blocks = append(blocks, block)
+	}
+	v.Blocks = blocks
+	return nil
+}
+
+type ViewState struct {
+	Values map[BlockID]map[ActionID]*ViewStateValue `json:"values"` // https://api.slack.com/reference/interaction-payloads/views#view_submission_fields
+}
+
+type ViewStateValue struct {
+	Type  string `json:"type"`
+	Value string `json:"value"`
 }

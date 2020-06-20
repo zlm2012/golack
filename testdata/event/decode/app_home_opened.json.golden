@@ -1,0 +1,47 @@
+{
+  "type": "app_home_opened",
+  "user": "U061F7AUR",
+  "channel": "D0LAN2Q65",
+  "event_ts": "1515449522000016",
+  "tab": "home",
+  "view": {
+    "id": "VPASKP233",
+    "team_id": "T21312902",
+    "type": "home",
+    "blocks": [
+      {
+        "type": "input",
+        "block_id": "multi-line",
+        "label": {
+          "type": "plain_text",
+          "text": "Enter your value"
+        },
+        "element": {
+          "type": "plain_text_input",
+          "multiline": true,
+          "action_id": "ml-value"
+        }
+      }
+    ],
+    "private_metadata": "",
+    "callback_id": "",
+    "state":{
+      "values": {
+        "multi-line": {
+          "ml-value": {
+            "type": "plain_text_input",
+            "value": "This is my example inputted value"
+          }
+        }
+      }
+    },
+    "hash":"1231232323.12321312",
+    "clear_on_close": false,
+    "notify_on_close": false,
+    "root_view_id": "VPASKP233",
+    "app_id": "A21SDS90",
+    "external_id": "",
+    "app_installed_team_id": "T21312902",
+    "bot_id": "BSDKSAO2"
+  }
+}

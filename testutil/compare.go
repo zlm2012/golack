@@ -76,6 +76,31 @@ func Compare(hierarchy []string, expected reflect.Value, actual reflect.Value, t
 			Compare(tmp, expected.Index(i), actual.Index(i), t)
 		}
 
+	case reflect.Map:
+		if expected.Len() != actual.Len() {
+			t.Errorf("%s Element %s size differs. Expected: %d. Actual: %d.",
+				hierarchyStr(hierarchy), expected.Kind().String(), expected.Len(), actual.Len())
+			return
+		}
+
+		if expected.Pointer() == actual.Pointer() {
+			return
+		}
+
+		for _, k := range expected.MapKeys() {
+			val1 := expected.MapIndex(k)
+			val2 := expected.MapIndex(k)
+			if !val1.IsValid() || !val2.IsValid() {
+				t.Errorf("%s Expected map element is not given: %s.", hierarchyStr(hierarchy), k.String())
+				return
+			}
+
+			tmp := make([]string, len(hierarchy))
+			copy(tmp, hierarchy)
+			tmp = append(tmp, k.String())
+			Compare(tmp, val1, val2, t)
+		}
+
 	default:
 		t.Errorf("Uncontrollable Kind %s is given: %#v", expected.Kind().String(), expected)
 

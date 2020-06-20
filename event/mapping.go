@@ -7,6 +7,7 @@ import (
 var (
 	eventTypeMap = map[string]reflect.Type{
 		"accounts_changed":        reflect.TypeOf(&AccountsChanged{}).Elem(),
+		"app_home_opened":         reflect.TypeOf(&AppHomeOpened{}).Elem(),
 		"bot_added":               reflect.TypeOf(&BotAdded{}).Elem(),
 		"bot_changed":             reflect.TypeOf(&BotChanged{}).Elem(),
 		"channel_archive":         reflect.TypeOf(&ChannelArchived{}).Elem(),

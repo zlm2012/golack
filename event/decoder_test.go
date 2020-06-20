@@ -17,6 +17,64 @@ var expectedPayloads = map[string]interface{}{
 			Type: "accounts_changed",
 		},
 	},
+	"app_home_opened": &AppHomeOpened{
+		TypedEvent: TypedEvent{
+			Type: "app_home_opened",
+		},
+		UserID:    "U061F7AUR",
+		ChannelID: "D0LAN2Q65",
+		TimeStamp: &TimeStamp{
+			Time:          time.Unix(1515449522000016, 0),
+			OriginalValue: "1515449522000016",
+		},
+		Tab: "home",
+		View: &View{
+			ID:     "VPASKP233",
+			TeamID: "T21312902",
+			Type:   "home",
+			Blocks: []Block{
+				&InputBlock{
+					block: block{
+						Type:    "input",
+						BlockID: "multi-line",
+					},
+					Label: &TextCompositionObject{
+						Type: "plain_text",
+						Text: "Enter your value",
+					},
+					Element: &PlainTextInputBlockElement{
+						blockElement: blockElement{
+							Type: "plain_text_input",
+						},
+						Multiline: true,
+						ActionID:  "ml-value",
+					},
+					Hint:     nil,
+					Optional: false,
+				},
+			},
+			PrivateMetadata: "",
+			CallbackID:      "",
+			State: &ViewState{
+				Values: map[BlockID]map[ActionID]*ViewStateValue{
+					"multi-line": {
+						"ml-value": &ViewStateValue{
+							Type:  "plain_text_input",
+							Value: "This is my example inputted value",
+						},
+					},
+				},
+			},
+			Hash:               "1231232323.12321312",
+			ClearOnClose:       false,
+			NotifyOnClose:      false,
+			RootViewID:         "VPASKP233",
+			AppID:              "A21SDS90",
+			ExternalID:         "",
+			AppInstalledTeamID: "T21312902",
+			BotID:              "BSDKSAO2",
+		},
+	},
 	"bot_added": &BotAdded{
 		TypedEvent: TypedEvent{
 			Type: "bot_added",
