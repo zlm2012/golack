@@ -25,7 +25,7 @@ func UnmarshalBlock(input json.RawMessage) (Block, error) {
 		typed = &ImageBlock{}
 
 	case "actions":
-		typed = &ActionBlock{}
+		typed = &ActionsBlock{}
 
 	case "context":
 		typed = &ContextBlock{}
@@ -42,7 +42,7 @@ func UnmarshalBlock(input json.RawMessage) (Block, error) {
 
 	err := json.Unmarshal(input, typed)
 	if err != nil {
-		return nil, xerrors.Errorf("failed to unmarshal %T", typed)
+		return nil, xerrors.Errorf("failed to unmarshal %T: %w", typed, err)
 	}
 	return typed, nil
 }
@@ -62,13 +62,13 @@ func (b *block) BlockType() string {
 	return b.Type
 }
 
-type ActionBlock struct {
+type ActionsBlock struct {
 	block
 	Elements []BlockElement `json:"elements"`
 }
 
-func (ab *ActionBlock) UnmarshalJSON(b []byte) error {
-	type alias ActionBlock
+func (ab *ActionsBlock) UnmarshalJSON(b []byte) error {
+	type alias ActionsBlock
 	t := &struct {
 		*alias
 		Elements []json.RawMessage `json:"elements"`
@@ -162,11 +162,14 @@ func (ib *InputBlock) UnmarshalJSON(b []byte) error {
 		return err
 	}
 
-	element, err := UnmarshalBlockElement(t.Element)
-	if err != nil {
-		return xerrors.Errorf("failed to unmarshal given element: %w", err)
+	if len(t.Element) > 0 {
+		element, err := UnmarshalBlockElement(t.Element)
+		if err != nil {
+			return xerrors.Errorf("failed to unmarshal given element: %w", err)
+		}
+		ib.Element = element
 	}
-	ib.Element = element
+
 	return nil
 }
 
@@ -174,5 +177,29 @@ type SectionBlock struct {
 	block
 	Text      *TextCompositionObject   `json:"text"`
 	Fields    []*TextCompositionObject `json:"fields"`
-	Accessory CompositionObject        `json:"accessory"`
+	Accessory BlockElement             `json:"accessory"`
+}
+
+func (sb *SectionBlock) UnmarshalJSON(b []byte) error {
+	type alias SectionBlock
+	t := &struct {
+		*alias
+		Accessory json.RawMessage `json:"accessory"`
+	}{
+		alias: (*alias)(sb),
+	}
+	err := json.Unmarshal(b, t)
+	if err != nil {
+		return err
+	}
+
+	if len(t.Accessory) > 0 {
+		accessory, err := UnmarshalBlockElement(t.Accessory)
+		if err != nil {
+			return xerrors.Errorf("failed to unmarshal given element: %w", err)
+		}
+		sb.Accessory = accessory
+	}
+
+	return nil
 }

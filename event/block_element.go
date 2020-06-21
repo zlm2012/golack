@@ -66,8 +66,11 @@ func UnmarshalBlockElement(input json.RawMessage) (BlockElement, error) {
 	case "channels_select":
 		typed = &ChannelsSelectBlockElement{}
 
+	case "mrkdwn", "plain_text":
+		typed = &TextObjectBlockElement{}
+
 	default:
-		return nil, fmt.Errorf("failed to handle unknown block type: %s", t)
+		return nil, fmt.Errorf("failed to handle unknown block element type: %s", t)
 	}
 
 	err := json.Unmarshal(input, typed)
@@ -263,4 +266,13 @@ type ChannelsSelectBlockElement struct {
 	InitialChannelID   ChannelID                 `json:"initial_channel,omitempty"`
 	Confirm            *ConfirmationDialogObject `json:"confirm,omitempty"`
 	ResponseURLEnabled bool                      `json:"response_url_enabled,omitempty"`
+}
+
+// TextObjectBlockElement has equal fields as TextCompositionObject does.
+// ContextBlock's Elements can include BlockElement and TextCompositionObject so this is a compromise to let []BlockElement include TextCompositionObject.
+type TextObjectBlockElement struct {
+	blockElement
+	Text     string `json:"text"`
+	Emoji    bool   `json:"emoji,omitempty"`
+	Verbatim bool   `json:"verbatim, omitempty"`
 }
