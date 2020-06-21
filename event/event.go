@@ -93,7 +93,15 @@ type BotChanged struct {
 	Bot *Bot `json:"bot"`
 }
 
-// TODO call_rejected
+// CallRejected is sent if the user rejects the Call.
+// https://api.slack.com/events/call_rejected
+type CallRejected struct {
+	TypedEvent
+	CallID           CallID    `json:"call_id"`
+	UserID           UserID    `json:"user_id"`
+	ChannelID        ChannelID `json:"channel_id"`
+	ExternalUniqueID string    `json:"external_unique_id"`
+}
 
 type ChannelArchived struct {
 	TypedEvent
@@ -136,8 +144,6 @@ type ChannelMarked struct {
 	MarkedAsRead
 }
 
-// TODO channel_shared
-
 type ChannelRenamed struct {
 	TypedEvent
 	Channel *struct {
@@ -147,13 +153,30 @@ type ChannelRenamed struct {
 	} `json:"channel"`
 }
 
+// ChannelShared is sent to all event subscriptions when a new shared channel is created or a channel is converted into a shared channel.
+// https://api.slack.com/events/channel_shared
+type ChannelShared struct {
+	TypedEvent
+	ConnectedTeamID TeamID     `json:"connected_team_id"`
+	ChannelID       ChannelID  `json:"channel"`
+	EventTimeStamp  *TimeStamp `json:"event_ts"`
+}
+
 type ChannelUnarchived struct {
 	TypedEvent
 	ChannelID ChannelID `json:"channel"`
 	UserID    UserID    `json:"user"`
 }
 
-// TODO channel_unshared
+// ChannelUnshared is sent to all event subscriptions when an external workspace has been removed from an existing shared channel.
+// https://api.slack.com/events/channel_unshared
+type ChannelUnshared struct {
+	TypedEvent
+	PreviouslyConnectedTeamID TeamID     `json:"previously_connected_team_id"`
+	ChannelID                 ChannelID  `json:"channel"`
+	IsExtShared               bool       `json:"is_ext_shared"`
+	EventTimeStamp            *TimeStamp `json:"event_ts"`
+}
 
 type CommandsChanged struct {
 	TypedEvent
@@ -195,8 +218,28 @@ type EmojiChanged struct {
 	TimeStamp *TimeStamp `json:"event_ts"`
 }
 
-// TODO external_org_migration_finished
-// TODO external_org_migration_started
+// ExternalOrgMigrationFinished is sent to all connections when an external workspace completes to migrate to an Enterprise Grid.
+// https://api.slack.com/events/external_org_migration_finished
+type ExternalOrgMigrationFinished struct {
+	TypedEvent
+	Team *struct {
+		ID          TeamID `json:"id"`
+		IsMigrating bool   `json:"is_migrating"`
+	} `json:"team"`
+	DateStarted  *TimeStamp `json:"date_started"`
+	DateFinished *TimeStamp `json:"date_finished"`
+}
+
+// ExternalOrgMigrationStarted is sent to all connections when an external workspace begins to migrate to an Enterprise Grid.
+// https://api.slack.com/events/external_org_migration_started
+type ExternalOrgMigrationStarted struct {
+	TypedEvent
+	Team *struct {
+		ID          TeamID `json:"id"`
+		IsMigrating bool   `json:"is_migrating"`
+	} `json:"team"`
+	DateStarted *TimeStamp `json:"date_started"`
+}
 
 type FileChanged struct {
 	TypedEvent
@@ -291,8 +334,19 @@ type GoodBye struct {
 	TypedEvent
 }
 
-// TODO add grid_migration_finished
-// TODO grid_migration_started
+// GridMigrationFinished is sent via subscription whenever your app is installed by completes migration to Enterprise Grid.
+// https://api.slack.com/events/grid_migration_finished
+type GridMigrationFinished struct {
+	TypedEvent
+	EnterpriseID string `json:"enterprise_id"`
+}
+
+// GridMigrationStarted is sent via subscription whenever your app is installed by begins to migrate to an Enterprise Grid.
+// https://api.slack.com/events/grid_migration_started
+type GridMigrationStarted struct {
+	TypedEvent
+	EnterpriseID string `json:"enterprise_id"`
+}
 
 type GroupArchived struct {
 	TypedEvent
@@ -386,8 +440,41 @@ type IMOpened struct {
 	ChannelID ChannelID `json:"channel"`
 }
 
-// TODO add invite_requested
-// TODO add link_shared
+// InviteRequested is sent when a user request an invite.
+// https://api.slack.com/events/invite_requested
+type InviteRequested struct {
+	TypedEvent
+	InviteRequest *struct {
+		ID            string      `json:"id"`
+		Email         string      `json:"email"`
+		DateCreated   *TimeStamp  `json:"date_created"`
+		RequesterIDs  []UserID    `json:"requester_ids"`
+		ChannelIDs    []ChannelID `json:"channel_ids"`
+		InviteType    string      `json:"invite_type"`
+		RealName      string      `json:"real_name"`
+		DateExpire    *TimeStamp  `json:"date_expire"`
+		RequestReason string      `json:"request_reason"`
+		Team          *struct {
+			ID     TeamID `json:"id"`
+			Name   string `json:"name"`
+			Domain string `json:"domain"`
+		} `json:"team"`
+	} `json:"invite_request"`
+}
+
+// LinkShared is sent to track a specific URL domain.
+// https://api.slack.com/events/link_shared
+type LinkShared struct {
+	TypedEvent
+	ChannelID        ChannelID  `json:"channel"`
+	UserID           UserID     `json:"user"`
+	MessageTimeStamp *TimeStamp `json:"message_ts"`
+	ThreadTimeStamp  *TimeStamp `json:"thread_ts"`
+	Links            []*struct {
+		Domain string `json:"domain"`
+		URL    string `json:"url"`
+	} `json:"links"`
+}
 
 type PresenceManuallyChanged struct {
 	TypedEvent
@@ -403,7 +490,15 @@ type MemberJoinedChannel struct {
 	InviterID   UserID    `json:"inviter"` // Empty when the user joins by herself. ref. https://api.slack.com/events/member_joined_channel
 }
 
-// TODO add member_left_channel
+// MemberLeftChannel is sent to all websocket connections and event subscriptions when users leave public or private channels.
+// https://api.slack.com/events/member_left_channel
+type MemberLeftChannel struct {
+	TypedEvent
+	UserID      UserID    `json:"user"`
+	ChannelID   ChannelID `json:"channel"`
+	ChannelType string    `json:"channel_type"` // TODO C or G https://api.slack.com/events/member_left_channel
+	TeamID      TeamID    `json:"team"`
+}
 
 // Message represent message event on RTM.
 // https://api.slack.com/events/message
@@ -427,11 +522,66 @@ type Message struct {
 	ThreadTimeStamp *TimeStamp `json:"thread_ts"` // https://api.slack.com/docs/message-threading
 }
 
-// TODO add message.app_home
-// TODO add message.channels
-// TODO add message.groups
-// TODO add message.im
-// TODO add message.mpim
+// MessageAppHome is sent to subscribers when a user engages with the application via the direct message-like App Home interface,
+// exclusive to the now defunct workspace apps project.
+// https://api.slack.com/events/message.app_home
+type MessageAppHome struct {
+	TypedEvent
+	UserID         UserID     `json:"user"`
+	Text           string     `json:"text"`
+	TimeStamp      *TimeStamp `json:"ts"`
+	ChannelID      ChannelID  `json:"channel"`
+	EventTimeStamp *TimeStamp `json:"event_ts"`
+	ChannelType    string     `json:"channel_type"`
+}
+
+// MessageChannels is similar to the core message event sent through the RTM API.
+// https://api.slack.com/events/message.channels
+type MessageChannels struct {
+	TypedEvent
+	ChannelID      ChannelID  `json:"channel"`
+	UserID         UserID     `json:"user"`
+	Text           string     `json:"text"`
+	TimeStamp      *TimeStamp `json:"ts"`
+	EventTimeStamp *TimeStamp `json:"event_ts"`
+	ChannelType    string     `json:"channel_type"`
+}
+
+// MessageGroups is similar to the core message event sent through the RTM API.
+// https://api.slack.com/events/message.groups
+type MessageGroups struct {
+	TypedEvent
+	ChannelID      ChannelID  `json:"channel"`
+	UserID         UserID     `json:"user"`
+	Text           string     `json:"text"`
+	TimeStamp      *TimeStamp `json:"ts"`
+	EventTimeStamp *TimeStamp `json:"event_ts"`
+	ChannelType    string     `json:"channel_type"`
+}
+
+// MessageIM is similar to the core message event sent through the RTM API.
+// https://api.slack.com/events/message.im
+type MessageIM struct {
+	TypedEvent
+	ChannelID      ChannelID  `json:"channel"`
+	UserID         UserID     `json:"user"`
+	Text           string     `json:"text"`
+	TimeStamp      *TimeStamp `json:"ts"`
+	EventTimeStamp *TimeStamp `json:"event_ts"`
+	ChannelType    string     `json:"channel_type"`
+}
+
+// MessageMPIM is similar to the core message event sent through the RTM API.
+// https://api.slack.com/events/message.mpim
+type MessageMPIM struct {
+	TypedEvent
+	ChannelID      ChannelID  `json:"channel"`
+	UserID         UserID     `json:"user"`
+	Text           string     `json:"text"`
+	TimeStamp      *TimeStamp `json:"ts"`
+	EventTimeStamp *TimeStamp `json:"event_ts"`
+	ChannelType    string     `json:"channel_type"`
+}
 
 type PinAdded struct {
 	TypedEvent
@@ -486,10 +636,42 @@ type ReconnectURL struct {
 	TypedEvent
 }
 
-// TODO add resources_added
-// TODO add resources_removed
-// TODO add scope_denied
-// TODO add scope_granted
+// ResourcesAdded is delivered as users install your Slack app, add your app to channels and conversations,
+// or approve your app for additional permissions and resources.
+// https://api.slack.com/events/resources_added
+type ResourcesAdded struct {
+	TypedEvent
+	Resources []*struct {
+		Resource *Resource `json:"resource"`
+		Scopes   []string  `json:"scopes"`
+	} `json:"resources"`
+}
+
+// ResourcesRemoved is delivered as users uninstall your Slack app and remove your app to channels & conversations.
+// https://api.slack.com/events/resources_removed
+type ResourcesRemoved struct {
+	TypedEvent
+	Resources []*struct {
+		Resource *Resource `json:"resource"`
+		Scopes   []string  `json:"scopes"`
+	} `json:"resources"`
+}
+
+// ScopeDenied is sent when scope you requested is denied.
+// https://api.slack.com/events/scope_denied
+type ScopeDenied struct {
+	TypedEvent
+	Scopes    []string `json:"scopes"`
+	TriggerID string   `json:"trigger_id"`
+}
+
+// ScopeGranted is sent when scope you requested is granted.
+// https://api.slack.com/events/scope_granted
+type ScopeGranted struct {
+	TypedEvent
+	Scopes    []string `json:"scopes"`
+	TriggerID string   `json:"trigger_id"`
+}
 
 type StarAdded struct {
 	TypedEvent
@@ -602,16 +784,46 @@ type TeamRenamed struct {
 	Name string `json:"name"`
 }
 
-// TODO add tokens_revoked
+// TokensRevoked is sent when API tokens are revoked.
+// https://api.slack.com/events/tokens_revoked
+type TokensRevoked struct {
+	TypedEvent
+	Tokens *struct {
+		OAuth []string `json:"oauth"`
+		Bot   []string `json:"bot"`
+	}
+}
 
 type UserChanged struct {
 	TypedEvent
 	User *User `json:"user"`
 }
 
-// TODO add user_resource_denied
-// TODO add user_resource_granted
-// TODO add user_resource_removed
+// UserResourceDenied is sent when a user declines to grant your workspace app the permissions you recently requested with "apps.permissions.users.request."
+// https://api.slack.com/events/user_resource_denied
+type UserResourceDenied struct {
+	TypedEvent
+	UserID    UserID   `json:"user"`
+	Scopes    []string `json:"scopes"`
+	TriggerID string   `json:"trigger_id"`
+}
+
+// UserResourceGranted is sent when a user grant your workspace app the permissions you recently requested with "apps.permissions.users.request."
+// https://api.slack.com/events/user_resource_granted
+type UserResourceGranted struct {
+	TypedEvent
+	UserID    UserID   `json:"user"`
+	Scopes    []string `json:"scopes"`
+	TriggerID string   `json:"trigger_id"`
+}
+
+// UserResourceRemoved is sent when a user removes an existing grant for your workspace app.
+// https://api.slack.com/events/user_resource_removed
+type UserResourceRemoved struct {
+	TypedEvent
+	UserID    UserID `json:"user"`
+	TriggerID string `json:"trigger_id"`
+}
 
 type UserTyping struct {
 	TypedEvent
@@ -751,6 +963,14 @@ type Item struct {
 type MarkedAsRead struct {
 	ChannelID ChannelID  `json:"channel"`
 	TimeStamp *TimeStamp `json:"ts"`
+}
+
+type Resource struct {
+	Type  string `json:"type"`
+	Grant *struct {
+		Type       string     `json:"type"`
+		ResourceID ResourceID `json:"resource_id"`
+	} `json:"grant"`
 }
 
 type SubTeam struct {

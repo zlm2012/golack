@@ -12,6 +12,12 @@ func (id BotID) String() string {
 	return string(id)
 }
 
+type CallID string
+
+func (id CallID) String() string {
+	return string(id)
+}
+
 type ChannelID string
 
 func (id ChannelID) String() string {
@@ -69,5 +75,11 @@ func (id ActionID) String() string {
 type ViewID string
 
 func (id ViewID) String() string {
+	return string(id)
+}
+
+type ResourceID string
+
+func (id ResourceID) String() string {
 	return string(id)
 }

@@ -199,6 +199,15 @@ var expectedPayloads = map[string]interface{}{
 			},
 		},
 	},
+	"call_rejected": &CallRejected{
+		TypedEvent: TypedEvent{
+			Type: "call_rejected",
+		},
+		CallID:           "RL731AVEF",
+		UserID:           "ULJS1TYR5",
+		ChannelID:        "DL5JN9K0T",
+		ExternalUniqueID: "123-456-7890",
+	},
 	"channel_archive": &ChannelArchived{
 		TypedEvent: TypedEvent{
 			Type: "channel_archive",
@@ -291,12 +300,35 @@ var expectedPayloads = map[string]interface{}{
 			},
 		},
 	},
+	"channel_shared": &ChannelShared{
+		TypedEvent: TypedEvent{
+			Type: "channel_shared",
+		},
+		ConnectedTeamID: "E163Q94DX",
+		ChannelID:       "C06EQBRR6",
+		EventTimeStamp: &TimeStamp{
+			Time:          time.Unix(1561064063, 0),
+			OriginalValue: "1561064063.001100",
+		},
+	},
 	"channel_unarchive": &ChannelUnarchived{
 		TypedEvent: TypedEvent{
 			Type: "channel_unarchive",
 		},
 		ChannelID: "C024BE91L",
 		UserID:    "U024BE7LH",
+	},
+	"channel_unshared": &ChannelUnshared{
+		TypedEvent: TypedEvent{
+			Type: "channel_unshared",
+		},
+		PreviouslyConnectedTeamID: "E163Q94DX",
+		ChannelID:                 "C06EQBRR6",
+		IsExtShared:               false,
+		EventTimeStamp: &TimeStamp{
+			Time:          time.Unix(1561064063, 0),
+			OriginalValue: "1561064063.001100",
+		},
 	},
 	"commands_changed": &CommandsChanged{
 		TypedEvent: TypedEvent{
@@ -375,6 +407,42 @@ var expectedPayloads = map[string]interface{}{
 		TimeStamp: &TimeStamp{
 			Time:          time.Unix(1361482916, 0),
 			OriginalValue: "1361482916.000004",
+		},
+	},
+	"external_org_migration_finished": &ExternalOrgMigrationFinished{
+		TypedEvent: TypedEvent{
+			Type: "external_org_migration_finished",
+		},
+		Team: &struct {
+			ID          TeamID `json:"id"`
+			IsMigrating bool   `json:"is_migrating"`
+		}{
+			ID:          "TXXXXXXXX",
+			IsMigrating: false,
+		},
+		DateStarted: &TimeStamp{
+			Time:          time.Unix(1551398400, 0),
+			OriginalValue: "1551398400",
+		},
+		DateFinished: &TimeStamp{
+			Time:          time.Unix(1551409200, 0),
+			OriginalValue: "1551409200",
+		},
+	},
+	"external_org_migration_started": &ExternalOrgMigrationStarted{
+		TypedEvent: TypedEvent{
+			Type: "external_org_migration_started",
+		},
+		Team: &struct {
+			ID          TeamID `json:"id"`
+			IsMigrating bool   `json:"is_migrating"`
+		}{
+			ID:          "TXXXXXXXX",
+			IsMigrating: true,
+		},
+		DateStarted: &TimeStamp{
+			Time:          time.Unix(1551398400, 0),
+			OriginalValue: "1551398400",
 		},
 	},
 	"file_change": &FileChanged{
@@ -498,6 +566,18 @@ var expectedPayloads = map[string]interface{}{
 		TypedEvent: TypedEvent{
 			Type: "goodbye",
 		},
+	},
+	"grid_migration_finished": &GridMigrationFinished{
+		TypedEvent: TypedEvent{
+			Type: "grid_migration_finished",
+		},
+		EnterpriseID: "EXXXXXXXX",
+	},
+	"grid_migration_started": &GridMigrationStarted{
+		TypedEvent: TypedEvent{
+			Type: "grid_migration_started",
+		},
+		EnterpriseID: "EXXXXXXXX",
 	},
 	"group_archive": &GroupArchived{
 		TypedEvent: TypedEvent{
@@ -652,6 +732,84 @@ var expectedPayloads = map[string]interface{}{
 		UserID:    "U024BE7LH",
 		ChannelID: "D024BE91L",
 	},
+	"invite_requested": &InviteRequested{
+		TypedEvent: TypedEvent{
+			Type: "invite_requested",
+		},
+		InviteRequest: &struct {
+			ID            string      `json:"id"`
+			Email         string      `json:"email"`
+			DateCreated   *TimeStamp  `json:"date_created"`
+			RequesterIDs  []UserID    `json:"requester_ids"`
+			ChannelIDs    []ChannelID `json:"channel_ids"`
+			InviteType    string      `json:"invite_type"`
+			RealName      string      `json:"real_name"`
+			DateExpire    *TimeStamp  `json:"date_expire"`
+			RequestReason string      `json:"request_reason"`
+			Team          *struct {
+				ID     TeamID `json:"id"`
+				Name   string `json:"name"`
+				Domain string `json:"domain"`
+			} `json:"team"`
+		}{
+			ID:    "12345",
+			Email: "bront@puppies.com",
+			DateCreated: &TimeStamp{
+				Time:          time.Unix(123455, 0),
+				OriginalValue: "123455",
+			},
+			RequesterIDs: []UserID{"U12345"},
+			ChannelIDs:   []ChannelID{"C12345"},
+			InviteType:   "full_member",
+			RealName:     "Brent",
+			DateExpire: &TimeStamp{
+				Time:          time.Unix(123456, 0),
+				OriginalValue: "123456",
+			},
+			RequestReason: "They're good dogs, Brant",
+			Team: &struct {
+				ID     TeamID `json:"id"`
+				Name   string `json:"name"`
+				Domain string `json:"domain"`
+			}{
+				ID:     "T12345",
+				Name:   "Puppy ratings workspace incorporated",
+				Domain: "puppiesrus",
+			},
+		},
+	},
+	"link_shared": &LinkShared{
+		TypedEvent: TypedEvent{
+			Type: "link_shared",
+		},
+		ChannelID: "Cxxxxxx",
+		UserID:    "Uxxxxxxx",
+		MessageTimeStamp: &TimeStamp{
+			Time:          time.Unix(123456789, 0),
+			OriginalValue: "123456789.9875",
+		},
+		ThreadTimeStamp: &TimeStamp{
+			Time:          time.Unix(123456621, 0),
+			OriginalValue: "123456621.1855",
+		},
+		Links: []*struct {
+			Domain string `json:"domain"`
+			URL    string `json:"url"`
+		}{
+			{
+				Domain: "example.com",
+				URL:    "https://example.com/12345",
+			},
+			{
+				Domain: "example.com",
+				URL:    "https://example.com/67890",
+			},
+			{
+				Domain: "another-example.com",
+				URL:    "https://yet.another-example.com/v/abcde",
+			},
+		},
+	},
 	"manual_presence_change": &PresenceManuallyChanged{
 		TypedEvent: TypedEvent{
 			Type: "manual_presence_change",
@@ -668,6 +826,15 @@ var expectedPayloads = map[string]interface{}{
 		TeamID:      "T024BE7LD",
 		InviterID:   "U123456789",
 	},
+	"member_left_channel": &MemberLeftChannel{
+		TypedEvent: TypedEvent{
+			Type: "member_left_channel",
+		},
+		UserID:      "W06GH7XHN",
+		ChannelID:   "C0698JE0H",
+		ChannelType: "C",
+		TeamID:      "T024BE7LD",
+	},
 	"message": &Message{
 		TypedEvent: TypedEvent{
 			Type: "message",
@@ -679,6 +846,91 @@ var expectedPayloads = map[string]interface{}{
 			Time:          time.Unix(1355517523, 0),
 			OriginalValue: "1355517523.000005",
 		},
+	},
+	"message.app_home": &MessageAppHome{
+		TypedEvent: TypedEvent{
+			Type: "message",
+		},
+		UserID: "U061F7AUR",
+		Text:   "How many cats did we herd yesterday?",
+		TimeStamp: &TimeStamp{
+			Time:          time.Unix(1525215129, 0),
+			OriginalValue: "1525215129.000001",
+		},
+		ChannelID: "D0PNCRP9N",
+		EventTimeStamp: &TimeStamp{
+			Time:          time.Unix(1525215129, 0),
+			OriginalValue: "1525215129.000001",
+		},
+		ChannelType: "app_home",
+	},
+	"message.channels": &MessageChannels{
+		TypedEvent: TypedEvent{
+			Type: "message",
+		},
+		ChannelID: "C024BE91L",
+		UserID:    "U2147483697",
+		Text:      "Live long and prospect.",
+		TimeStamp: &TimeStamp{
+			Time:          time.Unix(1355517523, 0),
+			OriginalValue: "1355517523.000005",
+		},
+		EventTimeStamp: &TimeStamp{
+			Time:          time.Unix(1355517523, 0),
+			OriginalValue: "1355517523.000005",
+		},
+		ChannelType: "channel",
+	},
+	"message.groups": &MessageGroups{
+		TypedEvent: TypedEvent{
+			Type: "message",
+		},
+		ChannelID: "G024BE91L",
+		UserID:    "U2147483697",
+		Text:      "One cannot programmatically detect the difference between `message.mpim` and `message.groups`.",
+		TimeStamp: &TimeStamp{
+			Time:          time.Unix(1355517523, 0),
+			OriginalValue: "1355517523.000005",
+		},
+		EventTimeStamp: &TimeStamp{
+			Time:          time.Unix(1355517523, 0),
+			OriginalValue: "1355517523.000005",
+		},
+		ChannelType: "group",
+	},
+	"message.im": &MessageGroups{
+		TypedEvent: TypedEvent{
+			Type: "message",
+		},
+		ChannelID: "D024BE91L",
+		UserID:    "U2147483697",
+		Text:      "Hello hello can you hear me?",
+		TimeStamp: &TimeStamp{
+			Time:          time.Unix(1355517523, 0),
+			OriginalValue: "1355517523.000005",
+		},
+		EventTimeStamp: &TimeStamp{
+			Time:          time.Unix(1355517523, 0),
+			OriginalValue: "1355517523.000005",
+		},
+		ChannelType: "im",
+	},
+	"message.mpim": &MessageGroups{
+		TypedEvent: TypedEvent{
+			Type: "message",
+		},
+		ChannelID: "G024BE91L",
+		UserID:    "U2147483697",
+		Text:      "Let's make a pact.",
+		TimeStamp: &TimeStamp{
+			Time:          time.Unix(1355517523, 0),
+			OriginalValue: "1355517523.000005",
+		},
+		EventTimeStamp: &TimeStamp{
+			Time:          time.Unix(1355517523, 0),
+			OriginalValue: "1355517523.000005",
+		},
+		ChannelType: "mpim",
 	},
 	"pin_added": &PinAdded{
 		TypedEvent: TypedEvent{
@@ -779,6 +1031,84 @@ var expectedPayloads = map[string]interface{}{
 		TypedEvent: TypedEvent{
 			Type: "reconnect_url",
 		},
+	},
+	"resources_added": &ResourcesAdded{
+		TypedEvent: TypedEvent{
+			Type: "resources_added",
+		},
+		Resources: []*struct {
+			Resource *Resource `json:"resource"`
+			Scopes   []string  `json:"scopes"`
+		}{
+			{
+				Resource: &Resource{
+					Type: "im",
+					Grant: &struct {
+						Type       string     `json:"type"`
+						ResourceID ResourceID `json:"resource_id"`
+					}{
+						Type:       "specific",
+						ResourceID: "DXXXXXXXX",
+					},
+				},
+				Scopes: []string{
+					"chat:write:user",
+					"im:read",
+					"im:history",
+					"commands",
+				},
+			},
+		},
+	},
+	"resources_removed": &ResourcesAdded{
+		TypedEvent: TypedEvent{
+			Type: "resources_removed",
+		},
+		Resources: []*struct {
+			Resource *Resource `json:"resource"`
+			Scopes   []string  `json:"scopes"`
+		}{
+			{
+				Resource: &Resource{
+					Type: "im",
+					Grant: &struct {
+						Type       string     `json:"type"`
+						ResourceID ResourceID `json:"resource_id"`
+					}{
+						Type:       "specific",
+						ResourceID: "DXXXXXXXX",
+					},
+				},
+				Scopes: []string{
+					"chat:write:user",
+					"im:read",
+					"im:history",
+					"commands",
+				},
+			},
+		},
+	},
+	"scope_denied": &ScopeDenied{
+		TypedEvent: TypedEvent{
+			Type: "scope_denied",
+		},
+		Scopes: []string{
+			"files:read",
+			"files:write",
+			"chat:write",
+		},
+		TriggerID: "241582872337.47445629121.string",
+	},
+	"scope_granted": &ScopeDenied{
+		TypedEvent: TypedEvent{
+			Type: "scope_granted",
+		},
+		Scopes: []string{
+			"files:read",
+			"files:write",
+			"chat:write",
+		},
+		TriggerID: "241582872337.47445629121.string",
 	},
 	"star_added": &StarAdded{
 		TypedEvent: TypedEvent{
@@ -1012,11 +1342,52 @@ var expectedPayloads = map[string]interface{}{
 		},
 		Name: "New Team Name Inc.",
 	},
+	"tokens_revoked": &TokensRevoked{
+		TypedEvent: TypedEvent{
+			Type: "tokens_revoked",
+		},
+		Tokens: &struct {
+			OAuth []string `json:"oauth"`
+			Bot   []string `json:"bot"`
+		}{
+			OAuth: []string{"UXXXXXXXX"},
+			Bot:   []string{"UXXXXXXXX"},
+		},
+	},
 	"user_change": &UserChanged{
 		TypedEvent: TypedEvent{
 			Type: "user_change",
 		},
 		User: &User{},
+	},
+	"user_resource_denied": &UserResourceDenied{
+		TypedEvent: TypedEvent{
+			Type: "user_resource_denied",
+		},
+		UserID: "WXXXXXXXX",
+		Scopes: []string{
+			"reminders:write:user",
+			"reminders:read:user",
+		},
+		TriggerID: "27082968880.6048553856.5eb9c671f75c636135fdb6bb9e87b606",
+	},
+	"user_resource_granted": &UserResourceDenied{
+		TypedEvent: TypedEvent{
+			Type: "user_resource_granted",
+		},
+		UserID: "WXXXXXXXX",
+		Scopes: []string{
+			"reminders:write:user",
+			"reminders:read:user",
+		},
+		TriggerID: "27082968880.6048553856.5eb9c671f75c636135fdb6bb9e87b606",
+	},
+	"user_resource_removed": &UserResourceRemoved{
+		TypedEvent: TypedEvent{
+			Type: "user_resource_removed",
+		},
+		UserID:    "WXXXXXXXX",
+		TriggerID: "27082968880.6048553856.5eb9c671f75c636135fdb6bb9e87b606",
 	},
 	"user_typing": &UserTyping{
 		TypedEvent: TypedEvent{
@@ -1062,12 +1433,12 @@ func TestDecode(t *testing.T) {
 				return
 			}
 
-			expected, ok := expectedPayloads[typed.EventType()]
+			expected, ok := expectedPayloads[eventName]
 			if !ok {
-				t.Fatalf("Expected payload for %s is not defined in test", typed.EventType())
+				t.Fatalf("Expected payload for %s is not defined in test", eventName)
 			}
 
-			testutil.Compare([]string{typed.EventType()}, reflect.ValueOf(expected), reflect.ValueOf(typed), t)
+			testutil.Compare([]string{eventName}, reflect.ValueOf(expected), reflect.ValueOf(typed), t)
 		})
 
 		return nil
@@ -1093,7 +1464,8 @@ func TestDecode(t *testing.T) {
 	})
 
 	t.Run("unknown type", func(t *testing.T) {
-		_, err := Decode([]byte(`{"type": "UNKNOWN_VALUE"`))
+		_, err := Decode([]byte(`{
+				"type": "UNKNOWN_VALUE"`))
 		if err == nil {
 			t.Fatalf("Expected error is not returned: %#v", err)
 		}

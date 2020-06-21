@@ -70,6 +70,15 @@ func Map(parsed gjson.Result) (interface{}, error) {
 			}
 			return unmarshal([]byte(parsed.String()), mapping)
 		}
+
+		channelType := parsed.Get("channel_type")
+		if channelType.Exists() {
+			mapping, ok := messageChannelTypeMap[channelType.String()]
+			if !ok {
+				return nil, NewUnknownPayloadTypeError(fmt.Sprintf("unknown channel_type of %s is given: %s", channelType, parsed))
+			}
+			return unmarshal([]byte(parsed.String()), mapping)
+		}
 	}
 
 	// Map to the corresponding struct
