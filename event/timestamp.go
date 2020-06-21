@@ -1,4 +1,4 @@
-package rtmapi
+package event
 
 import (
 	"encoding/json"

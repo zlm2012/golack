@@ -1,20 +1,14 @@
 package rtmapi
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
-	"io"
-	"reflect"
-	"strings"
-
 	"github.com/gorilla/websocket"
+	"github.com/oklahomer/golack/event"
 	"github.com/tidwall/gjson"
-)
-
-var (
-	ErrEmptyPayload = errors.New("empty payload was given")
+	"io"
 )
 
 type UnexpectedMessageTypeError struct {
@@ -104,166 +98,67 @@ func (wrapper *connWrapper) Close() error {
 	return wrapper.conn.Close()
 }
 
-var (
-	eventTypeMap = map[EventType]reflect.Type{
-		AccountsChangedEvent:       reflect.TypeOf(&AccountsChanged{}).Elem(),
-		BotAddedEvent:              reflect.TypeOf(&BotAdded{}).Elem(),
-		BotChangedEvent:            reflect.TypeOf(&BotChanged{}).Elem(),
-		ChannelArchivedEvent:       reflect.TypeOf(&ChannelArchived{}).Elem(),
-		ChannelCreatedEvent:        reflect.TypeOf(&ChannelCreated{}).Elem(),
-		ChannelDeletedEvent:        reflect.TypeOf(&ChannelDeleted{}).Elem(),
-		ChannelHistoryChangedEvent: reflect.TypeOf(&ChannelHistoryChanged{}).Elem(),
-		ChannelJoinedEvent:         reflect.TypeOf(&ChannelJoined{}).Elem(),
-		ChannelLeftEvent:           reflect.TypeOf(&ChannelLeft{}).Elem(),
-		ChannelMarkedEvent:         reflect.TypeOf(&ChannelMarked{}).Elem(),
-		ChannelRenameEvent:         reflect.TypeOf(&ChannelRenamed{}).Elem(),
-		ChannelUnarchiveEvent:      reflect.TypeOf(&ChannelUnarchived{}).Elem(),
-		CommandsChangedEvent:       reflect.TypeOf(&CommandsChanged{}).Elem(),
-		DNDUpdatedEvent:            reflect.TypeOf(&DNDUpdated{}).Elem(),
-		DNDUpdatedUserEvent:        reflect.TypeOf(&DNDUpdated{}).Elem(),
-		EmailDomainChangedEvent:    reflect.TypeOf(&EmailDomainChanged{}).Elem(),
-		EmojiChangedEvent:          reflect.TypeOf(&EmojiChanged{}).Elem(),
-		FileChangeEvent:            reflect.TypeOf(&FileChanged{}).Elem(),
-		FileCommentAddedEvent:      reflect.TypeOf(&FileCommentAdded{}).Elem(),
-		FileCommentDeletedEvent:    reflect.TypeOf(&FileCommentDeleted{}).Elem(),
-		FileCommentEditedEvent:     reflect.TypeOf(&FileCommentEdited{}).Elem(),
-		FileCreatedEvent:           reflect.TypeOf(&FileCreated{}).Elem(),
-		FileDeletedEvent:           reflect.TypeOf(&FileDeleted{}).Elem(),
-		FilePublicEvent:            reflect.TypeOf(&FilePublished{}).Elem(),
-		FileSharedEvent:            reflect.TypeOf(&FileShared{}).Elem(),
-		FileUnsharedEvent:          reflect.TypeOf(&FileUnshared{}).Elem(),
-		GoodByeEvent:               reflect.TypeOf(&GoodBye{}).Elem(),
-		GroupArchiveEvent:          reflect.TypeOf(&GroupArchived{}).Elem(),
-		GroupCloseEvent:            reflect.TypeOf(&GroupClosed{}).Elem(),
-		GroupDeletedEvent:          reflect.TypeOf(&GroupDeleted{}).Elem(),
-		GroupHistoryChangedEvent:   reflect.TypeOf(&GroupHistoryChanged{}).Elem(),
-		GroupJoinedEvent:           reflect.TypeOf(&GroupJoined{}).Elem(),
-		GroupLeftEvent:             reflect.TypeOf(&GroupLeft{}).Elem(),
-		GroupMarkedEvent:           reflect.TypeOf(&GroupMarked{}).Elem(),
-		GroupOpenEvent:             reflect.TypeOf(&GroupOpened{}).Elem(),
-		GroupRenameEvent:           reflect.TypeOf(&GroupRenamed{}).Elem(),
-		GroupUnarchiveEvent:        reflect.TypeOf(&GroupUnarchived{}).Elem(),
-		HelloEvent:                 reflect.TypeOf(&Hello{}).Elem(),
-		IMCloseEvent:               reflect.TypeOf(&IMClosed{}).Elem(),
-		IMCreatedEvent:             reflect.TypeOf(&IMCreated{}).Elem(),
-		IMHistoryChangedEvent:      reflect.TypeOf(&IMHistoryChanged{}).Elem(),
-		IMMarkedEvent:              reflect.TypeOf(&IMMarked{}).Elem(),
-		IMOpenEvent:                reflect.TypeOf(&IMOpened{}).Elem(),
-		ManualPresenceChangeEvent:  reflect.TypeOf(&PresenceManuallyChanged{}).Elem(),
-		MemberJoinedChannelEvent:   reflect.TypeOf(&MemberJoinedChannel{}).Elem(),
-		PinAddedEvent:              reflect.TypeOf(&PinAdded{}).Elem(),
-		PinRemovedEvent:            reflect.TypeOf(&PinRemoved{}).Elem(),
-		PrefChangeEvent:            reflect.TypeOf(&PreferenceChanged{}).Elem(),
-		PresenceChangeEvent:        reflect.TypeOf(&PresenceChange{}).Elem(),
-		PresenceQueryEvent:         reflect.TypeOf(&PresenceQuery{}).Elem(),
-		PresenceSubEvent:           reflect.TypeOf(&PresenceSubscribe{}).Elem(),
-		ReactionAddedEvent:         reflect.TypeOf(&ReactionAdded{}).Elem(),
-		ReactionRemovedEvent:       reflect.TypeOf(&ReactionRemoved{}).Elem(),
-		ReconnectURLEvent:          reflect.TypeOf(&ReconnectURL{}).Elem(),
-		StarAddedEvent:             reflect.TypeOf(&StarAdded{}).Elem(),
-		StarRemovedEvent:           reflect.TypeOf(&StarRemoved{}).Elem(),
-		SubTeamCreatedEvent:        reflect.TypeOf(&SubTeamCreated{}).Elem(),
-		SubTeamMembersChangedEvent: reflect.TypeOf(&SubTeamMembersChanged{}).Elem(),
-		SubTeamSelfAddedEvent:      reflect.TypeOf(&SubTeamSelfAdded{}).Elem(),
-		SubTeamSelfRemovedEvent:    reflect.TypeOf(&SubTeamSelfRemoved{}).Elem(),
-		SubTeamUpdatedEvent:        reflect.TypeOf(&SubTeamUpdated{}).Elem(),
-		TeamDomainChangeEvent:      reflect.TypeOf(&TeamDomainChanged{}).Elem(),
-		TeamJoinEvent:              reflect.TypeOf(&TeamJoined{}).Elem(),
-		TeamMigrationStartedEvent:  reflect.TypeOf(&TeamMigrationStarted{}).Elem(),
-		TeamPlanChangedEvent:       reflect.TypeOf(&TeamPlanChanged{}).Elem(),
-		TeamPrefChangeEvent:        reflect.TypeOf(&TeamPreferenceChanged{}).Elem(),
-		TeamProfileChangeEvent:     reflect.TypeOf(&TeamProfileChanged{}).Elem(),
-		TeamProfileDeleteEvent:     reflect.TypeOf(&TeamProfileDeleted{}).Elem(),
-		TeamProfileReorderEvent:    reflect.TypeOf(&TeamProfileReordered{}).Elem(),
-		TeamRenameEvent:            reflect.TypeOf(&TeamRenamed{}).Elem(),
-		UserChangeEvent:            reflect.TypeOf(&UserChanged{}).Elem(),
-		UserTypingEvent:            reflect.TypeOf(&UserTyping{}).Elem(),
-		PongEvent:                  reflect.TypeOf(&Pong{}).Elem(),
-	}
-	subTypeMap = map[SubType]reflect.Type{
-		BotMessage:       reflect.TypeOf(&MiscMessage{}).Elem(),
-		ChannelArchive:   reflect.TypeOf(&MiscMessage{}).Elem(),
-		ChannelJoin:      reflect.TypeOf(&MiscMessage{}).Elem(),
-		ChannelLeave:     reflect.TypeOf(&MiscMessage{}).Elem(),
-		ChannelName:      reflect.TypeOf(&MiscMessage{}).Elem(),
-		ChannelPurpose:   reflect.TypeOf(&MiscMessage{}).Elem(),
-		ChannelTopic:     reflect.TypeOf(&MiscMessage{}).Elem(),
-		ChannelUnarchive: reflect.TypeOf(&MiscMessage{}).Elem(),
-		FileComment:      reflect.TypeOf(&MiscMessage{}).Elem(),
-		FileMention:      reflect.TypeOf(&MiscMessage{}).Elem(),
-		FileShare:        reflect.TypeOf(&MiscMessage{}).Elem(),
-		GroupArchive:     reflect.TypeOf(&MiscMessage{}).Elem(),
-		GroupJoin:        reflect.TypeOf(&MiscMessage{}).Elem(),
-		GroupLeave:       reflect.TypeOf(&MiscMessage{}).Elem(),
-		GroupName:        reflect.TypeOf(&MiscMessage{}).Elem(),
-		GroupPurpose:     reflect.TypeOf(&MiscMessage{}).Elem(),
-		GroupTopic:       reflect.TypeOf(&MiscMessage{}).Elem(),
-		GroupUnarchive:   reflect.TypeOf(&MiscMessage{}).Elem(),
-		MeMessage:        reflect.TypeOf(&MiscMessage{}).Elem(),
-		MessageChanged:   reflect.TypeOf(&MiscMessage{}).Elem(),
-		MessageDeleted:   reflect.TypeOf(&MiscMessage{}).Elem(),
-		PinnedItem:       reflect.TypeOf(&MiscMessage{}).Elem(),
-		UnpinnedItem:     reflect.TypeOf(&MiscMessage{}).Elem(),
-	}
-	messageEventType          = reflect.TypeOf(&Message{}).Elem()
-	websocketReplyOKEventType = reflect.TypeOf(&WebSocketOKReply{}).Elem()
-	websocketReplyNGEventType = reflect.TypeOf(&WebSocketNGReply{}).Elem()
-)
-
 func decodePayload(input json.RawMessage) (DecodedPayload, error) {
-	inputStr := strings.TrimSpace(string(input))
-	if len(inputStr) == 0 {
-		return nil, ErrEmptyPayload
+	// Sometimes an empty payload comes in.
+	// Return a designated error and let caller decide how to handle.
+	input = bytes.TrimSpace(input)
+	if len(input) == 0 {
+		return nil, event.ErrEmptyPayload
 	}
 
-	res := gjson.Parse(inputStr)
-	eventTypeValue := res.Get("type")
-	if eventTypeValue.Exists() {
-		eventType := AtoEventType(eventTypeValue.String())
+	// Map the payload to predefined event
+	parsed := gjson.ParseBytes(input)
+	e, err := event.Map(parsed)
+	if err == nil {
+		return e, nil
+	}
 
-		// See if corresponding type can be found from type value.
-		mapping, ok := eventTypeMap[eventType]
-		if ok {
-			return unmarshal(input, mapping)
+	// Error may be returned when a WebSocket protocol-specific payload is given because such payload is not listed as "event" on https://api.slack.com/events.
+
+	// Type is not defined for "event," but can be for WebSocket protocol
+	if parsed.Get("reply_to").Exists() {
+		// https://api.slack.com/rtm#ping_and_pong
+		payloadType := parsed.Get("type")
+		if payloadType.Exists() && payloadType.String() == "pong" {
+			return decodePong(input)
 		}
 
-		// If type value is that of MessageEvent, subtype value must be checked to find corresponding type.
-		if eventType == MessageEvent {
-			subType := res.Get("subtype")
-			if subType.Exists() {
-				mapping, ok := subTypeMap[AtoSubType(subType.String())]
-				if ok {
-					return unmarshal(input, mapping)
-				}
-
-				// TODO handle unsupported subtype.
+		// https://api.slack.com/rtm#handling_responses
+		payloadOK := parsed.Get("ok")
+		if payloadOK.Exists() {
+			if payloadOK.Bool() {
+				return decodeOKResponse(input)
 			}
-
-			// If subtype is not given, then this is a plain message.
-			return unmarshal(input, messageEventType)
+			return decodeNGResponse(input)
 		}
-
-		// event type is given, but there is no matching type.
-		return nil, NewMalformedPayloadError(fmt.Sprintf(`unsupported event type "%s" is given: %s`, eventTypeValue.String(), input))
 	}
 
-	// https://api.slack.com/rtm#handling_responses
-	if res.Get("reply_to").Exists() && res.Get("ok").Exists() {
-		if res.Get("ok").Bool() {
-			return unmarshal(input, websocketReplyOKEventType)
-		}
-		return unmarshal(input, websocketReplyNGEventType)
-	}
-
-	return nil, NewMalformedPayloadError(fmt.Sprintf("given json object has unknown structure. can not handle: %s.", input))
+	return nil, event.NewMalformedPayloadError(fmt.Sprintf("given json object has unknown structure. can not handle: %s.", input))
 }
 
-func unmarshal(input json.RawMessage, mapping reflect.Type) (DecodedPayload, error) {
-	payload := reflect.New(mapping).Interface()
-	err := json.Unmarshal(input, &payload)
+func decodePong(input json.RawMessage) (DecodedPayload, error) {
+	mapping := &Pong{}
+	err := json.Unmarshal(input, mapping)
 	if err != nil {
-		return nil, NewMalformedPayloadError(err.Error())
+		return nil, event.NewMalformedPayloadError(fmt.Sprintf("malformed pong payload is given: %s", input))
 	}
+	return mapping, nil
+}
 
-	return payload, nil
+func decodeOKResponse(input json.RawMessage) (DecodedPayload, error) {
+	mapping := &OKReply{}
+	err := json.Unmarshal(input, mapping)
+	if err != nil {
+		return nil, event.NewMalformedPayloadError(fmt.Sprintf("malformed response is given: %s", input))
+	}
+	return mapping, nil
+}
+
+func decodeNGResponse(input json.RawMessage) (DecodedPayload, error) {
+	mapping := &NGReply{}
+	err := json.Unmarshal(input, mapping)
+	if err != nil {
+		return nil, event.NewMalformedPayloadError(fmt.Sprintf("malformed response is given: %s", input))
+	}
+	return mapping, nil
 }
