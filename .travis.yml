@@ -14,7 +14,7 @@ before_install:
 script:
   - go test -race ./...
   - go test -coverprofile=coverage.out -cover ./...
-  - goveralls -coverprofile=coverage.out -service=travis-ci
+  - goveralls -coverprofile=coverage.out -service=travis-ci -ignore=examples/*/*.go
 
 matrix:
   allow_failures:
