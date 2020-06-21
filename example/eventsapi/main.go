@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/oklahomer/golack/event"
 	"github.com/oklahomer/golack/eventsapi"
 	"log"
 	"net/http"
@@ -20,7 +21,18 @@ type Receiver struct {
 }
 
 func (r *Receiver) Receive(wrapper *eventsapi.EventWrapper) {
-	log.Printf("Recieved: %#v", wrapper)
+	switch typed := wrapper.Event.(type) {
+	case *event.MessageGroups:
+		// A message usually sent in a group
+		log.Printf("Group Message: %s", typed.Text)
+
+	case *event.MessageIM:
+		// A message directly sent to the app
+		log.Printf("IM Message: %s", typed.Text)
+
+	default:
+		log.Printf("Event: %+v", typed)
+	}
 }
 
 var _ eventsapi.EventReceiver = (*Receiver)(nil)
