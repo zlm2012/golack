@@ -27,7 +27,7 @@ func TestWithWebClient(t *testing.T) {
 
 	option(golack)
 
-	if golack.webClient != webClient {
+	if golack.WebClient != webClient {
 		t.Errorf("Specified WebClient is not set.")
 	}
 }
@@ -47,34 +47,6 @@ func TestNew(t *testing.T) {
 	}
 }
 
-func TestGolack_StartRTMSession(t *testing.T) {
-	webClient := &DummyWebClient{
-		GetFunc: func(_ context.Context, slackMethod string, _ *url.Values, intf interface{}) error {
-			if slackMethod != "rtm.start" {
-				t.Errorf("Requesting path is not correct: %s.", slackMethod)
-			}
-			start := intf.(*webapi.RTMStart)
-			start.APIResponse = webapi.APIResponse{OK: true}
-			start.URL = "https://localhost/foo"
-			start.Self = nil
-			return nil
-		},
-	}
-	golack := &Golack{
-		webClient: webClient,
-	}
-
-	rtmStart, err := golack.StartRTMSession(context.TODO())
-
-	if err != nil {
-		t.Errorf("something went wrong. %#v", err)
-	}
-
-	if rtmStart.URL != "https://localhost/foo" {
-		t.Errorf("URL is not returned properly. %#v", rtmStart)
-	}
-}
-
 func TestGolack_PostMessage(t *testing.T) {
 	webClient := &DummyWebClient{
 		PostFunc: func(ctx context.Context, slackMethod string, bodyParam url.Values, intf interface{}) error {
@@ -87,7 +59,7 @@ func TestGolack_PostMessage(t *testing.T) {
 
 	postMessage := webapi.NewPostMessage("channel", "my message")
 	golack := &Golack{
-		webClient: webClient,
+		WebClient: webClient,
 	}
 	response, err := golack.PostMessage(context.TODO(), postMessage)
 

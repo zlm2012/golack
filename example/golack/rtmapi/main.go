@@ -3,9 +3,8 @@ package main
 import (
 	"context"
 	"fmt"
+	"github.com/oklahomer/golack"
 	"github.com/oklahomer/golack/event"
-	"github.com/oklahomer/golack/rtmapi"
-	"github.com/oklahomer/golack/webapi"
 	"os"
 	"os/signal"
 	"syscall"
@@ -14,23 +13,13 @@ import (
 func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 
-	// Setup Web API client
-	config := webapi.NewConfig()
+	// Setup Golack client
+	config := golack.NewConfig()
 	config.Token = os.Getenv("APP_TOKEN")
-	client := webapi.NewClient(config)
+	client := golack.New(config)
 
-	// Retrieve RTM session information from Web API
-	rtmStart := &webapi.RTMStart{}
-	err := client.Get(ctx, "rtm.start", nil, rtmStart)
-	if err != nil {
-		panic(err)
-	}
-	if rtmStart.OK != true {
-		panic(fmt.Errorf("failed rtm.start request: %s", rtmStart.Error))
-	}
-
-	// Create WebSocket connection with the returned URL
-	conn, err := rtmapi.Connect(ctx, rtmStart.URL)
+	// Establish WebSocket connection
+	conn, err := client.ConnectRTM(ctx)
 	if err != nil {
 		panic(err)
 	}
