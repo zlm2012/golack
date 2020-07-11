@@ -42,7 +42,7 @@ func NewConfig() *Config {
 
 // WebClient defines an interface that abstracts the webapi.Client.
 type WebClient interface {
-	Get(ctx context.Context, slackMethod string, queryParams *url.Values, intf interface{}) error
+	Get(ctx context.Context, slackMethod string, queryParams url.Values, intf interface{}) error
 	Post(ctx context.Context, slackMethod string, bodyParam url.Values, intf interface{}) error
 }
 
