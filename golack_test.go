@@ -3,12 +3,16 @@ package golack
 import (
 	"context"
 	"fmt"
+	"github.com/oklahomer/golack/eventsapi"
 	"github.com/oklahomer/golack/testutil"
 	"github.com/oklahomer/golack/webapi"
 	"golang.org/x/xerrors"
 	"net"
+	"net/http"
 	"net/url"
+	"strings"
 	"testing"
+	"time"
 )
 
 type DummyWebClient struct {
@@ -22,6 +26,14 @@ func (wc *DummyWebClient) Get(ctx context.Context, slackMethod string, queryPara
 
 func (wc *DummyWebClient) Post(ctx context.Context, slackMethod string, bodyParam url.Values, intf interface{}) error {
 	return wc.PostFunc(ctx, slackMethod, bodyParam, intf)
+}
+
+type DummyReceiver struct {
+	ReceiveFunc func(wrapper *eventsapi.EventWrapper)
+}
+
+func (d DummyReceiver) Receive(wrapper *eventsapi.EventWrapper) {
+	d.ReceiveFunc(wrapper)
 }
 
 func TestNewConfig(t *testing.T) {
@@ -156,5 +168,57 @@ func TestGolack_ConnectRTM(t *testing.T) {
 				t.Fatalf("Unexpected error is returned on Ping: %s", err.Error())
 			}
 		})
+	})
+}
+
+func TestGolack_RunServer(t *testing.T) {
+	t.Run("without app secret", func(t *testing.T) {
+		g := &Golack{config: &Config{}}
+
+		errCh := g.RunServer(context.Background(), &DummyReceiver{})
+
+		select {
+		case err := <-errCh:
+			if !strings.Contains(err.Error(), "application secret") {
+				t.Errorf("Unexpected error is returned: %s", err.Error())
+			}
+
+		case <-time.NewTimer(1 * time.Second).C:
+			t.Fatal("Expected error is not returned.")
+		}
+	})
+
+	t.Run("run", func(t *testing.T) {
+		g := &Golack{
+			config: &Config{
+				AppSecret:      "DUMMY",
+				Token:          "",
+				ListenPort:     0, // Find a free port
+				RequestTimeout: 0,
+			},
+		}
+
+		ctx, cancel := context.WithCancel(context.Background())
+		errCh := g.RunServer(ctx, &DummyReceiver{})
+
+		select {
+		case err := <-errCh:
+			t.Fatalf("Unexpected error is returned: %s", err.Error())
+
+		case <-time.NewTimer(100 * time.Millisecond).C:
+			// O.K.
+		}
+
+		cancel()
+
+		select {
+		case err := <-errCh:
+			if err != http.ErrServerClosed {
+				t.Errorf("Expected type of error is not returned: %+v", err)
+			}
+
+		case <-time.NewTimer(100 * time.Millisecond).C:
+			t.Error("Expected error is not returned.")
+		}
 	})
 }
