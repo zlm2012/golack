@@ -87,7 +87,8 @@ func (g *Golack) PostMessage(ctx context.Context, postMessage *webapi.PostMessag
 // ConnectRTM connects to Slack WebSocket server.
 func (g *Golack) ConnectRTM(ctx context.Context) (rtmapi.Connection, error) {
 	rtmStart := &webapi.RTMStart{}
-	if err := g.WebClient.Get(ctx, "rtm.start", nil, rtmStart); err != nil {
+	err := g.WebClient.Get(ctx, "rtm.start", nil, rtmStart)
+	if err != nil {
 		return nil, err
 	}
 

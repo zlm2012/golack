@@ -6,90 +6,43 @@ import (
 	"fmt"
 	"github.com/gorilla/websocket"
 	"github.com/oklahomer/golack/event"
-	"net/http"
-	"net/http/httptest"
+	"github.com/oklahomer/golack/testutil"
+	"net"
 	"reflect"
 	"strconv"
-	"sync"
 	"testing"
 	"time"
 )
 
-var webSocketServerAddress string
-var once sync.Once
-
-func echoServer(w http.ResponseWriter, r *http.Request) {
-	upgrader := websocket.Upgrader{}
-	c, err := upgrader.Upgrade(w, r, nil)
-	if err != nil {
-		panic(fmt.Errorf("failed to upgrade protocol: %s", err.Error()))
-	}
-	defer c.Close()
-
-	for {
-		mt, message, err := c.ReadMessage()
-		if err != nil {
-			_, ok := err.(*websocket.CloseError)
-			if !ok {
-				panic(fmt.Errorf("failed to receive message: %s", err.Error()))
-			}
-			break
-		}
-		err = c.WriteMessage(mt, message)
-		if err != nil {
-			panic(fmt.Errorf("failed to send message. type: %d. error: %s", mt, err.Error()))
-		}
-	}
-}
-
-func pingServer(w http.ResponseWriter, r *http.Request) {
-	upgrader := websocket.Upgrader{}
-	c, err := upgrader.Upgrade(w, r, nil)
-	if err != nil {
-		panic(fmt.Errorf("failed to upgrade protocol: %s", err.Error()))
-	}
-	defer c.Close()
-
-	res := &Pong{}
-	c.WriteJSON(res)
-}
-
-func startServer() {
-	http.HandleFunc("/echo", echoServer)
-	http.HandleFunc("/ping", pingServer)
-	server := httptest.NewServer(nil)
-	webSocketServerAddress = server.Listener.Addr().String()
-}
-
 func TestConnect(t *testing.T) {
-	once.Do(startServer)
+	testutil.RunWithWebSocket(func(addr net.Addr) {
+		url := fmt.Sprintf("ws://%s%s", addr, "/echo")
+		connection, err := Connect(context.TODO(), url)
+		if err != nil {
+			t.Fatalf("webSocket connection error: %s.", err.Error())
+		}
 
-	// Establish connection
-	url := fmt.Sprintf("ws://%s%s", webSocketServerAddress, "/echo")
-	connection, err := Connect(context.TODO(), url)
-	if err != nil {
-		t.Fatalf("webSocket connection error: %s.", err.Error())
-	}
-
-	if connection == nil {
-		t.Fatalf("Connection is not reurned.")
-	}
+		if connection == nil {
+			t.Fatalf("Connection is not reurned.")
+		}
+		connection.Close()
+	})
 }
 
 func TestConnect_Fail(t *testing.T) {
-	once.Do(startServer)
+	testutil.RunWithWebSocket(func(addr net.Addr) {
+		// Establish connection
+		url := fmt.Sprintf("ws://%s%s", addr, "/undefined_path")
+		_, err := Connect(context.TODO(), url)
 
-	// Establish connection
-	url := fmt.Sprintf("ws://%s%s", webSocketServerAddress, "/undefined_path")
-	_, err := Connect(context.TODO(), url)
+		if err == nil {
+			t.Fatal("expected error is not returned.")
+		}
 
-	if err == nil {
-		t.Fatal("expected error is not returned.")
-	}
-
-	if err != websocket.ErrBadHandshake {
-		t.Fatalf("Unexpected error is returned: %s.", err.Error())
-	}
+		if err != websocket.ErrBadHandshake {
+			t.Fatalf("Unexpected error is returned: %s.", err.Error())
+		}
+	})
 }
 
 func Test_newConnectionWrapper(t *testing.T) {
@@ -114,110 +67,111 @@ func Test_newConnectionWrapper(t *testing.T) {
 }
 
 func TestConnWrapper_Receive(t *testing.T) {
-	once.Do(startServer)
+	testutil.RunWithWebSocket(func(addr net.Addr) {
+		url := fmt.Sprintf("ws://%s%s", addr, "/echo")
+		conn, _, err := websocket.DefaultDialer.Dial(url, nil)
+		if err != nil {
+			t.Fatal("can't establish connection with test server")
+		}
+		defer conn.Close()
 
-	url := fmt.Sprintf("ws://%s%s", webSocketServerAddress, "/echo")
-	conn, _, err := websocket.DefaultDialer.Dial(url, nil)
-	if err != nil {
-		t.Fatal("can't establish connection with test server")
-	}
-	defer conn.Close()
+		var channelID event.ChannelID = "C12345"
+		var userID event.UserID = "U6789"
+		text := "Hello world!"
+		timestamp := 1355517523
+		slackTimestamp := fmt.Sprintf("%d.000005", timestamp)
+		input := fmt.Sprintf(`{"type": "message", "channel": "%s", "user": "%s", "text": "%s", "ts": "%s"}`, channelID.String(), userID.String(), text, slackTimestamp)
 
-	var channelID event.ChannelID = "C12345"
-	var userID event.UserID = "U6789"
-	text := "Hello world!"
-	timestamp := 1355517523
-	slackTimestamp := fmt.Sprintf("%d.000005", timestamp)
-	input := fmt.Sprintf(`{"type": "message", "channel": "%s", "user": "%s", "text": "%s", "ts": "%s"}`, channelID.String(), userID.String(), text, slackTimestamp)
+		connWrapper := newConnectionWrapper(conn)
+		conn.WriteMessage(websocket.TextMessage, []byte(input))
+		decodedPayload, err := connWrapper.Receive()
+		if err != nil {
+			t.Fatalf("error on payload reception: %s.", err.Error())
+		}
 
-	connWrapper := newConnectionWrapper(conn)
-	conn.WriteMessage(websocket.TextMessage, []byte(input))
-	decodedPayload, err := connWrapper.Receive()
-	if err != nil {
-		t.Fatalf("error on payload reception: %s.", err.Error())
-	}
+		message, ok := decodedPayload.(*event.Message)
+		if !ok {
+			t.Fatalf("received payload is not Message: %#v.", message)
+		}
 
-	message, ok := decodedPayload.(*event.Message)
-	if !ok {
-		t.Fatalf("received payload is not Message: %#v.", message)
-	}
+		if message.ChannelID != channelID {
+			t.Errorf("expected channel name is not given: %s.", message.ChannelID.String())
+		}
 
-	if message.ChannelID != channelID {
-		t.Errorf("expected channel name is not given: %s.", message.ChannelID.String())
-	}
+		if message.SenderID != userID {
+			t.Errorf("expected user is not given: %s.", message.SenderID)
+		}
 
-	if message.SenderID != userID {
-		t.Errorf("expected user is not given: %s.", message.SenderID)
-	}
+		if message.Text != text {
+			t.Errorf("expected text is not given: %s.", message.Text)
+		}
 
-	if message.Text != text {
-		t.Errorf("expected text is not given: %s.", message.Text)
-	}
+		if !message.TimeStamp.Time.Equal(time.Unix(1355517523, 0)) {
+			t.Errorf("expected time is not given: %d.", message.TimeStamp.Time.Unix())
+		}
 
-	if !message.TimeStamp.Time.Equal(time.Unix(1355517523, 0)) {
-		t.Errorf("expected time is not given: %d.", message.TimeStamp.Time.Unix())
-	}
+		if message.TimeStamp.OriginalValue != slackTimestamp {
+			t.Errorf("expected timestamp original value is not given: %s.", message.TimeStamp.OriginalValue)
+		}
 
-	if message.TimeStamp.OriginalValue != slackTimestamp {
-		t.Errorf("expected timestamp original value is not given: %s.", message.TimeStamp.OriginalValue)
-	}
+	})
 }
 
 func TestConnWrapper_Send(t *testing.T) {
-	once.Do(startServer)
+	testutil.RunWithWebSocket(func(addr net.Addr) {
+		url := fmt.Sprintf("ws://%s%s", addr, "/echo")
+		conn, _, err := websocket.DefaultDialer.Dial(url, nil)
+		if err != nil {
+			t.Fatal("can't establish connection with test server")
+		}
+		defer conn.Close()
 
-	url := fmt.Sprintf("ws://%s%s", webSocketServerAddress, "/echo")
-	conn, _, err := websocket.DefaultDialer.Dial(url, nil)
-	if err != nil {
-		t.Fatal("can't establish connection with test server")
-	}
-	defer conn.Close()
+		connWrapper := newConnectionWrapper(conn)
+		message := &OutgoingMessage{}
+		if err := connWrapper.Send(message); err != nil {
+			t.Errorf("error on sending message over WebSocket connection. %#v.", err)
+		}
 
-	connWrapper := newConnectionWrapper(conn)
-	message := &OutgoingMessage{}
-	if err := connWrapper.Send(message); err != nil {
-		t.Errorf("error on sending message over WebSocket connection. %#v.", err)
-	}
-
-	if message.ID == 0 {
-		t.Errorf("Send() method must append message id.")
-	}
+		if message.ID == 0 {
+			t.Errorf("Send() method must append message id.")
+		}
+	})
 }
 
 func TestConnWrapper_Ping(t *testing.T) {
-	once.Do(startServer)
+	testutil.RunWithWebSocket(func(addr net.Addr) {
+		url := fmt.Sprintf("ws://%s%s", addr, "/ping")
+		conn, _, err := websocket.DefaultDialer.Dial(url, nil)
+		if err != nil {
+			t.Fatal("can't establish connection with test server")
+		}
+		defer conn.Close()
 
-	url := fmt.Sprintf("ws://%s%s", webSocketServerAddress, "/ping")
-	conn, _, err := websocket.DefaultDialer.Dial(url, nil)
-	if err != nil {
-		t.Fatal("can't establish connection with test server")
-	}
-	defer conn.Close()
-
-	connWrapper := newConnectionWrapper(conn)
-	if err := connWrapper.Ping(); err != nil {
-		t.Errorf("error on sending message over WebSocket connection. %#v.", err)
-	}
+		connWrapper := newConnectionWrapper(conn)
+		if err := connWrapper.Ping(); err != nil {
+			t.Errorf("error on sending message over WebSocket connection. %#v.", err)
+		}
+	})
 }
 
 func TestConnWrapper_Close(t *testing.T) {
-	once.Do(startServer)
+	testutil.RunWithWebSocket(func(addr net.Addr) {
+		url := fmt.Sprintf("ws://%s%s", addr, "/echo")
+		conn, _, err := websocket.DefaultDialer.Dial(url, nil)
+		if err != nil {
+			t.Fatal("can't establish connection with test server")
+		}
 
-	url := fmt.Sprintf("ws://%s%s", webSocketServerAddress, "/echo")
-	conn, _, err := websocket.DefaultDialer.Dial(url, nil)
-	if err != nil {
-		t.Fatal("can't establish connection with test server")
-	}
+		connWrapper := newConnectionWrapper(conn)
 
-	connWrapper := newConnectionWrapper(conn)
+		if err := connWrapper.Close(); err != nil {
+			t.Fatal("error on connection close")
+		}
 
-	if err := connWrapper.Close(); err != nil {
-		t.Fatal("error on connection close")
-	}
-
-	if err := conn.Close(); err == nil {
-		t.Fatal("net.OpError should be returned when WebSocket.Conn.Close is called multiple times.")
-	}
+		if err := conn.Close(); err == nil {
+			t.Fatal("net.OpError should be returned when WebSocket.Conn.Close is called multiple times.")
+		}
+	})
 }
 
 func Test_decodePayload(t *testing.T) {
