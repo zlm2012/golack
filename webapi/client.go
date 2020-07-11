@@ -16,8 +16,15 @@ const (
 )
 
 type Config struct {
-	Token          string
-	RequestTimeout time.Duration
+	Token          string        `json:"token" yaml:"token"`
+	RequestTimeout time.Duration `json:"request_timeout" yaml:"request_timeout"`
+}
+
+func NewConfig() *Config {
+	return &Config{
+		Token:          "",
+		RequestTimeout: 3 * time.Second,
+	}
 }
 
 type ClientOption func(*Client)
