@@ -53,24 +53,22 @@ func NewClient(config *Config, options ...ClientOption) *Client {
 	return c
 }
 
-func buildEndpoint(slackMethod, token string, queryParams *url.Values) *url.URL {
-	if queryParams == nil {
-		queryParams = &url.Values{}
-	}
-	queryParams.Add("token", token)
-
+func buildEndpoint(slackMethod string, queryParams url.Values) *url.URL {
 	requestURL, err := url.Parse(fmt.Sprintf(slackAPIEndpointFormat, slackMethod))
 	if err != nil {
 		panic(err.Error())
 	}
-	requestURL.RawQuery = queryParams.Encode()
+
+	if queryParams != nil {
+		requestURL.RawQuery = queryParams.Encode()
+	}
 
 	return requestURL
 }
 
-func (client *Client) Get(ctx context.Context, slackMethod string, queryParams *url.Values, intf interface{}) error {
+func (client *Client) Get(ctx context.Context, slackMethod string, queryParams url.Values, intf interface{}) error {
 	// Prepare request
-	endpoint := buildEndpoint(slackMethod, client.config.Token, queryParams)
+	endpoint := buildEndpoint(slackMethod, queryParams)
 	req, err := http.NewRequest(http.MethodGet, endpoint.String(), nil)
 	if err != nil {
 		return err
@@ -78,6 +76,7 @@ func (client *Client) Get(ctx context.Context, slackMethod string, queryParams *
 	reqCtx, cancel := context.WithTimeout(ctx, client.config.RequestTimeout)
 	defer cancel()
 	req.WithContext(reqCtx)
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", client.config.Token))
 
 	// Do request
 	resp, err := client.httpClient.Do(req)
@@ -119,15 +118,16 @@ func statusErr(resp *http.Response) error {
 
 func (client *Client) Post(ctx context.Context, slackMethod string, bodyParam url.Values, intf interface{}) error {
 	// Prepare request
-	endpoint := buildEndpoint(slackMethod, client.config.Token, nil)
+	endpoint := buildEndpoint(slackMethod, nil)
 	req, err := http.NewRequest("POST", endpoint.String(), strings.NewReader(bodyParam.Encode()))
 	if err != nil {
 		return err
 	}
 	reqCtx, cancel := context.WithTimeout(ctx, client.config.RequestTimeout)
 	defer cancel()
-	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	req.WithContext(reqCtx)
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", client.config.Token))
 
 	// Do request
 	resp, err := client.httpClient.Do(req)
