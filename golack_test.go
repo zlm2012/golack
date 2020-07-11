@@ -24,6 +24,21 @@ func (wc *DummyWebClient) Post(ctx context.Context, slackMethod string, bodyPara
 	return wc.PostFunc(ctx, slackMethod, bodyParam, intf)
 }
 
+func TestNewConfig(t *testing.T) {
+	config := NewConfig()
+	if config == nil {
+		t.Fatal("Returned *Config is nil.")
+	}
+
+	if config.RequestTimeout == 0 {
+		t.Error("Default timeout is not set.")
+	}
+
+	if config.ListenPort == 0 {
+		t.Error("Default listen port is not set.")
+	}
+}
+
 func TestWithWebClient(t *testing.T) {
 	webClient := &DummyWebClient{}
 	option := WithWebClient(webClient)
