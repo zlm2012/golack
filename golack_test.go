@@ -79,28 +79,69 @@ func TestNew(t *testing.T) {
 }
 
 func TestGolack_PostMessage(t *testing.T) {
-	webClient := &DummyWebClient{
-		PostFunc: func(ctx context.Context, slackMethod string, bodyParam url.Values, intf interface{}) error {
-			response := intf.(*webapi.APIResponse)
-			response.OK = true
-			response.Error = ""
-			return nil
-		},
-	}
-	g := &Golack{
-		WebClient: webClient,
-	}
+	t.Run("Web API returns error status", func(t *testing.T) {
+		expectedErr := xerrors.New("DUMMY")
+		webClient := &DummyWebClient{
+			PostFunc: func(ctx context.Context, slackMethod string, bodyParam url.Values, intf interface{}) error {
+				return expectedErr
+			},
+		}
+		g := &Golack{
+			WebClient: webClient,
+		}
 
-	postMessage := webapi.NewPostMessage("channel", "my message")
-	response, err := g.PostMessage(context.TODO(), postMessage)
+		_, err := g.PostMessage(context.TODO(), &webapi.PostMessage{})
+		if err == nil {
+			t.Fatal("Error is not returned.")
+		}
+		if err != expectedErr {
+			t.Fatalf("Expected error is not returned: %+v", err)
+		}
+	})
 
-	if err != nil {
-		t.Errorf("something is wrong. %#v", err)
-	}
+	t.Run("Web API returns error response", func(t *testing.T) {
+		webClient := &DummyWebClient{
+			PostFunc: func(ctx context.Context, slackMethod string, bodyParam url.Values, intf interface{}) error {
+				response := intf.(*webapi.APIResponse)
+				response.OK = false
+				response.Error = "some error"
+				return nil
+			},
+		}
+		g := &Golack{
+			WebClient: webClient,
+		}
 
-	if response.OK != true {
-		t.Errorf("OK status is wrong. %#v", response)
-	}
+		_, err := g.PostMessage(context.TODO(), &webapi.PostMessage{})
+		if err == nil {
+			t.Fatal("Expected error is not returned.")
+		}
+	})
+
+	t.Run("success", func(t *testing.T) {
+		webClient := &DummyWebClient{
+			PostFunc: func(ctx context.Context, slackMethod string, bodyParam url.Values, intf interface{}) error {
+				response := intf.(*webapi.APIResponse)
+				response.OK = true
+				response.Error = ""
+				return nil
+			},
+		}
+		g := &Golack{
+			WebClient: webClient,
+		}
+
+		postMessage := webapi.NewPostMessage("channel", "my message")
+		response, err := g.PostMessage(context.TODO(), postMessage)
+
+		if err != nil {
+			t.Errorf("something is wrong. %#v", err)
+		}
+
+		if response.OK != true {
+			t.Errorf("OK status is wrong. %#v", response)
+		}
+	})
 }
 
 func TestGolack_ConnectRTM(t *testing.T) {
