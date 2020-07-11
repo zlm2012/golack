@@ -1,3 +1,9 @@
+// Package golack provides higher-level interfaces to interact with Events API, Web API and RTM API.
+// Since its aim is to provides higher-level interfaces for easier setup, this lacks customizability.
+// Directly use below sub-packages when customization is required.
+//   - eventsapi ... Events API ( https://api.slack.com/events-api )
+//   - webapi ... Web API ( https://api.slack.com/web )
+//   - rtmapi ... RTM API ( https://api.slack.com/rtm )
 package golack
 
 import (
@@ -13,6 +19,8 @@ import (
 	"github.com/oklahomer/golack/webapi"
 )
 
+// Config defines the serializable/deserializable configuration value.
+// Use NewConfig() to build a Config with default setting, and then pass the instance to json.Unmarshal()/yaml.Unmarshal() to apply customization.
 type Config struct {
 	AppSecret      string        `json:"app_secret" yaml:"app_secret"`
 	Token          string        `json:"token" yaml:"token"`
@@ -32,6 +40,7 @@ func NewConfig() *Config {
 	}
 }
 
+// WebClient defines an interface that abstracts the webapi.Client.
 type WebClient interface {
 	Get(ctx context.Context, slackMethod string, queryParams *url.Values, intf interface{}) error
 	Post(ctx context.Context, slackMethod string, bodyParam url.Values, intf interface{}) error
@@ -39,17 +48,22 @@ type WebClient interface {
 
 type Option func(*Golack)
 
+// WithWebClient provides a way to use pre-configured WebClient implementation.
+// Pass the returned Option to New().
 func WithWebClient(wc WebClient) Option {
 	return func(g *Golack) {
 		g.WebClient = wc
 	}
 }
 
+// Golack works as a kind of facade to provide higher level interface to work with Events API, Web API and RTM API.
+// For more customizability, use each sub-package that corresponds to each API.
 type Golack struct {
-	config    *Config
 	WebClient WebClient
+	config    *Config
 }
 
+// New builds a new Golack instance with given config and options.
 func New(config *Config, options ...Option) *Golack {
 	g := &Golack{}
 	g.config = config
@@ -70,6 +84,9 @@ func New(config *Config, options ...Option) *Golack {
 	return g
 }
 
+// PostMessage posts a postMessage to Slack.
+//
+// See https://api.slack.com/methods/chat.postMessage for official document.
 func (g *Golack) PostMessage(ctx context.Context, postMessage *webapi.PostMessage) (*webapi.APIResponse, error) {
 	response := &webapi.APIResponse{}
 	err := g.WebClient.Post(ctx, "chat.postMessage", postMessage.ToURLValues(), response)
@@ -85,6 +102,8 @@ func (g *Golack) PostMessage(ctx context.Context, postMessage *webapi.PostMessag
 }
 
 // ConnectRTM connects to Slack WebSocket server.
+//
+// See https://api.slack.com/rtm for official document.
 func (g *Golack) ConnectRTM(ctx context.Context) (rtmapi.Connection, error) {
 	rtmStart := &webapi.RTMStart{}
 	err := g.WebClient.Get(ctx, "rtm.start", nil, rtmStart)
@@ -99,6 +118,12 @@ func (g *Golack) ConnectRTM(ctx context.Context) (rtmapi.Connection, error) {
 	return rtmapi.Connect(ctx, rtmStart.URL)
 }
 
+// RunServer starts a server to interact with Events API.
+// The server runs in another goroutine so this method is not blocking.
+// To pass and notify the error state of the server from the server, this returns a channel that passes the error.
+// When the error is returned from the channel, the server is not running or is already stopped.
+//
+// See https://api.slack.com/events-api for official document.
 func (g *Golack) RunServer(ctx context.Context, receiver eventsapi.EventReceiver) <-chan error {
 	errChan := make(chan error, 1)
 
