@@ -12,8 +12,9 @@ import (
 )
 
 const (
-	AuthHeaderName   = "Authorization"
-	AuthBearerSchema = "Bearer "
+	AuthHeaderName        = "Authorization"
+	AuthBearerSchema      = "Bearer "
+	ContentTypeHeaderName = "Content-Type"
 )
 
 type GetResponseDummy struct {
@@ -178,11 +179,28 @@ func TestClient_Get(t *testing.T) {
 	})
 }
 
+type urlValuerImpl struct {
+	v url.Values
+}
+
+var _ URLValuer = (*urlValuerImpl)(nil)
+
+func (u urlValuerImpl) ToURLValues() url.Values {
+	return u.v
+}
+
 func TestClient_Post(t *testing.T) {
-	t.Run("success", func(t *testing.T) {
+	t.Run("url.Values payload", func(t *testing.T) {
 		token := "abc"
+		param := "foo"
+		value := "bar"
 		mux := http.NewServeMux()
-		mux.HandleFunc("/api/foo", func(w http.ResponseWriter, req *http.Request) {
+		mux.HandleFunc("/api/aMethod", func(w http.ResponseWriter, req *http.Request) {
+			contentType := req.Header.Get(ContentTypeHeaderName)
+			if contentType != "application/x-www-form-urlencoded" {
+				t.Errorf("Expected %s header is not passed: %s", ContentTypeHeaderName, contentType)
+			}
+
 			auth := req.Header.Get(AuthHeaderName)
 			if len(auth) == 0 {
 				t.Fatal("Authorization header is not given")
@@ -196,7 +214,7 @@ func TestClient_Post(t *testing.T) {
 			defer req.Body.Close()
 			bytes, _ := ioutil.ReadAll(req.Body)
 			query, _ := url.ParseQuery(string(bytes))
-			if query.Get("foo") != "bar" {
+			if query.Get(param) != value {
 				t.Errorf("Expected parameter is not passed: %+v", query)
 			}
 
@@ -217,11 +235,159 @@ func TestClient_Post(t *testing.T) {
 
 		returnedResponse := &APIResponse{}
 		values := url.Values{}
-		values.Set("foo", "bar")
-		err := client.Post(context.TODO(), "foo", values, returnedResponse)
+		values.Set(param, value)
+		err := client.Post(context.TODO(), "aMethod", values, returnedResponse)
 
 		if err != nil {
 			t.Errorf("something is wrong. %#v", err)
+		}
+
+		if !returnedResponse.OK {
+			t.Error("OK field must be true.")
+		}
+	})
+
+	t.Run("URLValuer payload", func(t *testing.T) {
+		token := "abc"
+		param := "foo"
+		value := "bar"
+		mux := http.NewServeMux()
+		mux.HandleFunc("/api/aMethod", func(w http.ResponseWriter, req *http.Request) {
+			contentType := req.Header.Get(ContentTypeHeaderName)
+			if contentType != "application/x-www-form-urlencoded" {
+				t.Errorf("Expected %s header is not passed: %s", ContentTypeHeaderName, contentType)
+			}
+
+			auth := req.Header.Get(AuthHeaderName)
+			if len(auth) == 0 {
+				t.Fatal("Authorization header is not given")
+			}
+
+			tokenVal := auth[len(AuthBearerSchema):]
+			if tokenVal != token {
+				t.Errorf("Expected token value is not given: %s", auth)
+			}
+
+			defer req.Body.Close()
+			bytes, _ := ioutil.ReadAll(req.Body)
+			query, _ := url.ParseQuery(string(bytes))
+			if query.Get(param) != value {
+				t.Errorf("Expected parameter is not passed: %+v", query)
+			}
+
+			w.WriteHeader(http.StatusOK)
+
+			response := &APIResponse{OK: true}
+			bytes, _ = json.Marshal(response)
+			w.Write(bytes)
+		})
+
+		client := &Client{
+			config: &Config{
+				Token:          token,
+				RequestTimeout: 3 * time.Second,
+			},
+			httpClient: &http.Client{Transport: &localRoundTripper{mux: mux}},
+		}
+
+		payload := &urlValuerImpl{
+			v: url.Values{
+				param: []string{value},
+			},
+		}
+		returnedResponse := &APIResponse{}
+		err := client.Post(context.TODO(), "aMethod", payload, returnedResponse)
+
+		if err != nil {
+			t.Errorf("something is wrong. %#v", err)
+		}
+
+		if !returnedResponse.OK {
+			t.Error("OK field must be true.")
+		}
+	})
+
+	t.Run("JSON payload", func(t *testing.T) {
+		type jsonSerializable struct {
+			Foo string `json:"foo"`
+		}
+
+		token := "abc"
+		value := "bar"
+		mux := http.NewServeMux()
+		mux.HandleFunc("/api/chat.postMessage", func(w http.ResponseWriter, req *http.Request) {
+			contentType := req.Header.Get(ContentTypeHeaderName)
+			if contentType != "application/json" {
+				t.Errorf("Expected %s header is not passed: %s", ContentTypeHeaderName, contentType)
+			}
+
+			auth := req.Header.Get(AuthHeaderName)
+			if len(auth) == 0 {
+				t.Fatal("Authorization header is not given")
+			}
+
+			tokenVal := auth[len(AuthBearerSchema):]
+			if tokenVal != token {
+				t.Errorf("Expected token value is not given: %s", auth)
+			}
+
+			defer req.Body.Close()
+			payload := &jsonSerializable{}
+			json.NewDecoder(req.Body).Decode(payload)
+			if payload.Foo != value {
+				t.Error("Expected parameter is not passed.")
+			}
+
+			w.WriteHeader(http.StatusOK)
+
+			response := &APIResponse{OK: true}
+			bytes, _ := json.Marshal(response)
+			w.Write(bytes)
+		})
+
+		client := &Client{
+			config: &Config{
+				Token:          token,
+				RequestTimeout: 3 * time.Second,
+			},
+			httpClient: &http.Client{Transport: &localRoundTripper{mux: mux}},
+		}
+
+		payload := &jsonSerializable{Foo: value}
+		returnedResponse := &APIResponse{}
+		err := client.Post(context.TODO(), "chat.postMessage", payload, returnedResponse)
+
+		if err != nil {
+			t.Errorf("something is wrong. %#v", err)
+		}
+
+		if !returnedResponse.OK {
+			t.Error("OK field must be true.")
+		}
+	})
+
+	t.Run("JSON unsupported method", func(t *testing.T) {
+		type jsonSerializable struct {
+			Foo string `json:"foo"`
+		}
+
+		client := &Client{
+			config: &Config{
+				Token:          "abc",
+				RequestTimeout: 3 * time.Second,
+			},
+		}
+
+		payload := &jsonSerializable{Foo: "bar"}
+		returnedResponse := &APIResponse{}
+		err := client.Post(context.TODO(), "invalid.method", payload, returnedResponse)
+
+		if err == nil {
+			t.Error("Expected error is not returned.")
+		}
+
+		if err != ErrJSONPayloadNotSupported {
+			t.Errorf("Unexpected type of error is returned: %+v", err)
 		}
 	})
 

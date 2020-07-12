@@ -2,7 +2,6 @@ package webapi
 
 import (
 	"github.com/oklahomer/golack/event"
-	"strconv"
 	"testing"
 )
 
@@ -101,85 +100,4 @@ func TestPostMessage_WithUnfurlMedia(t *testing.T) {
 	if message.UnfurlMedia == oldVal {
 		t.Error("value is not updated.")
 	}
-}
-
-func TestPostMessage_ToURLValues(t *testing.T) {
-	channelID := event.ChannelID("myChannel")
-	text := "myText"
-	parse := ParseModeFull
-	linkNames := 1
-	attachment := &MessageAttachment{}
-	unfurlLinks := true
-	unfurlMedia := true
-	userName := "myName"
-	asUser := true
-	iconUrl := "http://example.com/icon.png"
-	iconEmoji := ":chart_with_upwards_trend:"
-	message := &PostMessage{
-		ChannelID:   channelID,
-		Text:        text,
-		Parse:       parse,
-		LinkNames:   linkNames,
-		Attachments: []*MessageAttachment{attachment},
-		UnfurlLinks: unfurlLinks,
-		UnfurlMedia: unfurlMedia,
-		UserName:    userName,
-		AsUser:      asUser,
-		IconURL:     iconUrl,
-		IconEmoji:   iconEmoji,
-	}
-
-	testVars := []struct {
-		key string
-		val interface{}
-	}{
-		{
-			key: "channel",
-			val: channelID.String(),
-		},
-		{
-			key: "text",
-			val: text,
-		},
-		{
-			key: "parse",
-			val: parse.String(),
-		},
-		{
-			key: "link_names",
-			val: strconv.Itoa(linkNames),
-		},
-		{
-			key: "unfurl_links",
-			val: strconv.FormatBool(unfurlLinks),
-		},
-		{
-			key: "unfurl_media",
-			val: strconv.FormatBool(unfurlMedia),
-		},
-		{
-			key: "username",
-			val: userName,
-		},
-		{
-			key: "as_user",
-			val: strconv.FormatBool(asUser),
-		},
-		{
-			key: "icon_url",
-			val: iconUrl,
-		},
-		{
-			key: "icon_emoji",
-			val: iconEmoji,
-		},
-	}
-
-	urlVal := message.ToURLValues()
-	for _, testVar := range testVars {
-		if urlVal.Get(testVar.key) != testVar.val {
-			t.Errorf("expected value is not returned. key: %s. val: %#v.", testVar.key, urlVal.Get(testVar.key))
-		}
-	}
-	// TODO check marshaled attachments field
 }

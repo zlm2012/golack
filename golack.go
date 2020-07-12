@@ -42,8 +42,8 @@ func NewConfig() *Config {
 
 // WebClient defines an interface that abstracts the webapi.Client.
 type WebClient interface {
-	Get(ctx context.Context, slackMethod string, queryParams url.Values, intf interface{}) error
-	Post(ctx context.Context, slackMethod string, bodyParam url.Values, intf interface{}) error
+	Get(ctx context.Context, slackMethod string, queryParams url.Values, response interface{}) error
+	Post(ctx context.Context, slackMethod string, payload interface{}, response interface{}) error
 }
 
 type Option func(*Golack)
@@ -89,7 +89,7 @@ func New(config *Config, options ...Option) *Golack {
 // See https://api.slack.com/methods/chat.postMessage for official document.
 func (g *Golack) PostMessage(ctx context.Context, postMessage *webapi.PostMessage) (*webapi.APIResponse, error) {
 	response := &webapi.APIResponse{}
-	err := g.WebClient.Post(ctx, "chat.postMessage", postMessage.ToURLValues(), response)
+	err := g.WebClient.Post(ctx, "chat.postMessage", postMessage, response)
 	if err != nil {
 		return nil, err
 	}

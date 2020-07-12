@@ -1,10 +1,7 @@
 package webapi
 
 import (
-	"encoding/json"
 	"github.com/oklahomer/golack/event"
-	"net/url"
-	"strconv"
 )
 
 // ParseMode defines the parse parameter values for post.message method.
@@ -45,19 +42,19 @@ type MessageAttachment struct {
 // PostMessage is a payload to be sent with chat.postMessage method.
 // See https://api.slack.com/methods/chat.postMessage
 type PostMessage struct {
-	ChannelID       event.ChannelID
-	Text            string
-	Parse           ParseMode
-	LinkNames       int
-	Attachments     []*MessageAttachment
-	UnfurlLinks     bool
-	UnfurlMedia     bool
-	UserName        string
-	AsUser          bool
-	IconURL         string
-	IconEmoji       string
-	ReplyBroadcast  bool
-	ThreadTimeStamp string
+	ChannelID       event.ChannelID      `json:"channel"`
+	Text            string               `json:"text"`
+	Parse           ParseMode            `json:"parse,omitempty"`
+	LinkNames       int                  `json:"link_names,omitempty"`
+	Attachments     []*MessageAttachment `json:"attachments,omitempty"`
+	UnfurlLinks     bool                 `json:"unfurl_links,omitempty"`
+	UnfurlMedia     bool                 `json:"unfurl_media,omitempty"`
+	UserName        string               `json:"username,omitempty"`
+	AsUser          bool                 `json:"as_user,omitempty"`
+	IconURL         string               `json:"icon_url,omitempty"`
+	IconEmoji       string               `json:"icon_emoji,omitempty"`
+	ReplyBroadcast  bool                 `json:"reply_broadcast,omitempty"`
+	ThreadTimeStamp string               `json:"thread_ts,omitempty"`
 }
 
 // WithAttachments sets/overrides attachments parameter for current PostMessage.
@@ -108,39 +105,6 @@ func (message *PostMessage) WithUnfurlLinks(unfurl bool) *PostMessage {
 func (message *PostMessage) WithUnfurlMedia(unfurl bool) *PostMessage {
 	message.UnfurlMedia = unfurl
 	return message
-}
-
-// ToURLValues forms requesting parameter for Slack's Rest API endpoint.
-// See https://api.slack.com/docs/message-formatting
-func (message *PostMessage) ToURLValues() url.Values {
-	values := url.Values{}
-
-	values.Add("channel", message.ChannelID.String())
-	values.Add("text", message.Text)
-	values.Add("parse", message.Parse.String())
-	values.Add("link_names", strconv.Itoa(message.LinkNames))
-	values.Add("unfurl_links", strconv.FormatBool(message.UnfurlLinks))
-	values.Add("unfurl_media", strconv.FormatBool(message.UnfurlMedia))
-	values.Add("as_user", strconv.FormatBool(message.AsUser))
-	if message.ThreadTimeStamp != "" {
-		values.Add("thread_ts", message.ThreadTimeStamp)
-		values.Add("reply_broadcast", strconv.FormatBool(message.ReplyBroadcast))
-	}
-	if message.UserName != "" {
-		values.Add("username", message.UserName)
-	}
-	if message.IconURL != "" {
-		values.Add("icon_url", message.IconURL)
-	}
-	if message.IconEmoji != "" {
-		values.Add("icon_emoji", message.IconEmoji)
-	}
-	if message.Attachments != nil {
-		s, _ := json.Marshal(message.Attachments)
-		values.Add("attachments", string(s))
-	}
-
-	return values
 }
 
 // NewPostMessage creates PostMessage instance with given channel and text settings.

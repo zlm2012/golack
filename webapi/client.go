@@ -1,19 +1,24 @@
 package webapi
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
+	"golang.org/x/xerrors"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
-	"strings"
 	"time"
 )
 
 const (
 	slackAPIEndpointFormat = "https://slack.com/api/%s"
 )
+
+type URLValuer interface {
+	ToURLValues() url.Values
+}
 
 type Config struct {
 	Token          string        `json:"token" yaml:"token"`
@@ -66,7 +71,7 @@ func buildEndpoint(slackMethod string, queryParams url.Values) *url.URL {
 	return requestURL
 }
 
-func (client *Client) Get(ctx context.Context, slackMethod string, queryParams url.Values, intf interface{}) error {
+func (client *Client) Get(ctx context.Context, slackMethod string, queryParams url.Values, response interface{}) error {
 	// Prepare request
 	endpoint := buildEndpoint(slackMethod, queryParams)
 	req, err := http.NewRequest(http.MethodGet, endpoint.String(), nil)
@@ -92,7 +97,7 @@ func (client *Client) Get(ctx context.Context, slackMethod string, queryParams u
 	}
 
 	// Handle response body
-	err = json.NewDecoder(resp.Body).Decode(&intf)
+	err = json.NewDecoder(resp.Body).Decode(&response)
 	if err != nil {
 		return err
 	}
@@ -116,18 +121,24 @@ func statusErr(resp *http.Response) error {
 	return fmt.Errorf("response status error. Status: %d.\nRequest: %s\nResponse: %s", resp.StatusCode, string(reqDump), string(resDump))
 }
 
-func (client *Client) Post(ctx context.Context, slackMethod string, bodyParam url.Values, intf interface{}) error {
-	// Prepare request
-	endpoint := buildEndpoint(slackMethod, nil)
-	req, err := http.NewRequest("POST", endpoint.String(), strings.NewReader(bodyParam.Encode()))
+func (client *Client) Post(ctx context.Context, slackMethod string, payload interface{}, response interface{}) error {
+	// Decide how the request should be treated depending on the slackMethod/payload
+	p, err := genPayload(slackMethod, payload)
 	if err != nil {
 		return err
 	}
+
+	// Prepare request
+	endpoint := buildEndpoint(slackMethod, nil)
+	req, err := http.NewRequest("POST", endpoint.String(), bytes.NewReader(p.Body))
+	if err != nil {
+		return err
+	}
+	req.Header.Set("Content-Type", p.Type)
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", client.config.Token))
 	reqCtx, cancel := context.WithTimeout(ctx, client.config.RequestTimeout)
 	defer cancel()
 	req.WithContext(reqCtx)
-	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", client.config.Token))
 
 	// Do request
 	resp, err := client.httpClient.Do(req)
@@ -143,9 +154,50 @@ func (client *Client) Post(ctx context.Context, slackMethod string, bodyParam ur
 	}
 
 	// Handle response body
-	err = json.NewDecoder(resp.Body).Decode(&intf)
+	err = json.NewDecoder(resp.Body).Decode(&response)
 	if err != nil {
 		return err
 	}
 	return nil
+}
+
+func genPayload(m string, p interface{}) (*payload, error) {
+	// Other than specifically designed methods, most payloads must be sent as application/x-www-form-urlencoded
+	// See https://api.slack.com/web#basics
+	switch typed := p.(type) {
+	case url.Values:
+		return &payload{
+			Type: "application/x-www-form-urlencoded",
+			Body: []byte(typed.Encode()),
+		}, nil
+
+	case URLValuer:
+		// When the endpoint does not support JSON formatted payload, the incoming struct should implement URLValuer.
+		// See how PostMessage worked back in https://github.com/oklahomer/golack/blob/75ad9b2a4ace063b033241c514458789056bd874/webapi/request.go#L113-L144
+		return &payload{
+			Type: "application/x-www-form-urlencoded",
+			Body: []byte(typed.ToURLValues().Encode()),
+		}, nil
+
+	default:
+		// Send JSON formatted payload when the method supports: https://api.slack.com/web#methods_supporting_json
+		supported := IsJSONPayloadSupportedMethod(m)
+		if !supported {
+			return nil, ErrJSONPayloadNotSupported
+		}
+
+		b, err := json.Marshal(p)
+		if err != nil {
+			return nil, xerrors.Errorf("failed to serialize payload: %w", err)
+		}
+		return &payload{
+			Type: "application/json",
+			Body: b,
+		}, nil
+	}
+}
+
+type payload struct {
+	Type string
+	Body []byte
 }
