@@ -60,6 +60,8 @@ type PostMessage struct {
 	ThreadTimeStamp string
 }
 
+var _ URLValuer = (*PostMessage)(nil)
+
 // WithAttachments sets/overrides attachments parameter for current PostMessage.
 // See https://api.slack.com/docs/message-attachments
 func (message *PostMessage) WithAttachments(attachments []*MessageAttachment) *PostMessage {
