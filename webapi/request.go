@@ -44,17 +44,26 @@ type MessageAttachment struct {
 type PostMessage struct {
 	ChannelID       event.ChannelID      `json:"channel"`
 	Text            string               `json:"text"`
-	Parse           ParseMode            `json:"parse,omitempty"`
-	LinkNames       int                  `json:"link_names,omitempty"`
+	AsUser          bool                 `json:"as_user,omitempty"`
 	Attachments     []*MessageAttachment `json:"attachments,omitempty"`
+	Blocks          []event.Block        `json:"blocks,omitempty"`
+	IconEmoji       string               `json:"icon_emoji,omitempty"`
+	IconURL         string               `json:"icon_url,omitempty"`
+	LinkNames       int                  `json:"link_names,omitempty"`
+	Markdown        bool                 `json:"mrkdwn,omitempty"`
+	Parse           ParseMode            `json:"parse,omitempty"`
+	ReplyBroadcast  bool                 `json:"reply_broadcast,omitempty"`
+	ThreadTimeStamp string               `json:"thread_ts,omitempty"`
 	UnfurlLinks     bool                 `json:"unfurl_links,omitempty"`
 	UnfurlMedia     bool                 `json:"unfurl_media,omitempty"`
 	UserName        string               `json:"username,omitempty"`
-	AsUser          bool                 `json:"as_user,omitempty"`
-	IconURL         string               `json:"icon_url,omitempty"`
-	IconEmoji       string               `json:"icon_emoji,omitempty"`
-	ReplyBroadcast  bool                 `json:"reply_broadcast,omitempty"`
-	ThreadTimeStamp string               `json:"thread_ts,omitempty"`
+}
+
+// WithAsUser sets optional boolean value so the outgoing message is sent as a user.
+// See https://api.slack.com/methods/chat.postMessage
+func (message *PostMessage) WithAsUser(flg bool) *PostMessage {
+	message.AsUser = flg
+	return message
 }
 
 // WithAttachments sets/overrides attachments parameter for current PostMessage.
@@ -64,10 +73,38 @@ func (message *PostMessage) WithAttachments(attachments []*MessageAttachment) *P
 	return message
 }
 
+// WithBlocks sets/overrides blocks parameter for current PostMessage.
+// See https://api.slack.com/messaging/composing/layouts#adding-blocks
+func (message *PostMessage) WithBlocks(blocks []event.Block) *PostMessage {
+	message.Blocks = blocks
+	return message
+}
+
+// WithIconEmoji sets an icon emoji for the message.
+// See https://api.slack.com/methods/chat.postMessage
+func (message *PostMessage) WithIconEmoji(iconEmoji string) *PostMessage {
+	message.IconEmoji = iconEmoji
+	return message
+}
+
+// WithIconURL sets an icon image url for the message.
+// See https://api.slack.com/methods/chat.postMessage
+func (message *PostMessage) WithIconURL(iconURL string) *PostMessage {
+	message.IconURL = iconURL
+	return message
+}
+
 // WithLinkNames sets/overrides link_names parameter for current PostMessage.
 // See https://api.slack.com/methods/chat.postMessage#formatting
 func (message *PostMessage) WithLinkNames(linkNames int) *PostMessage {
 	message.LinkNames = linkNames
+	return message
+}
+
+// WithMarkdown sets optional boolean value to decide if the message should be treated as Markdown.
+// See https://api.slack.com/methods/chat.postMessage
+func (message *PostMessage) WithMarkdown(flg bool) *PostMessage {
+	message.Markdown = flg
 	return message
 }
 
@@ -81,8 +118,8 @@ func (message *PostMessage) WithParse(parse ParseMode) *PostMessage {
 // WithReplyBroadcast sets optional boolean value so the thread response can be broadcasted.
 // Thread identifier must be present with WithThreadTimeStamp() to use this option.
 // See https://api.slack.com/docs/message-threading#using_the_web_api
-func (message *PostMessage) WithReplyBroadcast(broadcast bool) *PostMessage {
-	message.ReplyBroadcast = broadcast
+func (message *PostMessage) WithReplyBroadcast(flg bool) *PostMessage {
+	message.ReplyBroadcast = flg
 	return message
 }
 
@@ -104,6 +141,13 @@ func (message *PostMessage) WithUnfurlLinks(unfurl bool) *PostMessage {
 // See https://api.slack.com/docs/message-attachments#unfurling
 func (message *PostMessage) WithUnfurlMedia(unfurl bool) *PostMessage {
 	message.UnfurlMedia = unfurl
+	return message
+}
+
+// WithUserName sets a name to be used as user name.
+// See https://api.slack.com/methods/chat.postMessage
+func (message *PostMessage) WithUserName(name string) *PostMessage {
+	message.UserName = name
 	return message
 }
 

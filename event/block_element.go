@@ -100,7 +100,7 @@ type ButtonBlockElement struct {
 	ActionID ActionID                  `json:"action_id"`
 	URL      string                    `json:"url,omitempty"`
 	Value    string                    `json:"value,omitempty"`
-	Style    string                    `json:"style,omitempty"` // TODO "primary", "danger" or empty
+	Style    Style                     `json:"style,omitempty"`
 	Confirm  *ConfirmationDialogObject `json:"confirm,omitempty"`
 }
 
