@@ -1,7 +1,7 @@
 package eventsapi
 
 import (
-	"github.com/oklahomer/golack/event"
+	"github.com/oklahomer/golack/v2/event"
 	"log"
 	"net/http"
 )

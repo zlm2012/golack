@@ -1,6 +1,6 @@
 package rtmapi
 
-import "github.com/oklahomer/golack/event"
+import "github.com/oklahomer/golack/v2/event"
 
 // Reply represents a response from Slack.
 // No matter if the response represents successful operation or not,

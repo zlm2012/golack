@@ -1,7 +1,7 @@
 package webapi
 
 import (
-	"github.com/oklahomer/golack/event"
+	"github.com/oklahomer/golack/v2/event"
 )
 
 // ParseMode defines the parse parameter values for post.message method.

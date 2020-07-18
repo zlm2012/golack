@@ -1,7 +1,7 @@
 package event
 
 import (
-	"github.com/oklahomer/golack/testutil"
+	"github.com/oklahomer/golack/v2/testutil"
 	"io/ioutil"
 	"os"
 	"path/filepath"

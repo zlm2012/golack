@@ -9,14 +9,13 @@ package golack
 import (
 	"context"
 	"fmt"
-	"github.com/oklahomer/golack/eventsapi"
+	"github.com/oklahomer/golack/v2/eventsapi"
+	"github.com/oklahomer/golack/v2/rtmapi"
+	"github.com/oklahomer/golack/v2/webapi"
 	"golang.org/x/xerrors"
 	"net/http"
 	"net/url"
 	"time"
-
-	"github.com/oklahomer/golack/rtmapi"
-	"github.com/oklahomer/golack/webapi"
 )
 
 // Config defines the serializable/deserializable configuration value.

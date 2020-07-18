@@ -2,7 +2,7 @@ package rtmapi
 
 import (
 	"encoding/json"
-	"github.com/oklahomer/golack/event"
+	"github.com/oklahomer/golack/v2/event"
 	"strings"
 	"testing"
 )

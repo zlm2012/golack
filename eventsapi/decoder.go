@@ -3,7 +3,7 @@ package eventsapi
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/oklahomer/golack/event"
+	"github.com/oklahomer/golack/v2/event"
 	"github.com/tidwall/gjson"
 	"golang.org/x/xerrors"
 )
