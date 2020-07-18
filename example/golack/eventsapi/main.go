@@ -54,6 +54,11 @@ func (r *Receiver) Receive(wrapper *eventsapi.EventWrapper) {
 
 		message := webapi.NewPostMessage(typed.ChannelID, echoMsg).
 			WithBlocks([]event.Block{
+				event.NewContextBlock([]event.BlockElement{
+					event.NewPlainTextObjectBlockElement("Hello! Wanna grab a *beer*? :beer:").
+						WithEmoji(true),
+				}),
+				event.NewDividerBlock(),
 				event.NewSectionBlock(event.NewMarkdownTextCompositionObject("Below message was sent by the user as *.echo* command")),
 				event.NewDividerBlock(),
 				event.NewSectionBlock(event.NewPlainTextCompositionObject(echoMsg)).
@@ -66,7 +71,8 @@ func (r *Receiver) Receive(wrapper *eventsapi.EventWrapper) {
 						event.NewPlainTextCompositionObject(typed.EventTimeStamp.Time.String()),
 					}),
 			})
-		log.Printf("Payload: %+v", message)
+
+		log.Printf("Payload: %+v\n", message)
 		response, err := r.client.PostMessage(context.TODO(), message)
 		if err != nil {
 			log.Printf("Post error: %s", err.Error())
