@@ -3,8 +3,8 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/oklahomer/golack"
-	"github.com/oklahomer/golack/event"
+	"github.com/oklahomer/golack/v2"
+	"github.com/oklahomer/golack/v2/event"
 	"os"
 	"os/signal"
 	"syscall"

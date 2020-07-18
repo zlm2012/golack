@@ -1,4 +1,4 @@
-module github.com/oklahomer/golack
+module github.com/oklahomer/golack/v2
 
 go 1.11
 

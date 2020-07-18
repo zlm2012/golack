@@ -1,8 +1,8 @@
 package main
 
 import (
-	"github.com/oklahomer/golack/event"
-	"github.com/oklahomer/golack/eventsapi"
+	"github.com/oklahomer/golack/v2/event"
+	"github.com/oklahomer/golack/v2/eventsapi"
 	"log"
 	"net/http"
 	"os"

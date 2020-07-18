@@ -3,9 +3,9 @@ package golack
 import (
 	"context"
 	"fmt"
-	"github.com/oklahomer/golack/eventsapi"
-	"github.com/oklahomer/golack/testutil"
-	"github.com/oklahomer/golack/webapi"
+	"github.com/oklahomer/golack/v2/eventsapi"
+	"github.com/oklahomer/golack/v2/testutil"
+	"github.com/oklahomer/golack/v2/webapi"
 	"golang.org/x/xerrors"
 	"net"
 	"net/http"

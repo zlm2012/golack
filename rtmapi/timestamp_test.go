@@ -2,7 +2,7 @@ package rtmapi
 
 import (
 	"bytes"
-	"github.com/oklahomer/golack/event"
+	"github.com/oklahomer/golack/v2/event"
 	"strconv"
 	"testing"
 	"time"

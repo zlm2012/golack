@@ -3,9 +3,9 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/oklahomer/golack/event"
-	"github.com/oklahomer/golack/rtmapi"
-	"github.com/oklahomer/golack/webapi"
+	"github.com/oklahomer/golack/v2/event"
+	"github.com/oklahomer/golack/v2/rtmapi"
+	"github.com/oklahomer/golack/v2/webapi"
 	"os"
 	"os/signal"
 	"syscall"

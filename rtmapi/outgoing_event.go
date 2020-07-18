@@ -1,7 +1,7 @@
 package rtmapi
 
 import (
-	"github.com/oklahomer/golack/event"
+	"github.com/oklahomer/golack/v2/event"
 )
 
 // OutgoingEvent takes care of some common fields all outgoing event MUST have.
