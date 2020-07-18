@@ -62,9 +62,23 @@ func (b *block) BlockType() string {
 	return b.Type
 }
 
+func (b *block) WithBlockID(blockID BlockID) *block {
+	b.BlockID = blockID
+	return b
+}
+
 type ActionsBlock struct {
 	block
 	Elements []BlockElement `json:"elements"`
+}
+
+func NewActionsBlock(elements []BlockElement) *ActionsBlock {
+	return &ActionsBlock{
+		block: block{
+			Type: "actions",
+		},
+		Elements: elements,
+	}
 }
 
 func (ab *ActionsBlock) UnmarshalJSON(b []byte) error {
@@ -98,6 +112,15 @@ type ContextBlock struct {
 	Elements []BlockElement `json:"elements"`
 }
 
+func NewContextBlock(elements []BlockElement) *ContextBlock {
+	return &ContextBlock{
+		block: block{
+			Type: "context",
+		},
+		Elements: elements,
+	}
+}
+
 func (cb *ContextBlock) UnmarshalJSON(b []byte) error {
 	type alias ContextBlock
 	t := &struct {
@@ -128,10 +151,28 @@ type DividerBlock struct {
 	block
 }
 
+func NewDividerBlock() *DividerBlock {
+	return &DividerBlock{
+		block: block{
+			Type: "divider",
+		},
+	}
+}
+
 type FileBlock struct {
 	block
 	ExternalID string `json:"external_id"`
 	Source     string `json:"source"`
+}
+
+func NewRemoteFileBlock(externalID string) *FileBlock {
+	return &FileBlock{
+		block: block{
+			Type: "file",
+		},
+		ExternalID: externalID,
+		Source:     "remote",
+	}
 }
 
 type ImageBlock struct {
@@ -141,12 +182,47 @@ type ImageBlock struct {
 	Title    *TextCompositionObject `json:"title,omitempty"`
 }
 
+func (ib *ImageBlock) WithTitle(title *TextCompositionObject) *ImageBlock {
+	ib.Title = title
+	return ib
+}
+
+func NewImageBlock(imageURL string, altText string) *ImageBlock {
+	return &ImageBlock{
+		block: block{
+			Type: "image",
+		},
+		ImageURL: imageURL,
+		AltText:  altText,
+	}
+}
+
 type InputBlock struct {
 	block
 	Label    *TextCompositionObject `json:"label"`
 	Element  BlockElement           `json:"element"`
 	Hint     *TextCompositionObject `json:"hint,omitempty"`
 	Optional bool                   `json:"optional,omitempty"`
+}
+
+func (ib *InputBlock) WithHint(hint *TextCompositionObject) *InputBlock {
+	ib.Hint = hint
+	return ib
+}
+
+func (ib *InputBlock) WithOptional(flg bool) *InputBlock {
+	ib.Optional = flg
+	return ib
+}
+
+func NewInputBlock(label *TextCompositionObject, element BlockElement) *InputBlock {
+	return &InputBlock{
+		block: block{
+			Type: "input",
+		},
+		Label:   label,
+		Element: element,
+	}
 }
 
 func (ib *InputBlock) UnmarshalJSON(b []byte) error {
@@ -176,8 +252,27 @@ func (ib *InputBlock) UnmarshalJSON(b []byte) error {
 type SectionBlock struct {
 	block
 	Text      *TextCompositionObject   `json:"text"`
-	Fields    []*TextCompositionObject `json:"fields"`
-	Accessory BlockElement             `json:"accessory"`
+	Fields    []*TextCompositionObject `json:"fields,omitempty"`
+	Accessory BlockElement             `json:"accessory,omitempty"`
+}
+
+func (sb *SectionBlock) WithFields(fields []*TextCompositionObject) *SectionBlock {
+	sb.Fields = fields
+	return sb
+}
+
+func (sb *SectionBlock) WithAccessory(accessory BlockElement) *SectionBlock {
+	sb.Accessory = accessory
+	return sb
+}
+
+func NewSectionBlock(text *TextCompositionObject) *SectionBlock {
+	return &SectionBlock{
+		block: block{
+			Type: "section",
+		},
+		Text: text,
+	}
 }
 
 func (sb *SectionBlock) UnmarshalJSON(b []byte) error {
