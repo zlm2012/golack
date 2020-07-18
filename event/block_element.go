@@ -223,7 +223,7 @@ type MultiStaticSelectBlockElement struct {
 	MaxSelectedItems int                       `json:"max_selected_items,omitempty"`
 }
 
-func (m *MultiStaticSelectBlockElement) WithOptionsGroups(optionGroups []*OptionGroupObject) *MultiStaticSelectBlockElement {
+func (m *MultiStaticSelectBlockElement) WithOptionGroups(optionGroups []*OptionGroupObject) *MultiStaticSelectBlockElement {
 	m.OptionGroups = optionGroups
 	return m
 }
