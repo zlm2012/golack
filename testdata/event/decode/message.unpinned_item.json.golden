@@ -1,0 +1,10 @@
+{
+  "type": "message",
+  "subtype": "unpinned_item",
+  "user": "USLACKBOT",
+  "item_type": "G",
+  "text": "<@U024BE7LH|cal> unpinned the message you pinned to the secretplans group.",
+  "item": {},
+  "channel": "G024BE91L",
+  "ts": "1360782804.083113"
+}

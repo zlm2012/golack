@@ -177,9 +177,7 @@ var expectedPayloads = map[string]interface{}{
 			ID:    "B024BE7LH",
 			AppID: "A4H1JB4AZ",
 			Name:  "hugbot",
-			Icon: &struct {
-				Image48 string `json:"image_48"`
-			}{
+			Icon: &BotIcon{
 				Image48: "https://slack.com/path/to/hugbot_48.png",
 			},
 		},
@@ -192,9 +190,7 @@ var expectedPayloads = map[string]interface{}{
 			ID:    "B024BE7LH",
 			AppID: "A4H1JB4AZ",
 			Name:  "hugbot",
-			Icon: &struct {
-				Image48 string `json:"image_48"`
-			}{
+			Icon: &BotIcon{
 				Image48: "https://slack.com/path/to/hugbot_48.png",
 			},
 		},
@@ -468,7 +464,7 @@ var expectedPayloads = map[string]interface{}{
 		},
 		Comment: &Comment{
 			ID: "C12345",
-			Created: &TimeStamp{
+			TimeStamp: &TimeStamp{
 				Time:          time.Unix(1360782804, 0),
 				OriginalValue: "1360782804",
 			},
@@ -500,7 +496,7 @@ var expectedPayloads = map[string]interface{}{
 		},
 		Comment: &Comment{
 			ID: "C12345",
-			Created: &TimeStamp{
+			TimeStamp: &TimeStamp{
 				Time:          time.Unix(1360782804, 0),
 				OriginalValue: "1360782804",
 			},
@@ -931,6 +927,410 @@ var expectedPayloads = map[string]interface{}{
 			OriginalValue: "1355517523.000005",
 		},
 		ChannelType: "mpim",
+	},
+	"message.bot_message": &MessageBotMessage{
+		TypedEvent: TypedEvent{
+			Type: "message",
+		},
+		SubType: "bot_message",
+		TimeStamp: &TimeStamp{
+			Time:          time.Unix(1358877455, 0),
+			OriginalValue: "1358877455.000010",
+		},
+		Text:     "Pushing is the answer",
+		BotID:    "BB12033",
+		UserName: "github",
+		Icon: &BotIcon{
+			Image48: "https://slack.com/path/to/hugbot_48.png",
+		},
+	},
+	"message.channel_archive": &MessageChannelArchive{
+		TypedEvent: TypedEvent{
+			Type: "message",
+		},
+		SubType: "channel_archive",
+		TimeStamp: &TimeStamp{
+			Time:          time.Unix(1361482916, 0),
+			OriginalValue: "1361482916.000003",
+		},
+		Text: "<U1234|@cal> archived the channel",
+		User: "U1234",
+	},
+	"message.channel_join": &MessageChannelJoin{
+		TypedEvent: TypedEvent{
+			Type: "message",
+		},
+		SubType: "channel_join",
+		TimeStamp: &TimeStamp{
+			Time:          time.Unix(1358877458, 0),
+			OriginalValue: "1358877458.000011",
+		},
+		Text:    "<@U2147483828|cal> has joined the channel",
+		User:    "U2147483828",
+		Inviter: "U123456789",
+	},
+	"message.channel_leave": &MessageChannelLeave{
+		TypedEvent: TypedEvent{
+			Type: "message",
+		},
+		SubType: "channel_leave",
+		TimeStamp: &TimeStamp{
+			Time:          time.Unix(1358877455, 0),
+			OriginalValue: "1358877455.000010",
+		},
+		Text: "<@U2147483828|cal> has left the channel",
+		User: "U2147483828",
+	},
+	"message.channel_name": &MessageChannelName{
+		TypedEvent: TypedEvent{
+			Type: "message",
+		},
+		SubType: "channel_name",
+		TimeStamp: &TimeStamp{
+			Time:          time.Unix(1358877455, 0),
+			OriginalValue: "1358877455.000010",
+		},
+		Text:    "<@U2147483828|cal> has renamed the channek from \"random\" to \"watercooler\"",
+		User:    "U2147483828",
+		OldName: "random",
+		Name:    "watercooler",
+	},
+	"message.channel_topic": &MessageChannelTopic{
+		TypedEvent: TypedEvent{
+			Type: "message",
+		},
+		SubType: "channel_topic",
+		TimeStamp: &TimeStamp{
+			Time:          time.Unix(1358877455, 0),
+			OriginalValue: "1358877455.000010",
+		},
+		Text:  "<@U2147483828|cal> set the channel topic: hello world",
+		User:  "U2147483828",
+		Topic: "hello world",
+	},
+	"message.channel_unarchive": &MessageChannelUnarchive{
+		TypedEvent: TypedEvent{
+			Type: "message",
+		},
+		SubType: "channel_unarchive",
+		TimeStamp: &TimeStamp{
+			Time:          time.Unix(1361482916, 0),
+			OriginalValue: "1361482916.000003",
+		},
+		Text: "<U1234|@cal> un-archived the channel",
+		User: "U1234",
+	},
+	"message.ekm_access_denied": &MessageEKMAccessDenied{
+		TypedEvent: TypedEvent{
+			Type: "message",
+		},
+		SubType: "ekm_access_denied",
+		TimeStamp: &TimeStamp{
+			Time:          time.Unix(1358877455, 0),
+			OriginalValue: "1358877455.000010",
+		},
+		Text: "Your admins have suspended everyone's access to this content.",
+		User: "UREVOKEDU",
+	},
+	"message.file_comment": &MessageFileComment{
+		TypedEvent: TypedEvent{
+			Type: "message",
+		},
+		SubType: "file_comment",
+		TimeStamp: &TimeStamp{
+			Time:          time.Unix(1361482916, 0),
+			OriginalValue: "1361482916.000003",
+		},
+		Text: "<@cal> commented on a file: ...",
+		File: &File{},
+		Comment: &Comment{
+			ID: "C12345",
+			TimeStamp: &TimeStamp{
+				Time:          time.Unix(1360782804, 0),
+				OriginalValue: "1360782804",
+			},
+			UserID:  "U1234",
+			Content: "comment content",
+		},
+	},
+	"message.file_mention": &MessageFileMention{
+		TypedEvent: TypedEvent{
+			Type: "message",
+		},
+		SubType: "file_mention",
+		TimeStamp: &TimeStamp{
+			Time:          time.Unix(1358877455, 0),
+			OriginalValue: "1358877455.000010",
+		},
+		Text: "<@cal> mentioned a file: <https:...7.png|7.png>",
+		File: &File{},
+		User: "U2147483697",
+	},
+	"message.group_archive": &MessageGroupArchive{
+		TypedEvent: TypedEvent{
+			Type: "message",
+		},
+		SubType: "group_archive",
+		TimeStamp: &TimeStamp{
+			Time:          time.Unix(1361482916, 0),
+			OriginalValue: "1361482916.000003",
+		},
+		Text:    "<U1234|@cal> archived the group",
+		User:    "U1234",
+		Members: []UserID{"U1234", "U5678"},
+	},
+	"message.group_join": &MessageGroupJoin{
+		TypedEvent: TypedEvent{
+			Type: "message",
+		},
+		SubType: "group_join",
+		TimeStamp: &TimeStamp{
+			Time:          time.Unix(1358877458, 0),
+			OriginalValue: "1358877458.000011",
+		},
+		Text: "<@U2147483828|cal> has joined the group",
+		User: "U2147483828",
+	},
+	"message.group_leave": &MessageGroupLeave{
+		TypedEvent: TypedEvent{
+			Type: "message",
+		},
+		SubType: "group_leave",
+		TimeStamp: &TimeStamp{
+			Time:          time.Unix(1358877455, 0),
+			OriginalValue: "1358877455.000010",
+		},
+		Text: "<@U2147483828|cal> has left the group",
+		User: "U2147483828",
+	},
+	"message.group_name": &MessageGroupName{
+		TypedEvent: TypedEvent{
+			Type: "message",
+		},
+		SubType: "group_name",
+		TimeStamp: &TimeStamp{
+			Time:          time.Unix(1358877455, 0),
+			OriginalValue: "1358877455.000010",
+		},
+		Text:    "<@U2147483828|cal> has renamed the group from \"random\" to \"watercooler\"",
+		User:    "U2147483828",
+		OldName: "random",
+		Name:    "watercooler",
+	},
+	"message.group_purpose": &MessageGroupPurpose{
+		TypedEvent: TypedEvent{
+			Type: "message",
+		},
+		SubType: "group_purpose",
+		TimeStamp: &TimeStamp{
+			Time:          time.Unix(1358877455, 0),
+			OriginalValue: "1358877455.000010",
+		},
+		Text:    "<@U2147483828|cal> set the group purpose: whatever",
+		User:    "U2147483828",
+		Purpose: "whatever",
+	},
+	"message.group_topic": &MessageGroupTopic{
+		TypedEvent: TypedEvent{
+			Type: "message",
+		},
+		SubType: "group_topic",
+		TimeStamp: &TimeStamp{
+			Time:          time.Unix(1358877455, 0),
+			OriginalValue: "1358877455.000010",
+		},
+		Text:  "<@U2147483828|cal> set the group topic: hello world",
+		User:  "U2147483828",
+		Topic: "hello world",
+	},
+	"message.group_unarchive": &MessageGroupUnarchive{
+		TypedEvent: TypedEvent{
+			Type: "message",
+		},
+		SubType: "group_unarchive",
+		TimeStamp: &TimeStamp{
+			Time:          time.Unix(1361482916, 0),
+			OriginalValue: "1361482916.000003",
+		},
+		Text: "<U1234|@cal> un-archived the group",
+		User: "U1234",
+	},
+	"message.me_message": &MessageMeMessage{
+		TypedEvent: TypedEvent{
+			Type: "message",
+		},
+		SubType: "me_message",
+		TimeStamp: &TimeStamp{
+			Time:          time.Unix(1355517523, 0),
+			OriginalValue: "1355517523.000005",
+		},
+		Text:    "is doing that thing",
+		User:    "U2147483697",
+		Channel: "C2147483705",
+	},
+	"message.message_changed": &MessageMessageChanged{
+		TypedEvent: TypedEvent{
+			Type: "message",
+		},
+		SubType: "message_changed",
+		TimeStamp: &TimeStamp{
+			Time:          time.Unix(1358878755, 0),
+			OriginalValue: "1358878755.000001",
+		},
+		Channel: "C2147483705",
+		Message: &Message{
+			TypedEvent: TypedEvent{
+				Type: "message",
+			},
+			SenderID: "U2147483697",
+			Text:     "Hello, world!",
+			TimeStamp: &TimeStamp{
+				Time:          time.Unix(1355517523, 0),
+				OriginalValue: "1355517523.000005",
+			},
+			Edited: &struct {
+				User      UserID     `json:"user"`
+				TimeStamp *TimeStamp `json:"ts"`
+			}{
+				User: "U2147483697",
+				TimeStamp: &TimeStamp{
+					Time:          time.Unix(1358878755, 0),
+					OriginalValue: "1358878755.000001",
+				},
+			},
+		},
+		Hidden: true,
+	},
+	"message.message_deleted": &MessageMessageDeleted{
+		TypedEvent: TypedEvent{
+			Type: "message",
+		},
+		SubType: "message_deleted",
+		TimeStamp: &TimeStamp{
+			Time:          time.Unix(1358878755, 0),
+			OriginalValue: "1358878755.000001",
+		},
+		Channel: "C2147483705",
+		Hidden:  true,
+		DeletedTimeStamp: &TimeStamp{
+			Time:          time.Unix(1358878749, 0),
+			OriginalValue: "1358878749.000002",
+		},
+	},
+	"message.message_replied": &MessageMessageReplied{
+		TypedEvent: TypedEvent{
+			Type: "message",
+		},
+		SubType: "message_replied",
+		TimeStamp: &TimeStamp{
+			Time:          time.Unix(1483037604, 0),
+			OriginalValue: "1483037604.017506",
+		},
+		Channel: "C061EG9SL",
+		Hidden:  true,
+		EventTimeStamp: &TimeStamp{
+			Time:          time.Unix(1483037604, 0),
+			OriginalValue: "1483037604.017506",
+		},
+		Message: &Message{
+			TypedEvent: TypedEvent{
+				Type: "message",
+			},
+			SenderID: "U061F7TRS",
+			Text:     "Was there was there was there what was there was there what was there was there there was there.",
+			TimeStamp: &TimeStamp{
+				Time:          time.Unix(1482960137, 0),
+				OriginalValue: "1482960137.003543",
+			},
+			ThreadTimeStamp: &TimeStamp{
+				Time:          time.Unix(1482960137, 0),
+				OriginalValue: "1482960137.003543",
+			},
+			Replies: []*struct {
+				User      UserID     `json:"user"`
+				TimeStamp *TimeStamp `json:"ts"`
+			}{
+				{
+					User: "U061F7AUR",
+					TimeStamp: &TimeStamp{
+						Time:          time.Unix(1483037603, 0),
+						OriginalValue: "1483037603.017503",
+					},
+				},
+			},
+		},
+	},
+	"message.pinned_item": &MessagePinnedItem{
+		TypedEvent: TypedEvent{
+			Type: "message",
+		},
+		SubType: "pinned_item",
+		TimeStamp: &TimeStamp{
+			Time:          time.Unix(1360782804, 0),
+			OriginalValue: "1360782804.083113",
+		},
+		User:     "U024BE7LH",
+		Text:     "<@U024BE7LH|cal> pinned their Image <https:...7.png|7.png> to this channel.",
+		Channel:  "C02ELGNBH",
+		ItemType: ItemTypeFile,
+		Item:     &Item{},
+	},
+	"message.thread_broadcast": &MessageThreadBroadcast{
+		TypedEvent: TypedEvent{
+			Type: "message",
+		},
+		SubType: "thread_broadcast",
+		TimeStamp: &TimeStamp{
+			Time:          time.Unix(1517414906, 0),
+			OriginalValue: "1517414906.000889",
+		},
+		User: "U061F7AUR",
+		Text: "Is but a message within a thread",
+		Root: &Message{
+			TypedEvent: TypedEvent{
+				Type: "message",
+			},
+			SenderID: "U061F7AUR",
+			Text:     "All that we see or seem",
+			TimeStamp: &TimeStamp{
+				Time:          time.Unix(1517414896, 0),
+				OriginalValue: "1517414896.001003",
+			},
+			ThreadTimeStamp: &TimeStamp{
+				Time:          time.Unix(1517414896, 0),
+				OriginalValue: "1517414896.001003",
+			},
+			Replies: []*struct {
+				User      UserID     `json:"user"`
+				TimeStamp *TimeStamp `json:"ts"`
+			}{
+				{
+					User: "U061F7AUR",
+					TimeStamp: &TimeStamp{
+						Time:          time.Unix(1517414906, 0),
+						OriginalValue: "1517414906.000889",
+					},
+				},
+			},
+		},
+		ThreadTimeStamp: &TimeStamp{
+			Time:          time.Unix(1517414896, 0),
+			OriginalValue: "1517414896.001003",
+		},
+	},
+	"message.unpinned_item": &MessageUnpinnedItem{
+		TypedEvent: TypedEvent{
+			Type: "message",
+		},
+		SubType: "unpinned_item",
+		TimeStamp: &TimeStamp{
+			Time:          time.Unix(1360782804, 0),
+			OriginalValue: "1360782804.083113",
+		},
+		User:     "USLACKBOT",
+		Text:     "<@U024BE7LH|cal> unpinned the message you pinned to the secretplans group.",
+		ItemType: ItemTypeGroupMessage,
+		Item:     &Item{},
 	},
 	"pin_added": &PinAdded{
 		TypedEvent: TypedEvent{
