@@ -1,0 +1,11 @@
+{
+  "type": "message",
+  "subtype": "bot_message",
+  "ts": "1358877455.000010",
+  "text": "Pushing is the answer",
+  "bot_id": "BB12033",
+  "username": "github",
+  "icons": {
+    "image_48": "https:\/\/slack.com\/path\/to\/hugbot_48.png"
+  }
+}

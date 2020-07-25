@@ -64,7 +64,7 @@ func Map(parsed gjson.Result) (interface{}, error) {
 		// A message event may have subtype field
 		subtypeValue := parsed.Get("subtype")
 		if subtypeValue.Exists() {
-			mapping, ok := subTypeMap[subtypeValue.String()]
+			mapping, ok := messageSubTypeMap[subtypeValue.String()]
 			if !ok {
 				return nil, NewUnknownPayloadTypeError(fmt.Sprintf("unknown subtype of %s is given: %s", subtypeValue, parsed))
 			}

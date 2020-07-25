@@ -1,0 +1,7 @@
+{
+  "type": "message",
+  "subtype": "group_unarchive",
+  "ts": "1361482916.000003",
+  "text": "<U1234|@cal> un-archived the group",
+  "user": "U1234"
+}

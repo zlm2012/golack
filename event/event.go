@@ -520,6 +520,14 @@ type Message struct {
 	Text            string     `json:"text"`
 	TimeStamp       *TimeStamp `json:"ts"`
 	ThreadTimeStamp *TimeStamp `json:"thread_ts"` // https://api.slack.com/docs/message-threading
+	Edited          *struct {
+		User      UserID     `json:"user"`
+		TimeStamp *TimeStamp `json:"ts"`
+	} `json:"edited"`
+	Replies []*struct {
+		User      UserID     `json:"user"`
+		TimeStamp *TimeStamp `json:"ts"`
+	} `json:"replies"`
 }
 
 // MessageAppHome is sent to subscribers when a user engages with the application via the direct message-like App Home interface,
@@ -581,6 +589,232 @@ type MessageMPIM struct {
 	TimeStamp      *TimeStamp `json:"ts"`
 	EventTimeStamp *TimeStamp `json:"event_ts"`
 	ChannelType    string     `json:"channel_type"`
+}
+
+type MessageBotMessage struct {
+	TypedEvent
+	SubType   string     `json:"subtype"`
+	TimeStamp *TimeStamp `json:"ts"`
+	Text      string     `json:"text"`
+	BotID     BotID      `json:"bot_id"`
+	UserName  string     `json:"username"`
+	Icon      *BotIcon   `json:"icons"`
+}
+
+type MessageChannelArchive struct {
+	TypedEvent
+	SubType   string     `json:"subtype"`
+	TimeStamp *TimeStamp `json:"ts"`
+	Text      string     `json:"text"`
+	User      UserID     `json:"user"`
+}
+
+type MessageChannelJoin struct {
+	TypedEvent
+	SubType   string     `json:"subtype"`
+	TimeStamp *TimeStamp `json:"ts"`
+	Text      string     `json:"text"`
+	User      UserID     `json:"user"`
+	Inviter   UserID     `json:"inviter"`
+}
+
+type MessageChannelLeave struct {
+	TypedEvent
+	SubType   string     `json:"subtype"`
+	TimeStamp *TimeStamp `json:"ts"`
+	Text      string     `json:"text"`
+	User      UserID     `json:"user"`
+}
+
+type MessageChannelName struct {
+	TypedEvent
+	SubType   string     `json:"subtype"`
+	TimeStamp *TimeStamp `json:"ts"`
+	Text      string     `json:"text"`
+	User      UserID     `json:"user"`
+	OldName   string     `json:"old_name"`
+	Name      string     `json:"name"`
+}
+
+type MessageChannelPurpose struct {
+	TypedEvent
+	SubType   string     `json:"subtype"`
+	TimeStamp *TimeStamp `json:"ts"`
+	Text      string     `json:"text"`
+	User      UserID     `json:"user"`
+	Purpose   string     `json:"purpose"`
+}
+
+type MessageChannelTopic struct {
+	TypedEvent
+	SubType   string     `json:"subtype"`
+	TimeStamp *TimeStamp `json:"ts"`
+	Text      string     `json:"text"`
+	User      UserID     `json:"user"`
+	Topic     string     `json:"topic"`
+}
+
+type MessageChannelUnarchive struct {
+	TypedEvent
+	SubType   string     `json:"subtype"`
+	TimeStamp *TimeStamp `json:"ts"`
+	Text      string     `json:"text"`
+	User      UserID     `json:"user"`
+}
+
+type MessageEKMAccessDenied struct {
+	TypedEvent
+	SubType   string     `json:"subtype"`
+	TimeStamp *TimeStamp `json:"ts"`
+	Text      string     `json:"text"`
+	User      UserID     `json:"user"`
+}
+
+type MessageFileComment struct {
+	TypedEvent
+	SubType   string     `json:"subtype"`
+	TimeStamp *TimeStamp `json:"ts"`
+	Text      string     `json:"text"`
+	File      *File      `json:"file"`
+	Comment   *Comment   `json:"comment"`
+}
+
+type MessageFileMention struct {
+	TypedEvent
+	SubType   string     `json:"subtype"`
+	TimeStamp *TimeStamp `json:"ts"`
+	Text      string     `json:"text"`
+	File      *File      `json:"file"`
+	User      UserID     `json:"user"`
+}
+
+type MessageGroupArchive struct {
+	TypedEvent
+	SubType   string     `json:"subtype"`
+	TimeStamp *TimeStamp `json:"ts"`
+	Text      string     `json:"text"`
+	User      UserID     `json:"user"`
+	Members   []UserID   `json:"members"`
+}
+
+type MessageGroupJoin struct {
+	TypedEvent
+	SubType   string     `json:"subtype"`
+	TimeStamp *TimeStamp `json:"ts"`
+	Text      string     `json:"text"`
+	User      UserID     `json:"user"`
+}
+
+type MessageGroupLeave struct {
+	TypedEvent
+	SubType   string     `json:"subtype"`
+	TimeStamp *TimeStamp `json:"ts"`
+	Text      string     `json:"text"`
+	User      UserID     `json:"user"`
+}
+
+type MessageGroupName struct {
+	TypedEvent
+	SubType   string     `json:"subtype"`
+	TimeStamp *TimeStamp `json:"ts"`
+	Text      string     `json:"text"`
+	User      UserID     `json:"user"`
+	OldName   string     `json:"old_name"`
+	Name      string     `json:"name"`
+}
+
+type MessageGroupPurpose struct {
+	TypedEvent
+	SubType   string     `json:"subtype"`
+	TimeStamp *TimeStamp `json:"ts"`
+	Text      string     `json:"text"`
+	User      UserID     `json:"user"`
+	Purpose   string     `json:"purpose"`
+}
+
+type MessageGroupTopic struct {
+	TypedEvent
+	SubType   string     `json:"subtype"`
+	TimeStamp *TimeStamp `json:"ts"`
+	Text      string     `json:"text"`
+	User      UserID     `json:"user"`
+	Topic     string     `json:"topic"`
+}
+
+type MessageGroupUnarchive struct {
+	TypedEvent
+	SubType   string     `json:"subtype"`
+	TimeStamp *TimeStamp `json:"ts"`
+	Text      string     `json:"text"`
+	User      UserID     `json:"user"`
+}
+
+type MessageMeMessage struct {
+	TypedEvent
+	SubType   string     `json:"subtype"`
+	TimeStamp *TimeStamp `json:"ts"`
+	Text      string     `json:"text"`
+	User      UserID     `json:"user"`
+	Channel   ChannelID  `json:"channel"`
+}
+
+type MessageMessageChanged struct {
+	TypedEvent
+	SubType   string     `json:"subtype"`
+	TimeStamp *TimeStamp `json:"ts"`
+	Channel   ChannelID  `json:"channel"`
+	Message   *Message   `json:"message"`
+	Hidden    bool       `json:"hidden"`
+}
+
+type MessageMessageDeleted struct {
+	TypedEvent
+	SubType          string     `json:"subtype"`
+	TimeStamp        *TimeStamp `json:"ts"`
+	Channel          ChannelID  `json:"channel"`
+	Hidden           bool       `json:"hidden"`
+	DeletedTimeStamp *TimeStamp `json:"deleted_ts"`
+}
+
+type MessageMessageReplied struct {
+	TypedEvent
+	SubType        string     `json:"subtype"`
+	TimeStamp      *TimeStamp `json:"ts"`
+	Channel        ChannelID  `json:"channel"`
+	Hidden         bool       `json:"hidden"`
+	EventTimeStamp *TimeStamp `json:"event_ts"`
+	Message        *Message   `json:"message"`
+}
+
+type MessagePinnedItem struct {
+	TypedEvent
+	SubType   string     `json:"subtype"`
+	TimeStamp *TimeStamp `json:"ts"`
+	User      UserID     `json:"user"`
+	Text      string     `json:"text"`
+	Channel   ChannelID  `json:"channel"`
+	ItemType  ItemType   `json:"item_type"`
+	Item      *Item      `json:"item"`
+}
+
+type MessageThreadBroadcast struct {
+	TypedEvent
+	SubType         string     `json:"subtype"`
+	TimeStamp       *TimeStamp `json:"ts"`
+	User            UserID     `json:"user"`
+	Text            string     `json:"text"`
+	Root            *Message   `json:"root"`
+	ThreadTimeStamp *TimeStamp `json:"thread_ts"`
+}
+
+type MessageUnpinnedItem struct {
+	TypedEvent
+	SubType   string     `json:"subtype"`
+	TimeStamp *TimeStamp `json:"ts"`
+	User      UserID     `json:"user"`
+	Text      string     `json:"text"`
+	ItemType  ItemType   `json:"item_type"`
+	Item      *Item      `json:"item"`
 }
 
 type PinAdded struct {
@@ -875,12 +1109,14 @@ type AppRequestScope struct {
 }
 
 type Bot struct {
-	ID    BotID  `json:"id"`
-	AppID AppID  `json:"app_id"`
-	Name  string `json:"name"`
-	Icon  *struct {
-		Image48 string `json:"image_48"`
-	} `json:"icons"`
+	ID    BotID    `json:"id"`
+	AppID AppID    `json:"app_id"`
+	Name  string   `json:"name"`
+	Icon  *BotIcon `json:"icons"`
+}
+
+type BotIcon struct {
+	Image48 string `json:"image_48"`
 }
 
 type ChangedHistory struct {
@@ -890,10 +1126,10 @@ type ChangedHistory struct {
 }
 
 type Comment struct {
-	ID      CommentID  `json:"id"`
-	Created *TimeStamp `json:"created"`
-	UserID  UserID     `json:"user"`
-	Content string     `json:"comment"`
+	ID        CommentID  `json:"id"`
+	TimeStamp *TimeStamp `json:"created"`
+	UserID    UserID     `json:"user"`
+	Content   string     `json:"comment"`
 }
 
 // https://api.slack.com/types/file
