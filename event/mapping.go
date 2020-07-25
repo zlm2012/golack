@@ -102,7 +102,6 @@ var (
 		"user_resource_removed":           reflect.TypeOf(&UserResourceRemoved{}).Elem(),
 		"user_typing":                     reflect.TypeOf(&UserTyping{}).Elem(),
 		"message":                         reflect.TypeOf(&Message{}).Elem(),
-		"message.app_home":                reflect.TypeOf(&MessageAppHome{}).Elem(),
 	}
 	messageSubTypeMap = map[string]reflect.Type{
 		"bot_message":       reflect.TypeOf(&MessageBotMessage{}).Elem(),
@@ -132,10 +131,10 @@ var (
 		"unpinned_item":     reflect.TypeOf(&MessageUnpinnedItem{}).Elem(),
 	}
 	messageChannelTypeMap = map[string]reflect.Type{
-		"app_home": reflect.TypeOf(&MessageAppHome{}).Elem(),
-		"channel":  reflect.TypeOf(&MessageChannels{}).Elem(),
-		"group":    reflect.TypeOf(&MessageGroups{}).Elem(),
-		"im":       reflect.TypeOf(&MessageIM{}).Elem(),
-		"mpim":     reflect.TypeOf(&MessageMPIM{}).Elem(),
+		"app_home": reflect.TypeOf(&ChannelMessage{}).Elem(),
+		"channel":  reflect.TypeOf(&ChannelMessage{}).Elem(),
+		"group":    reflect.TypeOf(&ChannelMessage{}).Elem(),
+		"im":       reflect.TypeOf(&ChannelMessage{}).Elem(),
+		"mpim":     reflect.TypeOf(&ChannelMessage{}).Elem(),
 	}
 )

@@ -836,14 +836,14 @@ var expectedPayloads = map[string]interface{}{
 			Type: "message",
 		},
 		ChannelID: "C2147483705",
-		SenderID:  "U2147483697",
+		UserID:    "U2147483697",
 		Text:      "Hello world",
 		TimeStamp: &TimeStamp{
 			Time:          time.Unix(1355517523, 0),
 			OriginalValue: "1355517523.000005",
 		},
 	},
-	"message.app_home": &MessageAppHome{
+	"message.app_home": &ChannelMessage{
 		TypedEvent: TypedEvent{
 			Type: "message",
 		},
@@ -860,7 +860,7 @@ var expectedPayloads = map[string]interface{}{
 		},
 		ChannelType: "app_home",
 	},
-	"message.channels": &MessageChannels{
+	"message.channels": &ChannelMessage{
 		TypedEvent: TypedEvent{
 			Type: "message",
 		},
@@ -877,7 +877,7 @@ var expectedPayloads = map[string]interface{}{
 		},
 		ChannelType: "channel",
 	},
-	"message.groups": &MessageGroups{
+	"message.groups": &ChannelMessage{
 		TypedEvent: TypedEvent{
 			Type: "message",
 		},
@@ -894,7 +894,7 @@ var expectedPayloads = map[string]interface{}{
 		},
 		ChannelType: "group",
 	},
-	"message.im": &MessageGroups{
+	"message.im": &ChannelMessage{
 		TypedEvent: TypedEvent{
 			Type: "message",
 		},
@@ -911,7 +911,7 @@ var expectedPayloads = map[string]interface{}{
 		},
 		ChannelType: "im",
 	},
-	"message.mpim": &MessageGroups{
+	"message.mpim": &ChannelMessage{
 		TypedEvent: TypedEvent{
 			Type: "message",
 		},
@@ -1182,8 +1182,8 @@ var expectedPayloads = map[string]interface{}{
 			TypedEvent: TypedEvent{
 				Type: "message",
 			},
-			SenderID: "U2147483697",
-			Text:     "Hello, world!",
+			UserID: "U2147483697",
+			Text:   "Hello, world!",
 			TimeStamp: &TimeStamp{
 				Time:          time.Unix(1355517523, 0),
 				OriginalValue: "1355517523.000005",
@@ -1236,8 +1236,8 @@ var expectedPayloads = map[string]interface{}{
 			TypedEvent: TypedEvent{
 				Type: "message",
 			},
-			SenderID: "U061F7TRS",
-			Text:     "Was there was there was there what was there was there what was there was there there was there.",
+			UserID: "U061F7TRS",
+			Text:   "Was there was there was there what was there was there what was there was there there was there.",
 			TimeStamp: &TimeStamp{
 				Time:          time.Unix(1482960137, 0),
 				OriginalValue: "1482960137.003543",
@@ -1290,8 +1290,8 @@ var expectedPayloads = map[string]interface{}{
 			TypedEvent: TypedEvent{
 				Type: "message",
 			},
-			SenderID: "U061F7AUR",
-			Text:     "All that we see or seem",
+			UserID: "U061F7AUR",
+			Text:   "All that we see or seem",
 			TimeStamp: &TimeStamp{
 				Time:          time.Unix(1517414896, 0),
 				OriginalValue: "1517414896.001003",

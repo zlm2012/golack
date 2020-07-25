@@ -44,7 +44,7 @@ type Receiver struct {
 
 func (r *Receiver) Receive(wrapper *eventsapi.EventWrapper) {
 	switch typed := wrapper.Event.(type) {
-	case *event.MessageChannels:
+	case *event.ChannelMessage:
 		// A message is sent to a public channel
 		log.Printf("Channel Message: %+v", typed)
 		echoMsg := EchoMessage(typed.Text)
@@ -83,14 +83,6 @@ func (r *Receiver) Receive(wrapper *eventsapi.EventWrapper) {
 			log.Printf("Response error: %s", response.Error)
 			return
 		}
-
-	case *event.MessageGroups:
-		// A message is sent to a group
-		log.Printf("Group Message: %+v", typed)
-
-	case *event.MessageIM:
-		// A message directly sent to the app
-		log.Printf("IM Message: %+v", typed)
 
 	default:
 		log.Printf("Event: %T, %+v", typed, typed)

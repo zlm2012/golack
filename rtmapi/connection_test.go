@@ -98,8 +98,8 @@ func TestConnWrapper_Receive(t *testing.T) {
 			t.Errorf("expected channel name is not given: %s.", message.ChannelID.String())
 		}
 
-		if message.SenderID != userID {
-			t.Errorf("expected user is not given: %s.", message.SenderID)
+		if message.UserID != userID {
+			t.Errorf("expected user is not given: %s.", message.UserID)
 		}
 
 		if message.Text != text {

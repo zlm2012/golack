@@ -500,7 +500,7 @@ type MemberLeftChannel struct {
 	TeamID      TeamID    `json:"team"`
 }
 
-// Message represent message event on RTM.
+// Message represents a message event on RTM.
 // https://api.slack.com/events/message
 //  {
 //      "type": "message",
@@ -516,7 +516,7 @@ type MemberLeftChannel struct {
 type Message struct {
 	TypedEvent
 	ChannelID       ChannelID  `json:"channel"`
-	SenderID        UserID     `json:"user"`
+	UserID          UserID     `json:"user"`
 	Text            string     `json:"text"`
 	TimeStamp       *TimeStamp `json:"ts"`
 	ThreadTimeStamp *TimeStamp `json:"thread_ts"` // https://api.slack.com/docs/message-threading
@@ -530,63 +530,29 @@ type Message struct {
 	} `json:"replies"`
 }
 
-// MessageAppHome is sent to subscribers when a user engages with the application via the direct message-like App Home interface,
-// exclusive to the now defunct workspace apps project.
-// https://api.slack.com/events/message.app_home
-type MessageAppHome struct {
+// ChannelTypeMessage represents a message event on Events API.
+//
+// See below documents:
+//   - https://api.slack.com/events/message.app_home
+//   - https://api.slack.com/events/message.channels
+//   - https://api.slack.com/events/message.groups
+//   - https://api.slack.com/events/message.im
+//   - https://api.slack.com/events/message.mpim
+type ChannelMessage struct {
 	TypedEvent
-	UserID         UserID     `json:"user"`
-	Text           string     `json:"text"`
-	TimeStamp      *TimeStamp `json:"ts"`
-	ChannelID      ChannelID  `json:"channel"`
-	EventTimeStamp *TimeStamp `json:"event_ts"`
-	ChannelType    string     `json:"channel_type"`
-}
-
-// MessageChannels is similar to the core message event sent through the RTM API.
-// https://api.slack.com/events/message.channels
-type MessageChannels struct {
-	TypedEvent
-	ChannelID      ChannelID  `json:"channel"`
-	UserID         UserID     `json:"user"`
-	Text           string     `json:"text"`
-	TimeStamp      *TimeStamp `json:"ts"`
-	EventTimeStamp *TimeStamp `json:"event_ts"`
-	ChannelType    string     `json:"channel_type"`
-}
-
-// MessageGroups is similar to the core message event sent through the RTM API.
-// https://api.slack.com/events/message.groups
-type MessageGroups struct {
-	TypedEvent
-	ChannelID      ChannelID  `json:"channel"`
-	UserID         UserID     `json:"user"`
-	Text           string     `json:"text"`
-	TimeStamp      *TimeStamp `json:"ts"`
-	EventTimeStamp *TimeStamp `json:"event_ts"`
-	ChannelType    string     `json:"channel_type"`
-}
-
-// MessageIM is similar to the core message event sent through the RTM API.
-// https://api.slack.com/events/message.im
-type MessageIM struct {
-	TypedEvent
-	ChannelID      ChannelID  `json:"channel"`
-	UserID         UserID     `json:"user"`
-	Text           string     `json:"text"`
-	TimeStamp      *TimeStamp `json:"ts"`
-	EventTimeStamp *TimeStamp `json:"event_ts"`
-	ChannelType    string     `json:"channel_type"`
-}
-
-// MessageMPIM is similar to the core message event sent through the RTM API.
-// https://api.slack.com/events/message.mpim
-type MessageMPIM struct {
-	TypedEvent
-	ChannelID      ChannelID  `json:"channel"`
-	UserID         UserID     `json:"user"`
-	Text           string     `json:"text"`
-	TimeStamp      *TimeStamp `json:"ts"`
+	ChannelID       ChannelID  `json:"channel"`
+	UserID          UserID     `json:"user"`
+	Text            string     `json:"text"`
+	TimeStamp       *TimeStamp `json:"ts"`
+	ThreadTimeStamp *TimeStamp `json:"thread_ts"` // https://api.slack.com/docs/message-threading
+	Edited          *struct {
+		User      UserID     `json:"user"`
+		TimeStamp *TimeStamp `json:"ts"`
+	} `json:"edited"`
+	Replies []*struct {
+		User      UserID     `json:"user"`
+		TimeStamp *TimeStamp `json:"ts"`
+	} `json:"replies"`
 	EventTimeStamp *TimeStamp `json:"event_ts"`
 	ChannelType    string     `json:"channel_type"`
 }

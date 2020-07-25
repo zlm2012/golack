@@ -22,17 +22,9 @@ type Receiver struct {
 
 func (r *Receiver) Receive(wrapper *eventsapi.EventWrapper) {
 	switch typed := wrapper.Event.(type) {
-	case *event.MessageChannels:
+	case *event.ChannelMessage:
 		// A message in a public channel
 		log.Printf("Channel Message: %s", typed.Text)
-
-	case *event.MessageGroups:
-		// A message in a private group
-		log.Printf("Group Message: %s", typed.Text)
-
-	case *event.MessageIM:
-		// A message directly sent to the app
-		log.Printf("IM Message: %s", typed.Text)
 
 	default:
 		log.Printf("Event: %+v", typed)
