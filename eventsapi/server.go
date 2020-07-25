@@ -11,6 +11,20 @@ type EventReceiver interface {
 	Receive(wrapper *EventWrapper)
 }
 
+type defaultEventReceiver struct {
+	receive func(wrapper *EventWrapper)
+}
+
+func (d *defaultEventReceiver) Receive(wrapper *EventWrapper) {
+	d.receive(wrapper)
+}
+
+// NewDefaultEventReceiver builds an EventReceiver implementation with the given fnc.
+// To have more customizability, developers are encouraged to build their own EventReceiver implementation and pass it to SetupHandler.
+func NewDefaultEventReceiver(fnc func(*EventWrapper)) EventReceiver {
+	return &defaultEventReceiver{receive: fnc}
+}
+
 // WithRequestValidator returns a function to set given rv on SetupHandler.
 func WithRequestValidator(rv RequestValidator) func(*option) {
 	return func(o *option) {
