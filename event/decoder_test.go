@@ -953,8 +953,8 @@ var expectedPayloads = map[string]interface{}{
 			Time:          time.Unix(1361482916, 0),
 			OriginalValue: "1361482916.000003",
 		},
-		Text: "<U1234|@cal> archived the channel",
-		User: "U1234",
+		Text:   "<U1234|@cal> archived the channel",
+		UserID: "U1234",
 	},
 	"message.channel_join": &MessageChannelJoin{
 		TypedEvent: TypedEvent{
@@ -965,9 +965,9 @@ var expectedPayloads = map[string]interface{}{
 			Time:          time.Unix(1358877458, 0),
 			OriginalValue: "1358877458.000011",
 		},
-		Text:    "<@U2147483828|cal> has joined the channel",
-		User:    "U2147483828",
-		Inviter: "U123456789",
+		Text:      "<@U2147483828|cal> has joined the channel",
+		UserID:    "U2147483828",
+		InviterID: "U123456789",
 	},
 	"message.channel_leave": &MessageChannelLeave{
 		TypedEvent: TypedEvent{
@@ -978,8 +978,8 @@ var expectedPayloads = map[string]interface{}{
 			Time:          time.Unix(1358877455, 0),
 			OriginalValue: "1358877455.000010",
 		},
-		Text: "<@U2147483828|cal> has left the channel",
-		User: "U2147483828",
+		Text:   "<@U2147483828|cal> has left the channel",
+		UserID: "U2147483828",
 	},
 	"message.channel_name": &MessageChannelName{
 		TypedEvent: TypedEvent{
@@ -991,7 +991,7 @@ var expectedPayloads = map[string]interface{}{
 			OriginalValue: "1358877455.000010",
 		},
 		Text:    "<@U2147483828|cal> has renamed the channek from \"random\" to \"watercooler\"",
-		User:    "U2147483828",
+		UserID:  "U2147483828",
 		OldName: "random",
 		Name:    "watercooler",
 	},
@@ -1004,9 +1004,9 @@ var expectedPayloads = map[string]interface{}{
 			Time:          time.Unix(1358877455, 0),
 			OriginalValue: "1358877455.000010",
 		},
-		Text:  "<@U2147483828|cal> set the channel topic: hello world",
-		User:  "U2147483828",
-		Topic: "hello world",
+		Text:   "<@U2147483828|cal> set the channel topic: hello world",
+		UserID: "U2147483828",
+		Topic:  "hello world",
 	},
 	"message.channel_unarchive": &MessageChannelUnarchive{
 		TypedEvent: TypedEvent{
@@ -1017,8 +1017,8 @@ var expectedPayloads = map[string]interface{}{
 			Time:          time.Unix(1361482916, 0),
 			OriginalValue: "1361482916.000003",
 		},
-		Text: "<U1234|@cal> un-archived the channel",
-		User: "U1234",
+		Text:   "<U1234|@cal> un-archived the channel",
+		UserID: "U1234",
 	},
 	"message.ekm_access_denied": &MessageEKMAccessDenied{
 		TypedEvent: TypedEvent{
@@ -1029,8 +1029,8 @@ var expectedPayloads = map[string]interface{}{
 			Time:          time.Unix(1358877455, 0),
 			OriginalValue: "1358877455.000010",
 		},
-		Text: "Your admins have suspended everyone's access to this content.",
-		User: "UREVOKEDU",
+		Text:   "Your admins have suspended everyone's access to this content.",
+		UserID: "UREVOKEDU",
 	},
 	"message.file_comment": &MessageFileComment{
 		TypedEvent: TypedEvent{
@@ -1062,9 +1062,9 @@ var expectedPayloads = map[string]interface{}{
 			Time:          time.Unix(1358877455, 0),
 			OriginalValue: "1358877455.000010",
 		},
-		Text: "<@cal> mentioned a file: <https:...7.png|7.png>",
-		File: &File{},
-		User: "U2147483697",
+		Text:   "<@cal> mentioned a file: <https:...7.png|7.png>",
+		File:   &File{},
+		UserID: "U2147483697",
 	},
 	"message.group_archive": &MessageGroupArchive{
 		TypedEvent: TypedEvent{
@@ -1075,9 +1075,9 @@ var expectedPayloads = map[string]interface{}{
 			Time:          time.Unix(1361482916, 0),
 			OriginalValue: "1361482916.000003",
 		},
-		Text:    "<U1234|@cal> archived the group",
-		User:    "U1234",
-		Members: []UserID{"U1234", "U5678"},
+		Text:      "<U1234|@cal> archived the group",
+		UserID:    "U1234",
+		MemberIDs: []UserID{"U1234", "U5678"},
 	},
 	"message.group_join": &MessageGroupJoin{
 		TypedEvent: TypedEvent{
@@ -1088,8 +1088,8 @@ var expectedPayloads = map[string]interface{}{
 			Time:          time.Unix(1358877458, 0),
 			OriginalValue: "1358877458.000011",
 		},
-		Text: "<@U2147483828|cal> has joined the group",
-		User: "U2147483828",
+		Text:   "<@U2147483828|cal> has joined the group",
+		UserID: "U2147483828",
 	},
 	"message.group_leave": &MessageGroupLeave{
 		TypedEvent: TypedEvent{
@@ -1100,8 +1100,8 @@ var expectedPayloads = map[string]interface{}{
 			Time:          time.Unix(1358877455, 0),
 			OriginalValue: "1358877455.000010",
 		},
-		Text: "<@U2147483828|cal> has left the group",
-		User: "U2147483828",
+		Text:   "<@U2147483828|cal> has left the group",
+		UserID: "U2147483828",
 	},
 	"message.group_name": &MessageGroupName{
 		TypedEvent: TypedEvent{
@@ -1113,7 +1113,7 @@ var expectedPayloads = map[string]interface{}{
 			OriginalValue: "1358877455.000010",
 		},
 		Text:    "<@U2147483828|cal> has renamed the group from \"random\" to \"watercooler\"",
-		User:    "U2147483828",
+		UserID:  "U2147483828",
 		OldName: "random",
 		Name:    "watercooler",
 	},
@@ -1127,7 +1127,7 @@ var expectedPayloads = map[string]interface{}{
 			OriginalValue: "1358877455.000010",
 		},
 		Text:    "<@U2147483828|cal> set the group purpose: whatever",
-		User:    "U2147483828",
+		UserID:  "U2147483828",
 		Purpose: "whatever",
 	},
 	"message.group_topic": &MessageGroupTopic{
@@ -1139,9 +1139,9 @@ var expectedPayloads = map[string]interface{}{
 			Time:          time.Unix(1358877455, 0),
 			OriginalValue: "1358877455.000010",
 		},
-		Text:  "<@U2147483828|cal> set the group topic: hello world",
-		User:  "U2147483828",
-		Topic: "hello world",
+		Text:   "<@U2147483828|cal> set the group topic: hello world",
+		UserID: "U2147483828",
+		Topic:  "hello world",
 	},
 	"message.group_unarchive": &MessageGroupUnarchive{
 		TypedEvent: TypedEvent{
@@ -1152,8 +1152,8 @@ var expectedPayloads = map[string]interface{}{
 			Time:          time.Unix(1361482916, 0),
 			OriginalValue: "1361482916.000003",
 		},
-		Text: "<U1234|@cal> un-archived the group",
-		User: "U1234",
+		Text:   "<U1234|@cal> un-archived the group",
+		UserID: "U1234",
 	},
 	"message.me_message": &MessageMeMessage{
 		TypedEvent: TypedEvent{
@@ -1164,9 +1164,9 @@ var expectedPayloads = map[string]interface{}{
 			Time:          time.Unix(1355517523, 0),
 			OriginalValue: "1355517523.000005",
 		},
-		Text:    "is doing that thing",
-		User:    "U2147483697",
-		Channel: "C2147483705",
+		Text:      "is doing that thing",
+		UserID:    "U2147483697",
+		ChannelID: "C2147483705",
 	},
 	"message.message_changed": &MessageMessageChanged{
 		TypedEvent: TypedEvent{
@@ -1177,7 +1177,7 @@ var expectedPayloads = map[string]interface{}{
 			Time:          time.Unix(1358878755, 0),
 			OriginalValue: "1358878755.000001",
 		},
-		Channel: "C2147483705",
+		ChannelID: "C2147483705",
 		Message: &Message{
 			TypedEvent: TypedEvent{
 				Type: "message",
@@ -1210,8 +1210,8 @@ var expectedPayloads = map[string]interface{}{
 			Time:          time.Unix(1358878755, 0),
 			OriginalValue: "1358878755.000001",
 		},
-		Channel: "C2147483705",
-		Hidden:  true,
+		ChannelID: "C2147483705",
+		Hidden:    true,
 		DeletedTimeStamp: &TimeStamp{
 			Time:          time.Unix(1358878749, 0),
 			OriginalValue: "1358878749.000002",
@@ -1226,8 +1226,8 @@ var expectedPayloads = map[string]interface{}{
 			Time:          time.Unix(1483037604, 0),
 			OriginalValue: "1483037604.017506",
 		},
-		Channel: "C061EG9SL",
-		Hidden:  true,
+		ChannelID: "C061EG9SL",
+		Hidden:    true,
 		EventTimeStamp: &TimeStamp{
 			Time:          time.Unix(1483037604, 0),
 			OriginalValue: "1483037604.017506",
@@ -1269,11 +1269,11 @@ var expectedPayloads = map[string]interface{}{
 			Time:          time.Unix(1360782804, 0),
 			OriginalValue: "1360782804.083113",
 		},
-		User:     "U024BE7LH",
-		Text:     "<@U024BE7LH|cal> pinned their Image <https:...7.png|7.png> to this channel.",
-		Channel:  "C02ELGNBH",
-		ItemType: ItemTypeFile,
-		Item:     &Item{},
+		UserID:    "U024BE7LH",
+		Text:      "<@U024BE7LH|cal> pinned their Image <https:...7.png|7.png> to this channel.",
+		ChannelID: "C02ELGNBH",
+		ItemType:  ItemTypeFile,
+		Item:      &Item{},
 	},
 	"message.thread_broadcast": &MessageThreadBroadcast{
 		TypedEvent: TypedEvent{
@@ -1284,8 +1284,8 @@ var expectedPayloads = map[string]interface{}{
 			Time:          time.Unix(1517414906, 0),
 			OriginalValue: "1517414906.000889",
 		},
-		User: "U061F7AUR",
-		Text: "Is but a message within a thread",
+		UserID: "U061F7AUR",
+		Text:   "Is but a message within a thread",
 		Root: &Message{
 			TypedEvent: TypedEvent{
 				Type: "message",
@@ -1327,7 +1327,7 @@ var expectedPayloads = map[string]interface{}{
 			Time:          time.Unix(1360782804, 0),
 			OriginalValue: "1360782804.083113",
 		},
-		User:     "USLACKBOT",
+		UserID:   "USLACKBOT",
 		Text:     "<@U024BE7LH|cal> unpinned the message you pinned to the secretplans group.",
 		ItemType: ItemTypeGroupMessage,
 		Item:     &Item{},

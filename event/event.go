@@ -572,7 +572,7 @@ type MessageChannelArchive struct {
 	SubType   string     `json:"subtype"`
 	TimeStamp *TimeStamp `json:"ts"`
 	Text      string     `json:"text"`
-	User      UserID     `json:"user"`
+	UserID    UserID     `json:"user"`
 }
 
 type MessageChannelJoin struct {
@@ -580,8 +580,8 @@ type MessageChannelJoin struct {
 	SubType   string     `json:"subtype"`
 	TimeStamp *TimeStamp `json:"ts"`
 	Text      string     `json:"text"`
-	User      UserID     `json:"user"`
-	Inviter   UserID     `json:"inviter"`
+	UserID    UserID     `json:"user"`
+	InviterID UserID     `json:"inviter"`
 }
 
 type MessageChannelLeave struct {
@@ -589,7 +589,7 @@ type MessageChannelLeave struct {
 	SubType   string     `json:"subtype"`
 	TimeStamp *TimeStamp `json:"ts"`
 	Text      string     `json:"text"`
-	User      UserID     `json:"user"`
+	UserID    UserID     `json:"user"`
 }
 
 type MessageChannelName struct {
@@ -597,7 +597,7 @@ type MessageChannelName struct {
 	SubType   string     `json:"subtype"`
 	TimeStamp *TimeStamp `json:"ts"`
 	Text      string     `json:"text"`
-	User      UserID     `json:"user"`
+	UserID    UserID     `json:"user"`
 	OldName   string     `json:"old_name"`
 	Name      string     `json:"name"`
 }
@@ -607,7 +607,7 @@ type MessageChannelPurpose struct {
 	SubType   string     `json:"subtype"`
 	TimeStamp *TimeStamp `json:"ts"`
 	Text      string     `json:"text"`
-	User      UserID     `json:"user"`
+	UserID    UserID     `json:"user"`
 	Purpose   string     `json:"purpose"`
 }
 
@@ -616,7 +616,7 @@ type MessageChannelTopic struct {
 	SubType   string     `json:"subtype"`
 	TimeStamp *TimeStamp `json:"ts"`
 	Text      string     `json:"text"`
-	User      UserID     `json:"user"`
+	UserID    UserID     `json:"user"`
 	Topic     string     `json:"topic"`
 }
 
@@ -625,7 +625,7 @@ type MessageChannelUnarchive struct {
 	SubType   string     `json:"subtype"`
 	TimeStamp *TimeStamp `json:"ts"`
 	Text      string     `json:"text"`
-	User      UserID     `json:"user"`
+	UserID    UserID     `json:"user"`
 }
 
 type MessageEKMAccessDenied struct {
@@ -633,7 +633,7 @@ type MessageEKMAccessDenied struct {
 	SubType   string     `json:"subtype"`
 	TimeStamp *TimeStamp `json:"ts"`
 	Text      string     `json:"text"`
-	User      UserID     `json:"user"`
+	UserID    UserID     `json:"user"`
 }
 
 type MessageFileComment struct {
@@ -651,7 +651,7 @@ type MessageFileMention struct {
 	TimeStamp *TimeStamp `json:"ts"`
 	Text      string     `json:"text"`
 	File      *File      `json:"file"`
-	User      UserID     `json:"user"`
+	UserID    UserID     `json:"user"`
 }
 
 type MessageGroupArchive struct {
@@ -659,8 +659,8 @@ type MessageGroupArchive struct {
 	SubType   string     `json:"subtype"`
 	TimeStamp *TimeStamp `json:"ts"`
 	Text      string     `json:"text"`
-	User      UserID     `json:"user"`
-	Members   []UserID   `json:"members"`
+	UserID    UserID     `json:"user"`
+	MemberIDs []UserID   `json:"members"`
 }
 
 type MessageGroupJoin struct {
@@ -668,7 +668,7 @@ type MessageGroupJoin struct {
 	SubType   string     `json:"subtype"`
 	TimeStamp *TimeStamp `json:"ts"`
 	Text      string     `json:"text"`
-	User      UserID     `json:"user"`
+	UserID    UserID     `json:"user"`
 }
 
 type MessageGroupLeave struct {
@@ -676,7 +676,7 @@ type MessageGroupLeave struct {
 	SubType   string     `json:"subtype"`
 	TimeStamp *TimeStamp `json:"ts"`
 	Text      string     `json:"text"`
-	User      UserID     `json:"user"`
+	UserID    UserID     `json:"user"`
 }
 
 type MessageGroupName struct {
@@ -684,7 +684,7 @@ type MessageGroupName struct {
 	SubType   string     `json:"subtype"`
 	TimeStamp *TimeStamp `json:"ts"`
 	Text      string     `json:"text"`
-	User      UserID     `json:"user"`
+	UserID    UserID     `json:"user"`
 	OldName   string     `json:"old_name"`
 	Name      string     `json:"name"`
 }
@@ -694,7 +694,7 @@ type MessageGroupPurpose struct {
 	SubType   string     `json:"subtype"`
 	TimeStamp *TimeStamp `json:"ts"`
 	Text      string     `json:"text"`
-	User      UserID     `json:"user"`
+	UserID    UserID     `json:"user"`
 	Purpose   string     `json:"purpose"`
 }
 
@@ -703,7 +703,7 @@ type MessageGroupTopic struct {
 	SubType   string     `json:"subtype"`
 	TimeStamp *TimeStamp `json:"ts"`
 	Text      string     `json:"text"`
-	User      UserID     `json:"user"`
+	UserID    UserID     `json:"user"`
 	Topic     string     `json:"topic"`
 }
 
@@ -712,7 +712,7 @@ type MessageGroupUnarchive struct {
 	SubType   string     `json:"subtype"`
 	TimeStamp *TimeStamp `json:"ts"`
 	Text      string     `json:"text"`
-	User      UserID     `json:"user"`
+	UserID    UserID     `json:"user"`
 }
 
 type MessageMeMessage struct {
@@ -720,15 +720,15 @@ type MessageMeMessage struct {
 	SubType   string     `json:"subtype"`
 	TimeStamp *TimeStamp `json:"ts"`
 	Text      string     `json:"text"`
-	User      UserID     `json:"user"`
-	Channel   ChannelID  `json:"channel"`
+	UserID    UserID     `json:"user"`
+	ChannelID ChannelID  `json:"channel"`
 }
 
 type MessageMessageChanged struct {
 	TypedEvent
 	SubType   string     `json:"subtype"`
 	TimeStamp *TimeStamp `json:"ts"`
-	Channel   ChannelID  `json:"channel"`
+	ChannelID ChannelID  `json:"channel"`
 	Message   *Message   `json:"message"`
 	Hidden    bool       `json:"hidden"`
 }
@@ -737,7 +737,7 @@ type MessageMessageDeleted struct {
 	TypedEvent
 	SubType          string     `json:"subtype"`
 	TimeStamp        *TimeStamp `json:"ts"`
-	Channel          ChannelID  `json:"channel"`
+	ChannelID        ChannelID  `json:"channel"`
 	Hidden           bool       `json:"hidden"`
 	DeletedTimeStamp *TimeStamp `json:"deleted_ts"`
 }
@@ -746,7 +746,7 @@ type MessageMessageReplied struct {
 	TypedEvent
 	SubType        string     `json:"subtype"`
 	TimeStamp      *TimeStamp `json:"ts"`
-	Channel        ChannelID  `json:"channel"`
+	ChannelID      ChannelID  `json:"channel"`
 	Hidden         bool       `json:"hidden"`
 	EventTimeStamp *TimeStamp `json:"event_ts"`
 	Message        *Message   `json:"message"`
@@ -756,9 +756,9 @@ type MessagePinnedItem struct {
 	TypedEvent
 	SubType   string     `json:"subtype"`
 	TimeStamp *TimeStamp `json:"ts"`
-	User      UserID     `json:"user"`
+	UserID    UserID     `json:"user"`
 	Text      string     `json:"text"`
-	Channel   ChannelID  `json:"channel"`
+	ChannelID ChannelID  `json:"channel"`
 	ItemType  ItemType   `json:"item_type"`
 	Item      *Item      `json:"item"`
 }
@@ -767,7 +767,7 @@ type MessageThreadBroadcast struct {
 	TypedEvent
 	SubType         string     `json:"subtype"`
 	TimeStamp       *TimeStamp `json:"ts"`
-	User            UserID     `json:"user"`
+	UserID          UserID     `json:"user"`
 	Text            string     `json:"text"`
 	Root            *Message   `json:"root"`
 	ThreadTimeStamp *TimeStamp `json:"thread_ts"`
@@ -777,7 +777,7 @@ type MessageUnpinnedItem struct {
 	TypedEvent
 	SubType   string     `json:"subtype"`
 	TimeStamp *TimeStamp `json:"ts"`
-	User      UserID     `json:"user"`
+	UserID    UserID     `json:"user"`
 	Text      string     `json:"text"`
 	ItemType  ItemType   `json:"item_type"`
 	Item      *Item      `json:"item"`
