@@ -1189,10 +1189,10 @@ var expectedPayloads = map[string]interface{}{
 				OriginalValue: "1355517523.000005",
 			},
 			Edited: &struct {
-				User      UserID     `json:"user"`
+				UserID    UserID     `json:"user"`
 				TimeStamp *TimeStamp `json:"ts"`
 			}{
-				User: "U2147483697",
+				UserID: "U2147483697",
 				TimeStamp: &TimeStamp{
 					Time:          time.Unix(1358878755, 0),
 					OriginalValue: "1358878755.000001",
@@ -1247,11 +1247,11 @@ var expectedPayloads = map[string]interface{}{
 				OriginalValue: "1482960137.003543",
 			},
 			Replies: []*struct {
-				User      UserID     `json:"user"`
+				UserID    UserID     `json:"user"`
 				TimeStamp *TimeStamp `json:"ts"`
 			}{
 				{
-					User: "U061F7AUR",
+					UserID: "U061F7AUR",
 					TimeStamp: &TimeStamp{
 						Time:          time.Unix(1483037603, 0),
 						OriginalValue: "1483037603.017503",
@@ -1301,11 +1301,11 @@ var expectedPayloads = map[string]interface{}{
 				OriginalValue: "1517414896.001003",
 			},
 			Replies: []*struct {
-				User      UserID     `json:"user"`
+				UserID    UserID     `json:"user"`
 				TimeStamp *TimeStamp `json:"ts"`
 			}{
 				{
-					User: "U061F7AUR",
+					UserID: "U061F7AUR",
 					TimeStamp: &TimeStamp{
 						Time:          time.Unix(1517414906, 0),
 						OriginalValue: "1517414906.000889",

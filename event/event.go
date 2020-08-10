@@ -521,11 +521,11 @@ type Message struct {
 	TimeStamp       *TimeStamp `json:"ts"`
 	ThreadTimeStamp *TimeStamp `json:"thread_ts"` // https://api.slack.com/docs/message-threading
 	Edited          *struct {
-		User      UserID     `json:"user"`
+		UserID    UserID     `json:"user"`
 		TimeStamp *TimeStamp `json:"ts"`
 	} `json:"edited"`
 	Replies []*struct {
-		User      UserID     `json:"user"`
+		UserID    UserID     `json:"user"`
 		TimeStamp *TimeStamp `json:"ts"`
 	} `json:"replies"`
 }
@@ -546,11 +546,11 @@ type ChannelMessage struct {
 	TimeStamp       *TimeStamp `json:"ts"`
 	ThreadTimeStamp *TimeStamp `json:"thread_ts"` // https://api.slack.com/docs/message-threading
 	Edited          *struct {
-		User      UserID     `json:"user"`
+		UserID    UserID     `json:"user"`
 		TimeStamp *TimeStamp `json:"ts"`
 	} `json:"edited"`
 	Replies []*struct {
-		User      UserID     `json:"user"`
+		UserID    UserID     `json:"user"`
 		TimeStamp *TimeStamp `json:"ts"`
 	} `json:"replies"`
 	EventTimeStamp *TimeStamp `json:"event_ts"`
