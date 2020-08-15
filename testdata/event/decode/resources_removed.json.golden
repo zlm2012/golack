@@ -1,0 +1,20 @@
+{
+  "type": "resources_removed",
+  "resources": [
+    {
+      "resource": {
+        "type": "im",
+        "grant": {
+          "type": "specific",
+          "resource_id": "DXXXXXXXX"
+        }
+      },
+      "scopes": [
+        "chat:write:user",
+        "im:read",
+        "im:history",
+        "commands"
+      ]
+    }
+  ]
+}

@@ -1,10 +1,7 @@
 package webapi
 
 import (
-	"encoding/json"
-	"github.com/oklahomer/golack/slackobject"
-	"net/url"
-	"strconv"
+	"github.com/oklahomer/golack/v2/event"
 )
 
 // ParseMode defines the parse parameter values for post.message method.
@@ -45,19 +42,28 @@ type MessageAttachment struct {
 // PostMessage is a payload to be sent with chat.postMessage method.
 // See https://api.slack.com/methods/chat.postMessage
 type PostMessage struct {
-	ChannelID       slackobject.ChannelID
-	Text            string
-	Parse           ParseMode
-	LinkNames       int
-	Attachments     []*MessageAttachment
-	UnfurlLinks     bool
-	UnfurlMedia     bool
-	UserName        string
-	AsUser          bool
-	IconURL         string
-	IconEmoji       string
-	ReplyBroadcast  bool
-	ThreadTimeStamp string
+	ChannelID       event.ChannelID      `json:"channel"`
+	Text            string               `json:"text"`
+	AsUser          bool                 `json:"as_user,omitempty"`
+	Attachments     []*MessageAttachment `json:"attachments,omitempty"`
+	Blocks          []event.Block        `json:"blocks,omitempty"`
+	IconEmoji       string               `json:"icon_emoji,omitempty"`
+	IconURL         string               `json:"icon_url,omitempty"`
+	LinkNames       int                  `json:"link_names,omitempty"`
+	Markdown        bool                 `json:"mrkdwn,omitempty"`
+	Parse           ParseMode            `json:"parse,omitempty"`
+	ReplyBroadcast  bool                 `json:"reply_broadcast,omitempty"`
+	ThreadTimeStamp string               `json:"thread_ts,omitempty"`
+	UnfurlLinks     bool                 `json:"unfurl_links,omitempty"`
+	UnfurlMedia     bool                 `json:"unfurl_media,omitempty"`
+	UserName        string               `json:"username,omitempty"`
+}
+
+// WithAsUser sets optional boolean value so the outgoing message is sent as a user.
+// See https://api.slack.com/methods/chat.postMessage
+func (message *PostMessage) WithAsUser(flg bool) *PostMessage {
+	message.AsUser = flg
+	return message
 }
 
 // WithAttachments sets/overrides attachments parameter for current PostMessage.
@@ -67,10 +73,38 @@ func (message *PostMessage) WithAttachments(attachments []*MessageAttachment) *P
 	return message
 }
 
+// WithBlocks sets/overrides blocks parameter for current PostMessage.
+// See https://api.slack.com/messaging/composing/layouts#adding-blocks
+func (message *PostMessage) WithBlocks(blocks []event.Block) *PostMessage {
+	message.Blocks = blocks
+	return message
+}
+
+// WithIconEmoji sets an icon emoji for the message.
+// See https://api.slack.com/methods/chat.postMessage
+func (message *PostMessage) WithIconEmoji(iconEmoji string) *PostMessage {
+	message.IconEmoji = iconEmoji
+	return message
+}
+
+// WithIconURL sets an icon image url for the message.
+// See https://api.slack.com/methods/chat.postMessage
+func (message *PostMessage) WithIconURL(iconURL string) *PostMessage {
+	message.IconURL = iconURL
+	return message
+}
+
 // WithLinkNames sets/overrides link_names parameter for current PostMessage.
 // See https://api.slack.com/methods/chat.postMessage#formatting
 func (message *PostMessage) WithLinkNames(linkNames int) *PostMessage {
 	message.LinkNames = linkNames
+	return message
+}
+
+// WithMarkdown sets optional boolean value to decide if the message should be treated as Markdown.
+// See https://api.slack.com/methods/chat.postMessage
+func (message *PostMessage) WithMarkdown(flg bool) *PostMessage {
+	message.Markdown = flg
 	return message
 }
 
@@ -84,8 +118,8 @@ func (message *PostMessage) WithParse(parse ParseMode) *PostMessage {
 // WithReplyBroadcast sets optional boolean value so the thread response can be broadcasted.
 // Thread identifier must be present with WithThreadTimeStamp() to use this option.
 // See https://api.slack.com/docs/message-threading#using_the_web_api
-func (message *PostMessage) WithReplyBroadcast(broadcast bool) *PostMessage {
-	message.ReplyBroadcast = broadcast
+func (message *PostMessage) WithReplyBroadcast(flg bool) *PostMessage {
+	message.ReplyBroadcast = flg
 	return message
 }
 
@@ -110,43 +144,17 @@ func (message *PostMessage) WithUnfurlMedia(unfurl bool) *PostMessage {
 	return message
 }
 
-// ToURLValues forms requesting parameter for Slack's Rest API endpoint.
-// See https://api.slack.com/docs/message-formatting
-func (message *PostMessage) ToURLValues() url.Values {
-	values := url.Values{}
-
-	values.Add("channel", message.ChannelID.String())
-	values.Add("text", message.Text)
-	values.Add("parse", message.Parse.String())
-	values.Add("link_names", strconv.Itoa(message.LinkNames))
-	values.Add("unfurl_links", strconv.FormatBool(message.UnfurlLinks))
-	values.Add("unfurl_media", strconv.FormatBool(message.UnfurlMedia))
-	values.Add("as_user", strconv.FormatBool(message.AsUser))
-	if message.ThreadTimeStamp != "" {
-		values.Add("thread_ts", message.ThreadTimeStamp)
-		values.Add("reply_broadcast", strconv.FormatBool(message.ReplyBroadcast))
-	}
-	if message.UserName != "" {
-		values.Add("username", message.UserName)
-	}
-	if message.IconURL != "" {
-		values.Add("icon_url", message.IconURL)
-	}
-	if message.IconEmoji != "" {
-		values.Add("icon_emoji", message.IconEmoji)
-	}
-	if message.Attachments != nil {
-		s, _ := json.Marshal(message.Attachments)
-		values.Add("attachments", string(s))
-	}
-
-	return values
+// WithUserName sets a name to be used as user name.
+// See https://api.slack.com/methods/chat.postMessage
+func (message *PostMessage) WithUserName(name string) *PostMessage {
+	message.UserName = name
+	return message
 }
 
 // NewPostMessage creates PostMessage instance with given channel and text settings.
 // By default this sets commonly used settings as much as possible. e.g. link_names=1, unfurl_links=true, etc...
 // To override those settings and add some extra settings including username, icon_url, or icon_emoji, call setter methods start with With***.
-func NewPostMessage(channelID slackobject.ChannelID, text string) *PostMessage {
+func NewPostMessage(channelID event.ChannelID, text string) *PostMessage {
 	return &PostMessage{
 		ChannelID:   channelID,
 		Text:        text,

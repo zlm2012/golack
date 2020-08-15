@@ -1,4 +1,4 @@
-package slackobject
+package event
 
 type AppID string
 
@@ -9,6 +9,12 @@ func (id AppID) String() string {
 type BotID string
 
 func (id BotID) String() string {
+	return string(id)
+}
+
+type CallID string
+
+func (id CallID) String() string {
 	return string(id)
 }
 
@@ -45,5 +51,35 @@ func (id SubTeamID) String() string {
 type CommentID string
 
 func (id CommentID) String() string {
+	return string(id)
+}
+
+type EventID string
+
+func (id EventID) String() string {
+	return string(id)
+}
+
+type BlockID string
+
+func (id BlockID) String() string {
+	return string(id)
+}
+
+type ActionID string
+
+func (id ActionID) String() string {
+	return string(id)
+}
+
+type ViewID string
+
+func (id ViewID) String() string {
+	return string(id)
+}
+
+type ResourceID string
+
+func (id ResourceID) String() string {
 	return string(id)
 }

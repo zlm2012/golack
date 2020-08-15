@@ -1,0 +1,13 @@
+{
+  "type": "message",
+  "subtype": "file_comment",
+  "ts": "1361482916.000003",
+  "text": "<@cal> commented on a file: ...",
+  "file": {},
+  "comment": {
+    "id": "C12345",
+    "created": 1360782804,
+    "user": "U1234",
+    "comment": "comment content"
+  }
+}

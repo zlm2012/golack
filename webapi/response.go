@@ -35,7 +35,7 @@ type UserProfile struct {
 	Title              string `json:"title"`
 }
 
-// SenderID contains all the information of a user
+// User contains all the information of a user
 type User struct {
 	User              string      `json:"user"`
 	Name              string      `json:"name"`
@@ -76,7 +76,7 @@ type Purpose struct {
 }
 
 type Message struct {
-	Sender string `json:"user"`
+	UserID string `json:"user"`
 	Text   string `json:"text"`
 }
 
@@ -138,7 +138,7 @@ type IM struct {
 	UnreadCount        int       `json:"unread_count"`
 	UnreadCountDisplay int       `json:"unread_count_display"`
 	IsIM               bool      `json:"is_im"`
-	Sender             string    `json:"user"`
+	UserID             string    `json:"user"`
 	IsUserDeleted      bool      `json:"is_user_deleted"`
 }
 

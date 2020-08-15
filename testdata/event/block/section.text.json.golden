@@ -1,0 +1,18 @@
+{
+  "type": "section",
+  "text": {
+    "text": "A message *with some bold text* and _some italicized text_.",
+    "type": "mrkdwn"
+  },
+  "fields": [
+    {
+      "type": "mrkdwn",
+      "text": "High"
+    },
+    {
+      "type": "plain_text",
+      "emoji": true,
+      "text": "String"
+    }
+  ]
+}
