@@ -533,6 +533,7 @@ type Message struct {
 // ChannelTypeMessage represents a message event on Events API.
 //
 // See below documents:
+//   - https://api.slack.com/events/message
 //   - https://api.slack.com/events/message.app_home
 //   - https://api.slack.com/events/message.channels
 //   - https://api.slack.com/events/message.groups
@@ -652,6 +653,21 @@ type MessageFileMention struct {
 	Text      string     `json:"text"`
 	File      *File      `json:"file"`
 	UserID    UserID     `json:"user"`
+}
+
+type MessageFileShare struct {
+	TypedEvent
+	SubType        string     `json:"subtype"`
+	Files          []*File    `json:"files"`
+	TimeStamp      *TimeStamp `json:"ts"`
+	Text           string     `json:"text"`
+	File           *File      `json:"file"`
+	UserID         UserID     `json:"user"`
+	Upload         bool       `json:"upload"`
+	DisplayAsBot   bool       `json:"display_as_bot"`
+	BotID          BotID      `json:"bot_id"`
+	EventTimeStamp *TimeStamp `json:"event_ts"`
+	ChannelType    string     `json:"channel_type"`
 }
 
 type MessageGroupArchive struct {

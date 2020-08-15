@@ -115,6 +115,7 @@ var (
 		"ekm_access_denied": reflect.TypeOf(&MessageEKMAccessDenied{}).Elem(),
 		"file_comment":      reflect.TypeOf(&MessageFileComment{}).Elem(),
 		"file_mention":      reflect.TypeOf(&MessageFileMention{}).Elem(),
+		"file_share":        reflect.TypeOf(&MessageFileShare{}).Elem(),
 		"group_archive":     reflect.TypeOf(&MessageGroupArchive{}).Elem(),
 		"group_join":        reflect.TypeOf(&MessageGroupJoin{}).Elem(),
 		"group_leave":       reflect.TypeOf(&MessageGroupLeave{}).Elem(),
