@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/tidwall/gjson"
-	"golang.org/x/xerrors"
 )
 
 // List of layout blocks: https://api.slack.com/reference/block-kit/blocks
@@ -42,7 +41,7 @@ func UnmarshalBlock(input json.RawMessage) (Block, error) {
 
 	err := json.Unmarshal(input, typed)
 	if err != nil {
-		return nil, xerrors.Errorf("failed to unmarshal %T: %w", typed, err)
+		return nil, fmt.Errorf("failed to unmarshal %T: %w", typed, err)
 	}
 	return typed, nil
 }
@@ -98,7 +97,7 @@ func (ab *ActionsBlock) UnmarshalJSON(b []byte) error {
 	for _, elem := range t.Elements {
 		element, err := UnmarshalBlockElement(elem)
 		if err != nil {
-			return xerrors.Errorf("failed to unmarshal given element: %w", err)
+			return fmt.Errorf("failed to unmarshal given element: %w", err)
 		}
 		elements = append(elements, element)
 	}
@@ -138,7 +137,7 @@ func (cb *ContextBlock) UnmarshalJSON(b []byte) error {
 	for _, elem := range t.Elements {
 		element, err := UnmarshalBlockElement(elem)
 		if err != nil {
-			return xerrors.Errorf("failed to unmarshal given element: %w", err)
+			return fmt.Errorf("failed to unmarshal given element: %w", err)
 		}
 		elements = append(elements, element)
 	}
@@ -241,7 +240,7 @@ func (ib *InputBlock) UnmarshalJSON(b []byte) error {
 	if len(t.Element) > 0 {
 		element, err := UnmarshalBlockElement(t.Element)
 		if err != nil {
-			return xerrors.Errorf("failed to unmarshal given element: %w", err)
+			return fmt.Errorf("failed to unmarshal given element: %w", err)
 		}
 		ib.Element = element
 	}
@@ -291,7 +290,7 @@ func (sb *SectionBlock) UnmarshalJSON(b []byte) error {
 	if len(t.Accessory) > 0 {
 		accessory, err := UnmarshalBlockElement(t.Accessory)
 		if err != nil {
-			return xerrors.Errorf("failed to unmarshal given element: %w", err)
+			return fmt.Errorf("failed to unmarshal given element: %w", err)
 		}
 		sb.Accessory = accessory
 	}

@@ -2,11 +2,11 @@ package golack
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"github.com/oklahomer/golack/v2/eventsapi"
 	"github.com/oklahomer/golack/v2/testutil"
 	"github.com/oklahomer/golack/v2/webapi"
-	"golang.org/x/xerrors"
 	"net"
 	"net/http"
 	"net/url"
@@ -80,7 +80,7 @@ func TestNew(t *testing.T) {
 
 func TestGolack_PostMessage(t *testing.T) {
 	t.Run("Web API returns error status", func(t *testing.T) {
-		expectedErr := xerrors.New("DUMMY")
+		expectedErr := errors.New("DUMMY")
 		webClient := &DummyWebClient{
 			PostFunc: func(_ context.Context, _ string, _ interface{}, _ interface{}) error {
 				return expectedErr
@@ -146,7 +146,7 @@ func TestGolack_PostMessage(t *testing.T) {
 
 func TestGolack_ConnectRTM(t *testing.T) {
 	t.Run("Web API returns error status", func(t *testing.T) {
-		expectedErr := xerrors.New("DUMMY")
+		expectedErr := errors.New("DUMMY")
 		webClient := &DummyWebClient{
 			GetFunc: func(_ context.Context, _ string, _ url.Values, _ interface{}) error {
 				return expectedErr

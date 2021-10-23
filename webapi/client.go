@@ -5,7 +5,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"golang.org/x/xerrors"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
@@ -188,7 +187,7 @@ func genPayload(m string, p interface{}) (*payload, error) {
 
 		b, err := json.Marshal(p)
 		if err != nil {
-			return nil, xerrors.Errorf("failed to serialize payload: %w", err)
+			return nil, fmt.Errorf("failed to serialize payload: %w", err)
 		}
 		return &payload{
 			Type: "application/json",

@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/tidwall/gjson"
-	"golang.org/x/xerrors"
 )
 
 // List of block elements: https://api.slack.com/reference/block-kit/block-elements
@@ -75,7 +74,7 @@ func UnmarshalBlockElement(input json.RawMessage) (BlockElement, error) {
 
 	err := json.Unmarshal(input, typed)
 	if err != nil {
-		return nil, xerrors.Errorf("failed to unmarshal %T", typed)
+		return nil, fmt.Errorf("failed to unmarshal %T", typed)
 	}
 	return typed, nil
 }

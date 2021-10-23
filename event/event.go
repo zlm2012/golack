@@ -2,7 +2,7 @@ package event
 
 import (
 	"encoding/json"
-	"golang.org/x/xerrors"
+	"fmt"
 )
 
 // TypedEvent takes care of events that have "type" field in its JSON representation.
@@ -28,8 +28,8 @@ type Typer interface {
 	EventType() string
 }
 
-// https://api.slack.com/events
 // AccountsChanged event indicates that the list of accounts a user is signed into has changed.
+// https://api.slack.com/events
 // https://api.slack.com/events/accounts_changed
 type AccountsChanged struct {
 	TypedEvent
@@ -1280,7 +1280,7 @@ func (v *View) UnmarshalJSON(b []byte) error {
 	for _, elem := range t.Blocks {
 		block, err := UnmarshalBlock(elem)
 		if err != nil {
-			return xerrors.Errorf("failed to unmarshal given block: %w", err)
+			return fmt.Errorf("failed to unmarshal given block: %w", err)
 		}
 		blocks = append(blocks, block)
 	}

@@ -8,11 +8,11 @@ package golack
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"github.com/oklahomer/golack/v2/eventsapi"
 	"github.com/oklahomer/golack/v2/rtmapi"
 	"github.com/oklahomer/golack/v2/webapi"
-	"golang.org/x/xerrors"
 	"net/http"
 	"net/url"
 	"time"
@@ -130,7 +130,7 @@ func (g *Golack) RunServer(ctx context.Context, receiver eventsapi.EventReceiver
 	// For better security, this checks each request's signature
 	appSecret := g.config.AppSecret
 	if appSecret == "" {
-		errChan <- xerrors.New("application secret is not set")
+		errChan <- errors.New("application secret is not set")
 		return errChan
 	}
 	optValidator := eventsapi.WithRequestValidator(&eventsapi.SignatureValidator{Secret: appSecret})
