@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/oklahomer/golack/v2/event"
 	"github.com/tidwall/gjson"
-	"golang.org/x/xerrors"
 )
 
 // https://api.slack.com/events-api#callback_field_overview
@@ -55,7 +54,7 @@ func DecodePayload(req *SlackRequest) (interface{}, error) {
 		verification := &URLVerification{}
 		err := json.Unmarshal(req.Payload, verification)
 		if err != nil {
-			return nil, xerrors.Errorf("failed to unmarshal JSON: %w", err)
+			return nil, fmt.Errorf("failed to unmarshal JSON: %w", err)
 		}
 		return verification, nil
 
@@ -63,7 +62,7 @@ func DecodePayload(req *SlackRequest) (interface{}, error) {
 		o := &outer{}
 		err := json.Unmarshal(req.Payload, o)
 		if err != nil {
-			return nil, xerrors.Errorf("failed to unmarshal JSON: %w", err)
+			return nil, fmt.Errorf("failed to unmarshal JSON: %w", err)
 		}
 
 		// Read the event field that represents the Slack event being sent

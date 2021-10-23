@@ -1,6 +1,8 @@
 package webapi
 
-import "golang.org/x/xerrors"
+import (
+	"errors"
+)
 
 var (
 	// JSONAcceptableMethods lists all Web API methods that support JSON serialized payload.
@@ -127,7 +129,7 @@ var (
 		}
 		return m
 	}()
-	ErrJSONPayloadNotSupported = xerrors.New("JSON payload is not supported")
+	ErrJSONPayloadNotSupported = errors.New("JSON payload is not supported")
 )
 
 func IsJSONPayloadSupportedMethod(slackMethod string) bool {

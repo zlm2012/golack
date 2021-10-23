@@ -2,7 +2,6 @@ package eventsapi
 
 import (
 	"fmt"
-	"golang.org/x/xerrors"
 	"io/ioutil"
 	"net/http"
 	"strconv"
@@ -40,12 +39,12 @@ func NewSlackRequest(r *http.Request) (*SlackRequest, error) {
 
 	payload, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		return nil, xerrors.Errorf("failed to read payload: %w", err)
+		return nil, fmt.Errorf("failed to read payload: %w", err)
 	}
 
 	ts, err := strconv.Atoi(timestamp)
 	if err != nil {
-		return nil, xerrors.Errorf("failed to parse timestamp: %w", err)
+		return nil, fmt.Errorf("failed to parse timestamp: %w", err)
 	}
 
 	return &SlackRequest{
