@@ -105,13 +105,13 @@ func (g *Golack) PostMessage(ctx context.Context, postMessage *webapi.PostMessag
 // See https://api.slack.com/rtm for official document.
 func (g *Golack) ConnectRTM(ctx context.Context) (rtmapi.Connection, error) {
 	rtmStart := &webapi.RTMStart{}
-	err := g.WebClient.Get(ctx, "rtm.start", nil, rtmStart)
+	err := g.WebClient.Get(ctx, "rtm.connect", nil, rtmStart)
 	if err != nil {
 		return nil, err
 	}
 
 	if rtmStart.OK != true {
-		return nil, fmt.Errorf("failed rtm.start request: %s", rtmStart.Error)
+		return nil, fmt.Errorf("failed rtm.start request: %s, %v", rtmStart.Error, err)
 	}
 
 	return rtmapi.Connect(ctx, rtmStart.URL)
